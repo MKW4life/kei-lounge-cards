@@ -55,6 +55,10 @@ type InitialCardSettings = {
   tagY: number;
   tagSize: number;
 
+  rankTextX: number;
+  rankTextY: number;
+  rankTextSize: number;
+
   flagX: number;
   flagY: number;
   flagSize: number;
@@ -420,8 +424,8 @@ export default function CardClient({
             left: `${initial.tagX}%`,
             top: `${initial.tagY}%`,
             fontSize: initial.tagSize,
-            background: initial.modeColor,
-            color: initial.sub,
+            background: initial.modeColor || "#ffffff",
+            color: initial.sub || "#000000",
           }}
         >
           {initial.mode}
@@ -474,7 +478,16 @@ export default function CardClient({
           {activeRating}
         </div>
 
-        <div className="rank-line">{display.rank || "MKW Lounge"}</div>
+        <div
+          className="rank-line"
+          style={{
+            left: `${initial.rankTextX}%`,
+            top: `${initial.rankTextY}%`,
+            fontSize: initial.rankTextSize,
+          }}
+        >
+          {display.rank || "MKW Lounge"}
+        </div>
 
         {effect && effect.phase === "change" && (
           <div className={`effect-burst ${effect.kind}`}>{effect.text}</div>

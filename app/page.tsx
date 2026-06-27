@@ -77,6 +77,10 @@ type Settings = {
   tagY: number;
   tagSize: number;
 
+  rankTextX: number;
+  rankTextY: number;
+  rankTextSize: number;
+
   flagX: number;
   flagY: number;
   flagSize: number;
@@ -116,34 +120,38 @@ const defaultSettings: Settings = {
   rankIconUrl: "",
 
   mainColor: "#ff0000",
-  subColor: "#ffffff",
-  modeColor: "#000000",
+  subColor: "#000000",
+  modeColor: "#ffffff",
   bgUrl: "",
 
-  bgX: 50,
-  bgY: 50,
-  bgZoom: 120,
+  bgX: 60,
+  bgY: 67,
+  bgZoom: 100,
   cardScale: 100,
 
   nameX: 36,
-  nameY: 54,
-  nameSize: 34,
+  nameY: 58,
+  nameSize: 37,
 
-  scoreX: 78,
-  scoreY: 36,
-  scoreSize: 42,
+  scoreX: 79,
+  scoreY: 46,
+  scoreSize: 50,
 
-  tagX: 48,
-  tagY: 18,
+  tagX: 69,
+  tagY: 19,
   tagSize: 14,
 
-  flagX: 28,
-  flagY: 45,
+  rankTextX: 67,
+  rankTextY: 83,
+  rankTextSize: 20,
+
+  flagX: 22,
+  flagY: 25,
   flagSize: 24,
 
-  rankIconX: 18,
-  rankIconY: 35,
-  rankIconSize: 68,
+  rankIconX: 12,
+  rankIconY: 26,
+  rankIconSize: 60,
 };
 
 function numberParam(value: number) {
@@ -499,8 +507,8 @@ export default function Home() {
     params.set("rank", cleanRankText(settings.rankText));
 
     params.set("main", settings.mainColor.replace("#", ""));
-    params.set("sub", settings.subColor.replace("#", ""));
-    params.set("modeColor", (settings.modeColor ?? "#000000").replace("#", ""));
+    params.set("sub", (settings.subColor ?? "#000000").replace("#", ""));
+    params.set("modeColor", (settings.modeColor ?? "#ffffff").replace("#", ""));
 
     params.set("auto", "1");
     params.set("refresh", "60");
@@ -524,6 +532,10 @@ export default function Home() {
     params.set("tx", numberParam(settings.tagX));
     params.set("ty", numberParam(settings.tagY));
     params.set("ts", numberParam(settings.tagSize));
+
+    params.set("rx", numberParam(settings.rankTextX));
+    params.set("ry", numberParam(settings.rankTextY));
+    params.set("rs", numberParam(settings.rankTextSize));
 
     params.set("fx", numberParam(settings.flagX));
     params.set("fy", numberParam(settings.flagY));
@@ -705,7 +717,7 @@ export default function Home() {
               Sub color
               <input
                 type="color"
-                value={settings.subColor}
+                value={settings.subColor ?? "#000000"}
                 onChange={(e) => update("subColor", e.target.value)}
               />
             </label>
@@ -715,7 +727,7 @@ export default function Home() {
             Mode color
             <input
               type="color"
-              value={settings.modeColor}
+              value={settings.modeColor ?? "#ffffff"}
               onChange={(e) => update("modeColor", e.target.value)}
             />
           </label>
@@ -833,6 +845,30 @@ export default function Home() {
             min={8}
             max={30}
             onChange={(v) => update("tagSize", v)}
+          />
+
+          <Slider
+            label="Rank text X"
+            value={settings.rankTextX}
+            min={0}
+            max={100}
+            onChange={(v) => update("rankTextX", v)}
+          />
+
+          <Slider
+            label="Rank text Y"
+            value={settings.rankTextY}
+            min={0}
+            max={100}
+            onChange={(v) => update("rankTextY", v)}
+          />
+
+          <Slider
+            label="Rank text size"
+            value={settings.rankTextSize}
+            min={6}
+            max={28}
+            onChange={(v) => update("rankTextSize", v)}
           />
 
           <Slider
@@ -1099,7 +1135,14 @@ function Card({
         {activeRating}
       </div>
 
-      <div className="rank-line">
+      <div
+        className="rank-line"
+        style={{
+          left: `${settings.rankTextX}%`,
+          top: `${settings.rankTextY}%`,
+          fontSize: settings.rankTextSize,
+        }}
+      >
         {cleanRankText(settings.rankText || "MKW Lounge")}
       </div>
 

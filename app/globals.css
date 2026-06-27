@@ -258,6 +258,7 @@ input[type="color"] {
 .flag-badge,
 .card-name,
 .card-score,
+.rank-line,
 .type-name {
   position: absolute;
   z-index: 2;
@@ -379,19 +380,14 @@ input[type="color"] {
 }
 
 .rank-line {
-  position: absolute;
-  z-index: 2;
-  left: 50%;
-  bottom: 18px;
-  transform: translateX(-50%);
   max-width: 360px;
-  font-size: 13px;
   font-weight: 800;
   letter-spacing: 0.06em;
   color: rgba(255, 255, 255, .78);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-shadow: 0 3px 8px rgba(0, 0, 0, .7);
 }
 
 .rank-icon {
