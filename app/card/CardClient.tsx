@@ -774,7 +774,7 @@ export default function CardClient({
             fontSize: initial.flagSize,
             background: display.flagUrl
               ? "rgba(255, 255, 255, .92)"
-              : initial.main,
+              : initial.border,
           }}
         >
           {display.flagUrl ? (
