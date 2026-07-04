@@ -33,6 +33,18 @@ function ratingMode(value: string): "MMR" | "LR" | "SWITCH" {
   return "MMR";
 }
 
+function modeSetting(value: string): "RT" | "CT" {
+  return value === "CT" ? "CT" : "RT";
+}
+
+function labelShape(value: string): "ROUNDED" | "STAR" | "HEART" {
+  const shape = value.toUpperCase();
+
+  if (shape === "STAR") return "STAR";
+  if (shape === "HEART") return "HEART";
+  return "ROUNDED";
+}
+
 export default async function CardPage({
   searchParams,
 }: {
@@ -43,32 +55,79 @@ export default async function CardPage({
   const initial = {
     name: getValue(params, "name", "Your Name"),
     lounge: getValue(params, "lounge", ""),
-    mode: getValue(params, "mode", "RT") === "CT" ? "CT" : "RT",
+    mode: modeSetting(getValue(params, "mode", "RT")),
     ratingMode: ratingMode(getValue(params, "ratingMode", "MMR")),
-    switchSeconds: getNumber(params, "switch", 5),
+    ratingSwitchSeconds: getNumber(
+      params,
+      "ratingSwitch",
+      getNumber(params, "switch", 5)
+    ),
     flag: getValue(params, "flag", "🇯🇵"),
     flagUrl: getValue(params, "flagUrl", ""),
     mmr: getValue(params, "mmr", "0000"),
     lr: getValue(params, "lr", "0000"),
     rank: getValue(params, "rank", "MKW Lounge"),
     icon: getValue(params, "icon", ""),
-    main: color(getValue(params, "main", "ff0000"), "#ff0000"),
-    sub: color(getValue(params, "sub", "000000"), "#000000"),
-    modeColor: color(getValue(params, "modeColor", "ffffff"), "#ffffff"),
+    border: color(
+      getValue(params, "border", getValue(params, "main", "000000")),
+      "#000000"
+    ),
+    flow: color(getValue(params, "flow", "ffffff"), "#ffffff"),
+    flowOn: getValue(params, "flowOn", "1") !== "0",
+    flowSpeed: getNumber(params, "flowSpeed", 50),
+    flowLength: getNumber(params, "flowLength", 25),
+    ratingEffectUseMain: getValue(params, "effectMain", "0") !== "0",
+    ratingEffectColor: color(getValue(params, "effectColor", "ffffff"), "#ffffff"),
+    tagTop: color(getValue(params, "tagTop", "000000"), "#000000"),
+    tagBottom: color(getValue(params, "tagBottom", "ffffff"), "#ffffff"),
+    tagTextTop: color(getValue(params, "tagTextTop", "ffffff"), "#ffffff"),
+    tagTextBottom: color(getValue(params, "tagTextBottom", "000000"), "#000000"),
+    tagBoxGradient: getValue(params, "tagBoxGradient", "0") !== "0",
+    tagBoxBalance: getNumber(params, "tagBoxBalance", 50),
+    tagTextGradient: getValue(params, "tagTextGradient", "0") !== "0",
+    tagTextBalance: getNumber(params, "tagTextBalance", 50),
+    ratingTop: color(getValue(params, "ratingTop", "000000"), "#000000"),
+    ratingBottom: color(getValue(params, "ratingBottom", "ffffff"), "#ffffff"),
+    ratingTextTop: color(getValue(params, "ratingTextTop", "ffffff"), "#ffffff"),
+    ratingTextBottom: color(getValue(params, "ratingTextBottom", "ff0000"), "#ff0000"),
+    ratingBoxGradient:
+      getValue(params, "ratingBoxGradient", "0") !== "0",
+    ratingBoxBalance: getNumber(params, "ratingBoxBalance", 50),
+    ratingTextGradient:
+      getValue(params, "ratingTextGradient", "0") !== "0",
+    ratingTextBalance: getNumber(params, "ratingTextBalance", 50),
+    textTop: color(getValue(params, "textTop", "ffffff"), "#ffffff"),
+    textBottom: color(getValue(params, "textBottom", "000000"), "#000000"),
+    textGradient: getValue(params, "textGradient", "0") !== "0",
+    textBalance: getNumber(params, "textBalance", 35),
+    cardBgLeft: color(getValue(params, "bgLeft", "000000"), "#000000"),
+    cardBgRight: color(getValue(params, "bgRight", "ff0000"), "#ff0000"),
+    cardBgGradient: getValue(params, "bgGradient", "0") !== "0",
+    cardBgBalance: getNumber(params, "bgBalance", 34),
+    cardBgOpacity: getNumber(params, "bgOpacity", 30),
     bg: getValue(params, "bg", ""),
     bgX: getNumber(params, "bgx", 60),
-    bgY: getNumber(params, "bgy", 67),
+    bgY: getNumber(params, "bgy", 50),
     bgZoom: getNumber(params, "bgz", 100),
     scale: getNumber(params, "scale", 100),
     nameX: getNumber(params, "nx", 36),
     nameY: getNumber(params, "ny", 58),
     nameSize: getNumber(params, "ns", 37),
-    scoreX: getNumber(params, "sx", 79),
-    scoreY: getNumber(params, "sy", 46),
-    scoreSize: getNumber(params, "ss", 50),
-    tagX: getNumber(params, "tx", 69),
-    tagY: getNumber(params, "ty", 19),
-    tagSize: getNumber(params, "ts", 14),
+    scoreX: getNumber(params, "sx", 80),
+    scoreY: getNumber(params, "sy", 50),
+    scoreSize: getNumber(params, "ss", 45),
+    ratingBoxX: getNumber(params, "rbx", 90),
+    ratingBoxY: getNumber(params, "rby", 81),
+    ratingBoxSize: getNumber(params, "rbs", 13),
+    ratingTextSize: getNumber(params, "rts", 10),
+    ratingTextSpacing: getNumber(params, "rspace", 0),
+    labelRadius: getNumber(params, "radius", 10),
+    labelShape: labelShape(getValue(params, "shape", "rounded")),
+    tagX: getNumber(params, "tx", 70),
+    tagY: getNumber(params, "ty", 25),
+    tagSize: getNumber(params, "ts", 18),
+    tagTextSize: getNumber(params, "tts", getNumber(params, "ts", 18)),
+    tagTextSpacing: getNumber(params, "tspace", 0),
     rankTextX: getNumber(params, "rx", 67),
     rankTextY: getNumber(params, "ry", 83),
     rankTextSize: getNumber(params, "rs", 20),

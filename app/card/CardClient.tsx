@@ -4,6 +4,9 @@ import RollingNumber from "@/components/RollingNumber";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 
 type RatingMode = "MMR" | "LR" | "SWITCH";
+type ModeSetting = "RT" | "CT";
+type LabelShape = "ROUNDED" | "STAR" | "HEART";
+type ActiveMode = "RT" | "CT";
 type ActiveRating = "MMR" | "LR";
 type EffectKind = "win" | "loss" | "rank-up" | "rank-down";
 type EffectPhase = "change" | "rank-reveal";
@@ -19,10 +22,10 @@ type EffectState = {
 type InitialCardSettings = {
   name: string;
   lounge: string;
-  mode: "RT" | "CT";
+  mode: ModeSetting;
 
   ratingMode: RatingMode;
-  switchSeconds: number;
+  ratingSwitchSeconds: number;
 
   flag: string;
   flagUrl: string;
@@ -33,9 +36,38 @@ type InitialCardSettings = {
   rank: string;
   icon: string;
 
-  main: string;
-  sub: string;
-  modeColor: string;
+  border: string;
+  flow: string;
+  flowOn: boolean;
+  flowSpeed: number;
+  flowLength: number;
+  ratingEffectUseMain: boolean;
+  ratingEffectColor: string;
+  tagTop: string;
+  tagBottom: string;
+  tagTextTop: string;
+  tagTextBottom: string;
+  tagBoxGradient: boolean;
+  tagBoxBalance: number;
+  tagTextGradient: boolean;
+  tagTextBalance: number;
+  ratingTop: string;
+  ratingBottom: string;
+  ratingTextTop: string;
+  ratingTextBottom: string;
+  ratingBoxGradient: boolean;
+  ratingBoxBalance: number;
+  ratingTextGradient: boolean;
+  ratingTextBalance: number;
+  textTop: string;
+  textBottom: string;
+  textGradient: boolean;
+  textBalance: number;
+  cardBgLeft: string;
+  cardBgRight: string;
+  cardBgGradient: boolean;
+  cardBgBalance: number;
+  cardBgOpacity: number;
   bg: string;
 
   bgX: number;
@@ -51,9 +83,19 @@ type InitialCardSettings = {
   scoreY: number;
   scoreSize: number;
 
+  ratingBoxX: number;
+  ratingBoxY: number;
+  ratingBoxSize: number;
+  ratingTextSize: number;
+  ratingTextSpacing: number;
+  labelRadius: number;
+  labelShape: LabelShape;
+
   tagX: number;
   tagY: number;
   tagSize: number;
+  tagTextSize: number;
+  tagTextSpacing: number;
 
   rankTextX: number;
   rankTextY: number;
@@ -82,12 +124,128 @@ type PlayerApiResponse = {
   rankNumber: number | null;
 };
 
+type DisplayState = {
+  name: string;
+  flag: string;
+  flagUrl: string;
+  mmr: string;
+  lr: string;
+  rank: string;
+  icon: string;
+};
+
 function getInitialActiveRating(mode: RatingMode): ActiveRating {
   return mode === "LR" ? "LR" : "MMR";
 }
 
+function getInitialActiveMode(mode: ModeSetting): ActiveMode {
+  return mode === "CT" ? "CT" : "RT";
+}
+
+function getSafeRatingMode(_mode: ModeSetting, ratingMode: RatingMode): RatingMode {
+  return ratingMode;
+}
+
+
 function cleanRankText(text: string) {
   return text.replace(/\s*,\s*/g, " / ");
+}
+
+function normalizeRankText(text: string) {
+  return cleanRankText(text)
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+}
+
+function waitForImage(src: string) {
+  if (!src || typeof window === "undefined") {
+    return Promise.resolve();
+  }
+
+  return new Promise<void>((resolve) => {
+    const image = new window.Image();
+    let finished = false;
+
+    const done = () => {
+      if (finished) return;
+      finished = true;
+      resolve();
+    };
+
+    image.onload = done;
+    image.onerror = done;
+    window.setTimeout(done, 900);
+    image.src = src;
+  });
+}
+
+
+function alphaHexFromPercent(value: number | undefined, fallback: number) {
+  const opacity = Math.min(100, Math.max(0, Number(value ?? fallback)));
+
+  if (!Number.isFinite(opacity)) {
+    return Math.round((fallback / 100) * 255)
+      .toString(16)
+      .padStart(2, "0");
+  }
+
+  return Math.round((opacity / 100) * 255)
+    .toString(16)
+    .padStart(2, "0");
+}
+
+function hexWithAlpha(color: string | undefined, alpha: string) {
+  const value = (color || "").trim();
+
+  if (/^#[0-9a-fA-F]{6}$/.test(value)) {
+    return `${value}${alpha}`;
+  }
+
+  return value || "transparent";
+}
+
+function percent(value: number | undefined, fallback: number) {
+  const number = Number(value ?? fallback);
+
+  if (!Number.isFinite(number)) {
+    return fallback;
+  }
+
+  return Math.min(100, Math.max(0, Math.round(number)));
+}
+
+function flowDuration(value: number | undefined) {
+  const speed = percent(value, 65);
+  const seconds = 8 - speed * 0.072;
+
+  return `${Math.max(0.8, Math.min(8, seconds)).toFixed(2)}s`;
+}
+
+function gradientStops(value: number | undefined, fallback: number) {
+  const balance = percent(value, fallback);
+
+  if (balance <= 0) {
+    return {
+      topStop: 100,
+      bottomStart: 100,
+    };
+  }
+
+  if (balance >= 100) {
+    return {
+      topStop: 0,
+      bottomStart: 0,
+    };
+  }
+
+  const center = 100 - balance;
+  const blend = 18;
+
+  return {
+    topStop: Math.min(100, Math.max(0, center - blend)),
+    bottomStart: Math.min(100, Math.max(0, center + blend)),
+  };
 }
 
 export default function CardClient({
@@ -95,7 +253,7 @@ export default function CardClient({
 }: {
   initial: InitialCardSettings;
 }) {
-  const [display, setDisplay] = useState({
+  const initialDisplay: DisplayState = {
     name: initial.name,
     flag: initial.flag,
     flagUrl: initial.flagUrl,
@@ -103,7 +261,11 @@ export default function CardClient({
     lr: initial.lr,
     rank: cleanRankText(initial.rank),
     icon: initial.icon,
-  });
+  };
+
+  const [display, setDisplay] = useState<DisplayState>(initialDisplay);
+
+  const activeMode: ActiveMode = initial.mode;
 
   const [activeRating, setActiveRating] = useState<ActiveRating>(
     getInitialActiveRating(initial.ratingMode)
@@ -111,17 +273,21 @@ export default function CardClient({
 
   const [effect, setEffect] = useState<EffectState>(null);
   const [scoreAnimationToken, setScoreAnimationToken] = useState(0);
+  const [switchAnimationToken, setSwitchAnimationToken] = useState(0);
 
   const activeRatingRef = useRef<ActiveRating>(
     getInitialActiveRating(initial.ratingMode)
   );
 
+
   const lastMmrRef = useRef<number | null>(null);
   const lastLrRef = useRef<number | null>(null);
   const lastRankRef = useRef<number | null>(null);
+  const lastRankTextRef = useRef<string>("");
 
   const effectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const revealTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const rankChangeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const firstFetchRef = useRef(true);
 
   useEffect(() => {
@@ -191,18 +357,19 @@ export default function CardClient({
     setActiveRating("MMR");
     activeRatingRef.current = "MMR";
 
-    const seconds = Math.max(initial.switchSeconds, 1);
+    const seconds = Math.max(initial.ratingSwitchSeconds ?? 5, 3);
 
     const interval = setInterval(() => {
       setActiveRating((prev) => {
         const next = prev === "MMR" ? "LR" : "MMR";
         activeRatingRef.current = next;
+        setSwitchAnimationToken((token) => token + 1);
         return next;
       });
     }, seconds * 1000);
 
     return () => clearInterval(interval);
-  }, [initial.ratingMode, initial.switchSeconds]);
+  }, [initial.ratingMode, initial.ratingSwitchSeconds]);
 
   function clearEffectTimers() {
     if (effectTimerRef.current) {
@@ -211,6 +378,10 @@ export default function CardClient({
 
     if (revealTimerRef.current) {
       clearTimeout(revealTimerRef.current);
+    }
+
+    if (rankChangeTimerRef.current) {
+      clearTimeout(rankChangeTimerRef.current);
     }
   }
 
@@ -261,11 +432,56 @@ export default function CardClient({
         rankText: rankText || "NEW RANK",
         rankIcon,
       });
-    }, 1150);
+    }, 3800);
 
     effectTimerRef.current = setTimeout(() => {
       setEffect(null);
-    }, 3600);
+    }, 7000);
+  }
+
+  function triggerRateThenRankEffect(
+    rateKind: "win" | "loss",
+    rateText: string,
+    rankKind: "rank-up" | "rank-down",
+    rankText: string,
+    rankIcon: string
+  ) {
+    clearEffectTimers();
+
+    setEffect(null);
+    setScoreAnimationToken((prev) => prev + 1);
+
+    window.setTimeout(() => {
+      setEffect({
+        kind: rateKind,
+        phase: "change",
+        text: rateText,
+      });
+    }, 20);
+
+    rankChangeTimerRef.current = setTimeout(() => {
+      setEffect({
+        kind: rankKind,
+        phase: "change",
+        text: rankKind === "rank-up" ? "RANK UP" : "RANK DOWN",
+        rankText,
+        rankIcon,
+      });
+    }, 1700);
+
+    revealTimerRef.current = setTimeout(() => {
+      setEffect({
+        kind: rankKind,
+        phase: "rank-reveal",
+        text: rankText || "NEW RANK",
+        rankText: rankText || "NEW RANK",
+        rankIcon,
+      });
+    }, 5200);
+
+    effectTimerRef.current = setTimeout(() => {
+      setEffect(null);
+    }, 8200);
   }
 
   useEffect(() => {
@@ -296,28 +512,66 @@ export default function CardClient({
           const previousMmr = lastMmrRef.current;
           const previousLr = lastLrRef.current;
           const previousRank = lastRankRef.current;
+          const previousRankText = lastRankTextRef.current;
 
-          if (
+          const nextRankText = cleanRankText(data.rankText || "NEW RANK");
+          const nextRankIcon = data.emblemUrl || "";
+
+          const rankNumberChanged =
             nextRank !== null &&
             previousRank !== null &&
-            nextRank !== previousRank
-          ) {
-            const nextRankText = cleanRankText(data.rankText || "NEW RANK");
-            const nextRankIcon = data.emblemUrl || "";
+            nextRank !== previousRank;
 
-            if (nextRank < previousRank) {
-              triggerRankEffect(
-                "rank-up",
-                "RANK UP",
+          const rankTextChanged =
+            Boolean(previousRankText) &&
+            Boolean(nextRankText) &&
+            normalizeRankText(previousRankText) !== normalizeRankText(nextRankText);
+
+          const rankChanged = rankNumberChanged || rankTextChanged;
+
+          const mmrDiff = previousMmr !== null ? nextMmr - previousMmr : 0;
+          const lrDiff = previousLr !== null ? nextLr - previousLr : 0;
+
+          if (rankChanged) {
+            const rankKind: "rank-up" | "rank-down" = rankNumberChanged
+              ? nextRank !== null && previousRank !== null && nextRank < previousRank
+                ? "rank-up"
+                : "rank-down"
+              : mmrDiff > 0 || lrDiff > 0
+                ? "rank-up"
+                : "rank-down";
+
+            const ratingForEffect =
+              initial.ratingMode === "SWITCH"
+                ? activeRatingRef.current
+                : initial.ratingMode;
+
+            let rateText = "";
+            let rateKind: "win" | "loss" = "win";
+
+            if (ratingForEffect === "LR" && lrDiff !== 0) {
+              rateText = `${lrDiff > 0 ? "+" : ""}${lrDiff} LR`;
+              rateKind = lrDiff > 0 ? "win" : "loss";
+            } else if (mmrDiff !== 0) {
+              rateText = `${mmrDiff > 0 ? "+" : ""}${mmrDiff} MMR`;
+              rateKind = mmrDiff > 0 ? "win" : "loss";
+            } else if (lrDiff !== 0) {
+              rateText = `${lrDiff > 0 ? "+" : ""}${lrDiff} LR`;
+              rateKind = lrDiff > 0 ? "win" : "loss";
+            }
+
+            if (rateText) {
+              triggerRateThenRankEffect(
+                rateKind,
+                rateText,
+                rankKind,
                 nextRankText,
                 nextRankIcon
               );
-            }
-
-            if (nextRank > previousRank) {
+            } else {
               triggerRankEffect(
-                "rank-down",
-                "RANK DOWN",
+                rankKind,
+                rankKind === "rank-up" ? "RANK UP" : "RANK DOWN",
                 nextRankText,
                 nextRankIcon
               );
@@ -354,8 +608,9 @@ export default function CardClient({
         lastMmrRef.current = nextMmr;
         lastLrRef.current = nextLr;
         lastRankRef.current = nextRank;
+        lastRankTextRef.current = cleanRankText(data.rankText || initial.rank);
 
-        setDisplay({
+        const nextDisplay: DisplayState = {
           name: data.playerName || initial.name,
           flag: data.flagEmoji || initial.flag,
           flagUrl: data.flagUrl || initial.flagUrl,
@@ -363,7 +618,13 @@ export default function CardClient({
           lr: String(nextLr || 0),
           rank: cleanRankText(data.rankText || initial.rank),
           icon: data.emblemUrl || initial.icon,
-        });
+        };
+
+        await waitForImage(nextDisplay.icon);
+
+        if (!active) return;
+
+        setDisplay(nextDisplay);
       } catch {
         // OBS表示中に一時的に取得できなくても、前回表示を維持する
       }
@@ -383,27 +644,102 @@ export default function CardClient({
 
   const shownScore = activeRating === "MMR" ? display.mmr : display.lr;
 
+  const cardBgStops = gradientStops(initial.cardBgBalance, 50);
+  const cardBgAlpha = alphaHexFromPercent(initial.cardBgOpacity, 86);
+  const tagBoxStops = gradientStops(initial.tagBoxBalance, 50);
+  const tagTextStops = gradientStops(initial.tagTextBalance, 40);
+  const ratingBoxStops = gradientStops(initial.ratingBoxBalance, 50);
+  const ratingTextStops = gradientStops(initial.ratingTextBalance, 40);
+  const textStops = gradientStops(initial.textBalance, 40);
+  const ratingEffectColor = initial.ratingEffectUseMain
+    ? initial.border
+    : initial.ratingEffectColor;
+
+  const cardBackground = initial.cardBgGradient
+    ? initial.bg
+      ? `linear-gradient(90deg, ${hexWithAlpha(initial.cardBgLeft, cardBgAlpha)} 0%, ${hexWithAlpha(initial.cardBgLeft, cardBgAlpha)} ${cardBgStops.topStop}%, ${hexWithAlpha(initial.cardBgRight, cardBgAlpha)} ${cardBgStops.bottomStart}%, ${hexWithAlpha(initial.cardBgRight, cardBgAlpha)} 100%), url(${initial.bg})`
+      : `linear-gradient(90deg, ${initial.cardBgLeft || "#130716"} 0%, ${initial.cardBgLeft || "#130716"} ${cardBgStops.topStop}%, ${initial.cardBgRight || "#0a1024"} ${cardBgStops.bottomStart}%, ${initial.cardBgRight || "#0a1024"} 100%)`
+    : initial.bg
+      ? `linear-gradient(90deg, ${hexWithAlpha(initial.cardBgLeft, cardBgAlpha)} 0%, ${hexWithAlpha(initial.cardBgLeft, cardBgAlpha)} 100%), url(${initial.bg})`
+      : `linear-gradient(90deg, ${initial.cardBgLeft || "#130716"} 0%, ${initial.cardBgLeft || "#130716"} 100%)`;
+
   return (
     <main className="obs-page">
       <div
-        className={`card-shell ${
+        className={`card-shell ${!initial.flowOn ? "no-flow" : ""} ${
+          !initial.tagBoxGradient ? "no-tag-box-gradient" : ""
+        } ${!initial.tagTextGradient ? "no-tag-text-gradient" : ""} ${
+          !initial.ratingBoxGradient ? "no-rating-box-gradient" : ""
+        } ${!initial.ratingTextGradient ? "no-rating-text-gradient" : ""} ${
+          !initial.textGradient ? "no-text-gradient" : ""
+        } ${!initial.cardBgGradient ? "no-card-bg-gradient" : ""} label-shape-${(
+          initial.labelShape ?? "ROUNDED"
+        ).toLowerCase()} ${
           effect ? `effect-${effect.kind} effect-phase-${effect.phase}` : ""
         }`}
         style={
           {
             transform: `scale(${initial.scale / 100})`,
-            backgroundImage: initial.bg
-              ? `linear-gradient(90deg, rgba(5, 7, 20, .86), rgba(5, 7, 20, .56)), url(${initial.bg})`
-              : "linear-gradient(90deg, rgba(10, 12, 28, .96), rgba(20, 20, 42, .88))",
+            backgroundImage: cardBackground,
             backgroundPosition: `${initial.bgX}% ${initial.bgY}%`,
             backgroundSize: `${initial.bgZoom}%`,
             borderColor: "transparent",
-            boxShadow: `0 0 28px ${initial.main}44, inset 0 0 24px #ffffff10`,
-            "--main-color": initial.main,
-            "--sub-color": initial.sub,
+            boxShadow: `0 0 28px ${initial.border}44, inset 0 0 24px #ffffff10`,
+            "--border-color": initial.border,
+            "--flow-color": initial.flow || "#ff3030",
+            "--rating-effect-color": ratingEffectColor || "#ff3030",
+            "--flow-speed": flowDuration(initial.flowSpeed),
+            "--flow-length": String(percent(initial.flowLength, 16)),
+            "--flow-gap": String(100 - percent(initial.flowLength, 16)),
+            "--tag-top-color": initial.tagTop || "#b90000",
+            "--tag-bottom-color": initial.tagBottom || "#000000",
+            "--tag-text-top-color": initial.tagTextTop || "#ffffff",
+            "--tag-text-bottom-color": initial.tagTextBottom || "#ff3030",
+            "--tag-box-top-stop": `${tagBoxStops.topStop}%`,
+            "--tag-box-bottom-start": `${tagBoxStops.bottomStart}%`,
+            "--tag-text-top-stop": `${tagTextStops.topStop}%`,
+            "--tag-text-bottom-start": `${tagTextStops.bottomStart}%`,
+            "--rating-top-color": initial.ratingTop || "#b90000",
+            "--rating-bottom-color": initial.ratingBottom || "#000000",
+            "--rating-text-top-color": initial.ratingTextTop || "#ffffff",
+            "--rating-text-bottom-color": initial.ratingTextBottom || "#ff3030",
+            "--rating-box-top-stop": `${ratingBoxStops.topStop}%`,
+            "--rating-box-bottom-start": `${ratingBoxStops.bottomStart}%`,
+            "--rating-text-top-stop": `${ratingTextStops.topStop}%`,
+            "--rating-text-bottom-start": `${ratingTextStops.bottomStart}%`,
+            "--label-radius": `${initial.labelRadius ?? 10}px`,
+            "--tag-shape-size": `${Math.max(
+              44,
+              Math.round((initial.tagSize ?? 18) * 4.4)
+            )}px`,
+            "--rating-shape-size": `${Math.max(
+              48,
+              Math.round((initial.ratingBoxSize ?? 13) * 5.2)
+            )}px`,
+            "--text-top-color": initial.textTop || "#ffffff",
+            "--text-bottom-color": initial.textBottom || "#ff3030",
+            "--text-top-stop": `${textStops.topStop}%`,
+            "--text-bottom-start": `${textStops.bottomStart}%`,
           } as CSSProperties
         }
       >
+        <svg
+          className="flow-border-svg"
+          viewBox="0 0 650 150"
+          aria-hidden="true"
+        >
+          <rect
+            className="flow-border-path"
+            x="1"
+            y="1"
+            width="648"
+            height="148"
+            rx="69"
+            ry="69"
+            pathLength={100}
+          />
+        </svg>
+
         {display.icon && (
           <img
             className="rank-icon"
@@ -423,12 +759,11 @@ export default function CardClient({
           style={{
             left: `${initial.tagX}%`,
             top: `${initial.tagY}%`,
-            fontSize: initial.tagSize,
-            background: initial.modeColor || "#ffffff",
-            color: initial.sub || "#000000",
+            fontSize: initial.tagTextSize,
+            letterSpacing: `${(initial.tagTextSpacing ?? 0) / 100}em`,
           }}
         >
-          {initial.mode}
+          <span className="tag-text">{activeMode}</span>
         </div>
 
         <div
@@ -460,10 +795,24 @@ export default function CardClient({
           {display.name}
         </div>
 
+        {initial.ratingMode === "SWITCH" && switchAnimationToken > 0 && (
+          <div
+            key={`switch-wave-${switchAnimationToken}`}
+            className="rating-switch-wave"
+            style={{
+              left: `${initial.scoreX}%`,
+              top: `${initial.scoreY}%`,
+            }}
+          />
+        )}
+
         <RollingNumber
+          key={`score-${activeRating}-${switchAnimationToken}`}
           value={shownScore}
           animateToken={scoreAnimationToken}
-          className="card-score"
+          className={`card-score ${
+            switchAnimationToken > 0 ? "rating-score-switch" : ""
+          }`}
           style={{
             left: `${initial.scoreX}%`,
             top: `${initial.scoreY}%`,
@@ -472,10 +821,17 @@ export default function CardClient({
         />
 
         <div
-          key={`label-${activeRating}`}
+          key={`label-${activeMode}-${activeRating}-${switchAnimationToken}`}
           className="rating-label rating-switch-in"
+          style={{
+            left: `${initial.ratingBoxX}%`,
+            top: `${initial.ratingBoxY}%`,
+            fontSize: initial.ratingTextSize,
+            letterSpacing: `${(initial.ratingTextSpacing ?? 0) / 100}em`,
+            padding: `${Math.max(2, Math.round((initial.ratingBoxSize ?? 13) * 0.35))}px ${Math.max(5, Math.round((initial.ratingBoxSize ?? 13) * 0.75))}px`,
+          }}
         >
-          {activeRating}
+          <span className="tag-text">{activeRating}</span>
         </div>
 
         <div
