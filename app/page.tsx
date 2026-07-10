@@ -1824,7 +1824,7 @@ export default function Home() {
                   }
                 >
                   <option value="DEFAULT">Default</option>
-                  <option value="OEDO_KANTEIRYU">FOT-大江戸勘亭流 Std E</option>
+                  <option value="OEDO_KANTEIRYU">大江戸勘亭流</option>
                   <option value="YU_GOTHIC">Yu Gothic</option>
                   <option value="MEIRYO">Meiryo</option>
                   <option value="MINCHO">Yu Mincho</option>
@@ -2455,6 +2455,10 @@ export default function Home() {
           <details className="version-history">
             <summary>Version history</summary>
             <div className="version-history-body">
+              <div>
+                <b>v1.6.8</b>
+                <span>Registered the remade font file as 大江戸勘亭流 using public/fonts/remake.otf.</span>
+              </div>
               <div>
                 <b>v1.6.7</b>
                 <span>Corrected FOT-大江戸勘亭流 Std E using its exact internal names and original filename.</span>

@@ -2,12 +2,12 @@
 @font-face {
   font-family: "Oedo Kanteiryu Local";
   src:
+    url("/fonts/remake.otf") format("opentype"),
     local("FOT-大江戸勘亭流 Std E"),
     local("FOT-OedKtr Std E"),
     local("OedKtrStd-E"),
     local("FOT-大江戸勘亭流 Std"),
-    local("FOT-OedKtr Std"),
-    url("/fonts/FOT-大江戸勘亭流 Std E.otf") format("opentype");
+    local("FOT-OedKtr Std");
   font-style: normal;
   font-weight: 400;
   font-display: swap;
