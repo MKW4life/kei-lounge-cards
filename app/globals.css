@@ -3,10 +3,11 @@
   font-family: "Oedo Kanteiryu Local";
   src:
     local("FOT-大江戸勘亭流 Std E"),
-    local("FOT-大江戸勘亭流 Std"),
     local("FOT-OedKtr Std E"),
     local("OedKtrStd-E"),
-    url("/fonts/FOT-OedoKanteiryuStdE.otf") format("opentype");
+    local("FOT-大江戸勘亭流 Std"),
+    local("FOT-OedKtr Std"),
+    url("/fonts/FOT-大江戸勘亭流 Std E.otf") format("opentype");
   font-style: normal;
   font-weight: 400;
   font-display: swap;
@@ -2491,4 +2492,25 @@ label {
 .card-shell .rating-label::after {
   display: none !important;
   content: none !important;
+}
+
+
+/* v1.6.7 exact FOT-大江戸勘亭流 Std E handling */
+.card-shell.font-oedo-kanteiryu,
+.card-shell.font-oedo-kanteiryu .card-name,
+.card-shell.font-oedo-kanteiryu .card-score,
+.card-shell.font-oedo-kanteiryu .card-score .rolling-digit-item,
+.card-shell.font-oedo-kanteiryu .card-score .rolling-static-char,
+.card-shell.font-oedo-kanteiryu .mode-tag,
+.card-shell.font-oedo-kanteiryu .rating-label,
+.card-shell.font-oedo-kanteiryu .rank-line {
+  font-family:
+    "Oedo Kanteiryu Local",
+    "FOT-大江戸勘亭流 Std E",
+    "FOT-OedKtr Std E",
+    "OedKtrStd-E",
+    "FOT-大江戸勘亭流 Std",
+    "FOT-OedKtr Std",
+    serif !important;
+  font-weight: 400 !important;
 }

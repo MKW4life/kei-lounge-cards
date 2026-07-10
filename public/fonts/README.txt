@@ -1,10 +1,13 @@
-FOT-大江戸勘亭流 Std E をサイトで使用する方法
+FOT-大江戸勘亭流 Std E の設定
 
-1. 所有しているフォントファイルを次の名前に変更してください。
-   FOT-OedoKanteiryuStdE.otf
+所有しているフォントファイルを、名前を変更せずに次の場所へ配置してください。
 
-2. このフォルダに配置してください。
-   public/fonts/FOT-OedoKanteiryuStdE.otf
+public/fonts/FOT-大江戸勘亭流 Std E.otf
 
-フォントがWindowsにインストール済みの場合は、local()からも読み込まれます。
-Web公開に使用する前に、フォントのライセンスがWeb配信を許可しているか確認してください。
+このフォントの内部名は次のとおりです。
+日本語フルネーム: FOT-大江戸勘亭流 Std E
+英語フルネーム: FOT-OedKtr Std E
+PostScript名: OedKtrStd-E
+
+Windowsへインストール済みの場合は、local()からも読み込まれます。
+公開サイトへフォントファイルを配置する場合は、Web配信を許可するライセンスか確認してください。

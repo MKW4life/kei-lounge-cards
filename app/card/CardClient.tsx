@@ -290,7 +290,7 @@ function gradientStops(value: number | undefined, fallback: number) {
 function fontFamily(value: FontChoice | string | undefined) {
   switch (value) {
     case "OEDO_KANTEIRYU":
-      return '"Oedo Kanteiryu Local", "FOT-大江戸勘亭流 Std E", "FOT-大江戸勘亭流 Std", "OedKtrStd-E", serif';
+      return '"Oedo Kanteiryu Local", "FOT-大江戸勘亭流 Std E", "FOT-OedKtr Std E", "OedKtrStd-E", "FOT-大江戸勘亭流 Std", "FOT-OedKtr Std", serif';
     case "YU_GOTHIC":
       return '"Yu Gothic", "YuGothic", "Hiragino Kaku Gothic ProN", sans-serif';
     case "MEIRYO":
@@ -744,7 +744,11 @@ export default function CardClient({
   return (
     <main className="obs-page">
       <div
-        className={`card-shell ${!initial.flowOn ? "no-flow" : ""} ${
+        className={`card-shell ${
+          initial.textFont === "OEDO_KANTEIRYU"
+            ? "font-oedo-kanteiryu"
+            : ""
+        } ${!initial.flowOn ? "no-flow" : ""} ${
           !initial.tagBoxGradient ? "no-tag-box-gradient" : ""
         } ${!initial.tagTextGradient ? "no-tag-text-gradient" : ""} ${
           !initial.ratingBoxGradient ? "no-rating-box-gradient" : ""

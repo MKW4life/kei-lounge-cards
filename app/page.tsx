@@ -726,7 +726,7 @@ function normalizeFontChoice(value: string | undefined): FontChoice {
 function fontFamily(value: FontChoice | string | undefined) {
   switch (normalizeFontChoice(value)) {
     case "OEDO_KANTEIRYU":
-      return '"Oedo Kanteiryu Local", "FOT-大江戸勘亭流 Std E", "FOT-大江戸勘亭流 Std", "OedKtrStd-E", serif';
+      return '"Oedo Kanteiryu Local", "FOT-大江戸勘亭流 Std E", "FOT-OedKtr Std E", "OedKtrStd-E", "FOT-大江戸勘亭流 Std", "FOT-OedKtr Std", serif';
     case "YU_GOTHIC":
       return '"Yu Gothic", "YuGothic", "Hiragino Kaku Gothic ProN", sans-serif';
     case "MEIRYO":
@@ -2456,6 +2456,10 @@ export default function Home() {
             <summary>Version history</summary>
             <div className="version-history-body">
               <div>
+                <b>v1.6.7</b>
+                <span>Corrected FOT-大江戸勘亭流 Std E using its exact internal names and original filename.</span>
+              </div>
+              <div>
                 <b>v1.6.6</b>
                 <span>Changed the default MMR, LR, and Rank Text values to blank.</span>
               </div>
@@ -2705,7 +2709,9 @@ function Card({
 
   return (
     <div
-      className={`card-shell ${!settings.flowEnabled ? "no-flow" : ""} ${
+      className={`card-shell ${
+        settings.textFont === "OEDO_KANTEIRYU" ? "font-oedo-kanteiryu" : ""
+      } ${!settings.flowEnabled ? "no-flow" : ""} ${
         !settings.tagBoxGradientEnabled ? "no-tag-box-gradient" : ""
       } ${!settings.tagTextGradientEnabled ? "no-tag-text-gradient" : ""} ${
         !settings.ratingBoxGradientEnabled ? "no-rating-box-gradient" : ""
