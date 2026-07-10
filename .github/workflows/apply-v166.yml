@@ -1,0 +1,63 @@
+name: Apply v1.6.6 defaults
+
+on:
+  push:
+    paths:
+      - ".github/workflows/apply-v166.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Update defaults
+        shell: bash
+        run: |
+          python <<'PY'
+          from pathlib import Path
+
+          page_path = Path("app/page.tsx")
+          page = page_path.read_text(encoding="utf-8")
+          replacements = {
+              '  mmr: "1253",': '  mmr: "",',
+              '  lr: "770",': '  lr: "",',
+              '  rankText: "Iron / Low Tier",': '  rankText: "",',
+          }
+          for old, new in replacements.items():
+              if old not in page:
+                  raise SystemExit(f"Missing page target: {old}")
+              page = page.replace(old, new, 1)
+
+          marker = '''              <div>\n                <b>v1.6.5</b>\n'''
+          history = '''              <div>\n                <b>v1.6.6</b>\n                <span>Changed the default MMR, LR, and Rank Text values to blank.</span>\n              </div>\n              <div>\n                <b>v1.6.5</b>\n'''
+          if marker not in page:
+              raise SystemExit("Missing version history marker")
+          page = page.replace(marker, history, 1)
+          page_path.write_text(page, encoding="utf-8")
+
+          card_path = Path("app/card/page.tsx")
+          card = card_path.read_text(encoding="utf-8")
+          replacements = {
+              '    mmr: getValue(params, "mmr", "1253"),': '    mmr: getValue(params, "mmr", ""),',
+              '    lr: getValue(params, "lr", "770"),': '    lr: getValue(params, "lr", ""),',
+              '    rank: getValue(params, "rank", "Iron / Low Tier"),': '    rank: getValue(params, "rank", ""),',
+          }
+          for old, new in replacements.items():
+              if old not in card:
+                  raise SystemExit(f"Missing card target: {old}")
+              card = card.replace(old, new, 1)
+          card_path.write_text(card, encoding="utf-8")
+          PY
+
+          rm .github/workflows/apply-v166.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/page.tsx app/card/page.tsx .github/workflows/apply-v166.yml
+          git commit -m "Release overlay builder v1.6.6"
+          git push
