@@ -14,6 +14,20 @@ type PreviewEffect = "win" | "loss" | "rank-up" | "rank-down" | null;
 type RatingMode = "MMR" | "LR" | "SWITCH";
 type ModeSetting = "RT" | "CT";
 type LabelShape = "ROUNDED" | "STAR" | "HEART";
+type FontChoice =
+  | "DEFAULT"
+  | "OEDO_KANTEIRYU"
+  | "YU_GOTHIC"
+  | "MEIRYO"
+  | "MINCHO"
+  | "ARIAL"
+  | "IMPACT"
+  | "TREBUCHET"
+  | "VERDANA"
+  | "GEORGIA"
+  | "TIMES"
+  | "COURIER"
+  | "COMIC_SANS";
 type ActiveMode = "RT" | "CT";
 type ActiveRating = "MMR" | "LR";
 
@@ -87,6 +101,7 @@ type Settings = {
   textBottomColor: string;
   textGradientEnabled: boolean;
   textGradientBalance: number;
+  textFont: FontChoice;
   cardBgLeft: string;
   cardBgRight: string;
   cardBgGradientEnabled: boolean;
@@ -132,6 +147,29 @@ type Settings = {
   rankIconX: number;
   rankIconY: number;
   rankIconSize: number;
+
+  showName: boolean;
+  showRate: boolean;
+  showTrackTag: boolean;
+  showRatingLabel: boolean;
+  showTrackTagText: boolean;
+  showTrackTagBox: boolean;
+  showRatingLabelText: boolean;
+  showRatingLabelBox: boolean;
+  showRankText: boolean;
+  showFlag: boolean;
+  showRankIcon: boolean;
+  showBackgroundImage: boolean;
+  showCardBackground: boolean;
+  showCustomImage: boolean;
+
+  customImageUrl: string;
+  customImageX: number;
+  customImageY: number;
+  customImageZ: number;
+  customImageSize: number;
+  customImageGradient: number;
+  overallTransparency: number;
 };
 
 type PlayerApiResponse = {
@@ -155,13 +193,13 @@ const defaultSettings: Settings = {
   season: "16",
 
   flag: "🇯🇵",
-  flagUrl: "",
+  flagUrl: "https://flagcdn.com/w80/jp.png",
 
-  mmr: "0000",
-  lr: "0000",
+  mmr: "1253",
+  lr: "770",
 
-  rankText: "",
-  rankIconUrl: "",
+  rankText: "Iron / Low Tier",
+  rankIconUrl: "https://i.imgur.com/OwhIiNz.png",
 
   borderColor: "#000000",
   flowColor: "#ffffff",
@@ -182,7 +220,7 @@ const defaultSettings: Settings = {
   ratingBoxTopColor: "#000000",
   ratingBoxBottomColor: "#ffffff",
   ratingTextTopColor: "#ffffff",
-  ratingTextBottomColor: "#ff0000",
+  ratingTextBottomColor: "#ffffff",
   ratingBoxGradientEnabled: false,
   ratingBoxGradientBalance: 50,
   ratingTextGradientEnabled: false,
@@ -192,8 +230,9 @@ const defaultSettings: Settings = {
   textBottomColor: "#000000",
   textGradientEnabled: false,
   textGradientBalance: 35,
+  textFont: "DEFAULT",
   cardBgLeft: "#000000",
-  cardBgRight: "#ff0000",
+  cardBgRight: "#ffffff",
   cardBgGradientEnabled: false,
   cardBgGradientBalance: 34,
   cardBgOpacity: 30,
@@ -215,7 +254,7 @@ const defaultSettings: Settings = {
   ratingBoxX: 90,
   ratingBoxY: 81,
   ratingBoxSize: 13,
-  ratingTextSize: 10,
+  ratingTextSize: 15,
   ratingTextSpacing: 0,
   labelRadius: 10,
   labelShape: "ROUNDED",
@@ -237,6 +276,29 @@ const defaultSettings: Settings = {
   rankIconX: 12,
   rankIconY: 26,
   rankIconSize: 60,
+
+  showName: true,
+  showRate: true,
+  showTrackTag: true,
+  showRatingLabel: true,
+  showTrackTagText: true,
+  showTrackTagBox: true,
+  showRatingLabelText: true,
+  showRatingLabelBox: true,
+  showRankText: true,
+  showFlag: true,
+  showRankIcon: true,
+  showBackgroundImage: true,
+  showCardBackground: true,
+  showCustomImage: true,
+
+  customImageUrl: "",
+  customImageX: 50,
+  customImageY: 50,
+  customImageZ: 1,
+  customImageSize: 120,
+  customImageGradient: 0,
+  overallTransparency: 0,
 };
 
 const designSettingKeys: Array<keyof Settings> = [
@@ -247,20 +309,12 @@ const designSettingKeys: Array<keyof Settings> = [
   "flowLength",
   "ratingEffectUseMainColor",
   "ratingEffectColor",
-  "tagTopColor",
-  "tagBottomColor",
   "tagTextTopColor",
   "tagTextBottomColor",
-  "tagBoxGradientEnabled",
-  "tagBoxGradientBalance",
   "tagTextGradientEnabled",
   "tagTextGradientBalance",
-  "ratingBoxTopColor",
-  "ratingBoxBottomColor",
   "ratingTextTopColor",
   "ratingTextBottomColor",
-  "ratingBoxGradientEnabled",
-  "ratingBoxGradientBalance",
   "ratingTextGradientEnabled",
   "ratingTextGradientBalance",
   "textTopColor",
@@ -285,14 +339,10 @@ const designSettingKeys: Array<keyof Settings> = [
   "scoreSize",
   "ratingBoxX",
   "ratingBoxY",
-  "ratingBoxSize",
   "ratingTextSize",
   "ratingTextSpacing",
-  "labelRadius",
-  "labelShape",
   "tagX",
   "tagY",
-  "tagSize",
   "tagTextSize",
   "tagTextSpacing",
   "rankTextX",
@@ -304,6 +354,26 @@ const designSettingKeys: Array<keyof Settings> = [
   "rankIconX",
   "rankIconY",
   "rankIconSize",
+  "showName",
+  "showRate",
+  "showTrackTag",
+  "showRatingLabel",
+  "showRankText",
+  "showFlag",
+  "showRankIcon",
+  "showBackgroundImage",
+  "showCardBackground",
+  "showCustomImage",
+  "customImageUrl",
+  "customImageX",
+  "customImageY",
+  "customImageZ",
+  "customImageSize",
+  "customImageGradient",
+  "textFont",
+  "showTrackTagText",
+  "showRatingLabelText",
+  "overallTransparency",
 ];
 
 
@@ -359,7 +429,7 @@ function isColorDesignKey(key: keyof Settings) {
 }
 
 function isUrlDesignKey(key: keyof Settings) {
-  return key === "bgUrl";
+  return key === "bgUrl" || key === "customImageUrl";
 }
 
 function clampDesignNumber(key: keyof Settings, value: number) {
@@ -402,7 +472,13 @@ function clampDesignNumber(key: keyof Settings, value: number) {
     flagSize: [12, 50],
     rankIconX: [0, 100],
     rankIconY: [0, 100],
-    rankIconSize: [20, 90],
+    rankIconSize: [20, 120],
+    customImageX: [0, 100],
+    customImageY: [0, 100],
+    customImageZ: [0, 10],
+    customImageSize: [20, 500],
+    customImageGradient: [0, 100],
+    overallTransparency: [0, 100],
   };
 
   const range = ranges[key];
@@ -455,6 +531,10 @@ function decodeDesignValue(key: keyof Settings, token: string) {
       return (shape === "STAR" || shape === "HEART" || shape === "ROUNDED"
         ? shape
         : defaultValue) as never;
+    }
+
+    if (key === "textFont") {
+      return normalizeFontChoice(decoded) as never;
     }
 
     if (isColorDesignKey(key)) {
@@ -535,13 +615,35 @@ function parseDesignObject(input: unknown) {
     }
   });
 
-  if (data.labelShape !== undefined) {
-    const shape = String(data.labelShape).toUpperCase();
+  updates.labelShape = "ROUNDED";
+  updates.labelRadius = 10;
+  updates.showTrackTagBox = true;
+  updates.showRatingLabelBox = true;
 
-    updates.labelShape =
-      shape === "STAR" || shape === "HEART" || shape === "ROUNDED"
-        ? (shape as LabelShape)
-        : defaultSettings.labelShape;
+  if (data.textFont !== undefined) {
+    updates.textFont = normalizeFontChoice(String(data.textFont));
+  }
+
+  if (data.showTrackTagText === undefined && data.showTrackTag !== undefined) {
+    updates.showTrackTagText = Boolean(data.showTrackTag);
+  }
+
+  if (data.showTrackTagBox === undefined && data.showTrackTag !== undefined) {
+    updates.showTrackTagBox = Boolean(data.showTrackTag);
+  }
+
+  if (
+    data.showRatingLabelText === undefined &&
+    data.showRatingLabel !== undefined
+  ) {
+    updates.showRatingLabelText = Boolean(data.showRatingLabel);
+  }
+
+  if (
+    data.showRatingLabelBox === undefined &&
+    data.showRatingLabel !== undefined
+  ) {
+    updates.showRatingLabelBox = Boolean(data.showRatingLabel);
   }
 
   setIfDefined(
@@ -596,6 +698,61 @@ function parseDesignObject(input: unknown) {
   return updates;
 }
 
+
+
+function normalizeFontChoice(value: string | undefined): FontChoice {
+  const normalized = String(value ?? "DEFAULT").toUpperCase();
+  const allowed: FontChoice[] = [
+    "DEFAULT",
+    "OEDO_KANTEIRYU",
+    "YU_GOTHIC",
+    "MEIRYO",
+    "MINCHO",
+    "ARIAL",
+    "IMPACT",
+    "TREBUCHET",
+    "VERDANA",
+    "GEORGIA",
+    "TIMES",
+    "COURIER",
+    "COMIC_SANS",
+  ];
+
+  return allowed.includes(normalized as FontChoice)
+    ? (normalized as FontChoice)
+    : "DEFAULT";
+}
+
+function fontFamily(value: FontChoice | string | undefined) {
+  switch (normalizeFontChoice(value)) {
+    case "OEDO_KANTEIRYU":
+      return '"Oedo Kanteiryu Local", "FOT-大江戸勘亭流 Std E", "FOT-大江戸勘亭流 Std", "OedKtrStd-E", serif';
+    case "YU_GOTHIC":
+      return '"Yu Gothic", "YuGothic", "Hiragino Kaku Gothic ProN", sans-serif';
+    case "MEIRYO":
+      return 'Meiryo, "メイリオ", sans-serif';
+    case "MINCHO":
+      return '"Yu Mincho", "YuMincho", "Hiragino Mincho ProN", serif';
+    case "ARIAL":
+      return 'Arial, Helvetica, sans-serif';
+    case "IMPACT":
+      return 'Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif';
+    case "TREBUCHET":
+      return '"Trebuchet MS", Arial, sans-serif';
+    case "VERDANA":
+      return 'Verdana, Geneva, sans-serif';
+    case "GEORGIA":
+      return 'Georgia, "Times New Roman", serif';
+    case "TIMES":
+      return '"Times New Roman", Times, serif';
+    case "COURIER":
+      return '"Courier New", Courier, monospace';
+    case "COMIC_SANS":
+      return '"Comic Sans MS", "Comic Sans", cursive';
+    default:
+      return 'Arial, Helvetica, sans-serif';
+  }
+}
 
 function numberParam(value: number) {
   return String(Math.round(value));
@@ -895,6 +1052,17 @@ export default function Home() {
         parsed.labelShape === "STAR" || parsed.labelShape === "HEART"
           ? parsed.labelShape
           : "ROUNDED";
+      merged.textFont = normalizeFontChoice(parsed.textFont);
+      merged.showTrackTagText =
+        parsed.showTrackTagText ?? parsed.showTrackTag ?? true;
+      merged.showTrackTagBox = true;
+      merged.showRatingLabelText =
+        parsed.showRatingLabelText ?? parsed.showRatingLabel ?? true;
+      merged.showRatingLabelBox = true;
+      merged.labelShape = "ROUNDED";
+      merged.labelRadius = 10;
+      merged.overallTransparency =
+        parsed.overallTransparency ?? defaultSettings.overallTransparency;
       merged.ratingEffectUseMainColor =
         parsed.ratingEffectUseMainColor ?? defaultSettings.ratingEffectUseMainColor;
       merged.ratingEffectColor =
@@ -1008,7 +1176,10 @@ export default function Home() {
 
       setSettings((prev) => ({
         ...prev,
-        displayName: data.playerName || prev.displayName,
+        displayName:
+          prev.displayName.trim() && prev.displayName !== "Your Name"
+            ? prev.displayName
+            : data.playerName || prev.displayName,
         flag: data.flagEmoji || prev.flag,
         flagUrl: data.flagUrl || prev.flagUrl,
         mmr: String(data.currentMmr || 0),
@@ -1111,26 +1282,21 @@ export default function Home() {
     params.set("flowLength", numberParam(settings.flowLength ?? 16));
     params.set("effectMain", settings.ratingEffectUseMainColor ? "1" : "0");
     params.set("effectColor", (settings.ratingEffectColor ?? "#ff3030").replace("#", ""));
-    params.set("tagTop", (settings.tagTopColor ?? "#b90000").replace("#", ""));
-    params.set("tagBottom", (settings.tagBottomColor ?? "#000000").replace("#", ""));
     params.set("tagTextTop", (settings.tagTextTopColor ?? "#ffffff").replace("#", ""));
     params.set("tagTextBottom", (settings.tagTextBottomColor ?? "#ff3030").replace("#", ""));
-    params.set("tagBoxGradient", settings.tagBoxGradientEnabled ? "1" : "0");
-    params.set("tagBoxBalance", numberParam(settings.tagBoxGradientBalance ?? 50));
     params.set("tagTextGradient", settings.tagTextGradientEnabled ? "1" : "0");
     params.set("tagTextBalance", numberParam(settings.tagTextGradientBalance ?? 40));
     params.set("ratingTop", (settings.ratingBoxTopColor ?? "#b90000").replace("#", ""));
     params.set("ratingBottom", (settings.ratingBoxBottomColor ?? "#000000").replace("#", ""));
     params.set("ratingTextTop", (settings.ratingTextTopColor ?? "#ffffff").replace("#", ""));
     params.set("ratingTextBottom", (settings.ratingTextBottomColor ?? "#ff3030").replace("#", ""));
-    params.set("ratingBoxGradient", settings.ratingBoxGradientEnabled ? "1" : "0");
-    params.set("ratingBoxBalance", numberParam(settings.ratingBoxGradientBalance ?? 50));
     params.set("ratingTextGradient", settings.ratingTextGradientEnabled ? "1" : "0");
     params.set("ratingTextBalance", numberParam(settings.ratingTextGradientBalance ?? 40));
     params.set("textTop", (settings.textTopColor ?? "#ffffff").replace("#", ""));
     params.set("textBottom", (settings.textBottomColor ?? "#ff3030").replace("#", ""));
     params.set("textGradient", settings.textGradientEnabled ? "1" : "0");
     params.set("textBalance", numberParam(settings.textGradientBalance ?? 40));
+    params.set("font", settings.textFont ?? "DEFAULT");
     params.set("bgLeft", (settings.cardBgLeft ?? "#130716").replace("#", ""));
     params.set("bgRight", (settings.cardBgRight ?? "#0a1024").replace("#", ""));
     params.set("bgGradient", settings.cardBgGradientEnabled ? "1" : "0");
@@ -1158,15 +1324,11 @@ export default function Home() {
 
     params.set("rbx", numberParam(settings.ratingBoxX));
     params.set("rby", numberParam(settings.ratingBoxY));
-    params.set("rbs", numberParam(settings.ratingBoxSize));
     params.set("rts", numberParam(settings.ratingTextSize));
     params.set("rspace", numberParam(settings.ratingTextSpacing));
-    params.set("radius", numberParam(settings.labelRadius));
-    params.set("shape", (settings.labelShape ?? "ROUNDED").toLowerCase());
 
     params.set("tx", numberParam(settings.tagX));
     params.set("ty", numberParam(settings.tagY));
-    params.set("ts", numberParam(settings.tagSize));
     params.set("tts", numberParam(settings.tagTextSize));
     params.set("tspace", numberParam(settings.tagTextSpacing));
 
@@ -1181,6 +1343,36 @@ export default function Home() {
     params.set("ix", numberParam(settings.rankIconX));
     params.set("iy", numberParam(settings.rankIconY));
     params.set("isz", numberParam(settings.rankIconSize));
+
+    params.set("vname", settings.showName ? "1" : "0");
+    params.set("vrate", settings.showRate ? "1" : "0");
+    params.set(
+      "vtrack",
+      settings.showTrackTagText ? "1" : "0"
+    );
+    params.set(
+      "vrating",
+      settings.showRatingLabelText ? "1" : "0"
+    );
+    params.set("vtracktext", settings.showTrackTagText ? "1" : "0");
+    params.set("vratingtext", settings.showRatingLabelText ? "1" : "0");
+    params.set("vrank", settings.showRankText ? "1" : "0");
+    params.set("vflag", settings.showFlag ? "1" : "0");
+    params.set("vicon", settings.showRankIcon ? "1" : "0");
+    params.set("vbg", settings.showBackgroundImage ? "1" : "0");
+    params.set("vcard", settings.showCardBackground ? "1" : "0");
+    params.set("vimage", settings.showCustomImage ? "1" : "0");
+
+    if (settings.customImageUrl) params.set("overlay", settings.customImageUrl);
+    params.set("ox", numberParam(settings.customImageX));
+    params.set("oy", numberParam(settings.customImageY));
+    params.set("oz", numberParam(settings.customImageZ));
+    params.set("os", numberParam(settings.customImageSize));
+    params.set("ograd", numberParam(settings.customImageGradient));
+    params.set(
+      "opacity",
+      numberParam(settings.overallTransparency ?? 0)
+    );
 
     const path = `/card?${params.toString()}`;
 
@@ -1379,12 +1571,152 @@ export default function Home() {
 
           <h2>Design</h2>
 
-          <details className="design-group" open>
+                              <details className="design-group" open>
             <summary>
-              <span>Background</span>
+              <span className="summary-copy">
+                <span className="summary-title">Visibility</span>
+                <small>表示する要素と、オーバーレイ全体の透明度を設定します。</small>
+              </span>
             </summary>
 
             <div className="design-group-body">
+              <Slider
+                label="Overall transparency"
+                value={settings.overallTransparency}
+                min={0}
+                max={100}
+                onChange={(v) => update("overallTransparency", v)}
+              />
+              <p className="control-note">
+                0 = fully visible / 100 = fully transparent
+              </p>
+
+              <div className="visibility-pairs">
+                <div className="visibility-pair">
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={settings.showName}
+                      onChange={(e) => update("showName", e.target.checked)}
+                    />
+                    Display name
+                  </label>
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={settings.showRate}
+                      onChange={(e) => update("showRate", e.target.checked)}
+                    />
+                    Rate number
+                  </label>
+                </div>
+
+                <div className="visibility-pair">
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={settings.showTrackTagText}
+                      onChange={(e) =>
+                        update("showTrackTagText", e.target.checked)
+                      }
+                    />
+                    Track tag
+                  </label>
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={settings.showRatingLabelText}
+                      onChange={(e) =>
+                        update("showRatingLabelText", e.target.checked)
+                      }
+                    />
+                    Rating label
+                  </label>
+                </div>
+
+                <div className="visibility-pair">
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={settings.showRankText}
+                      onChange={(e) =>
+                        update("showRankText", e.target.checked)
+                      }
+                    />
+                    Rank text
+                  </label>
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={settings.showRankIcon}
+                      onChange={(e) =>
+                        update("showRankIcon", e.target.checked)
+                      }
+                    />
+                    Rank icon
+                  </label>
+                </div>
+
+                <div className="visibility-pair">
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={settings.showFlag}
+                      onChange={(e) => update("showFlag", e.target.checked)}
+                    />
+                    Flag
+                  </label>
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={settings.showCustomImage}
+                      onChange={(e) =>
+                        update("showCustomImage", e.target.checked)
+                      }
+                    />
+                    Custom image
+                  </label>
+                </div>
+
+                <div className="visibility-pair">
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={settings.showBackgroundImage}
+                      onChange={(e) =>
+                        update("showBackgroundImage", e.target.checked)
+                      }
+                    />
+                    Background image
+                  </label>
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={settings.showCardBackground}
+                      onChange={(e) =>
+                        update("showCardBackground", e.target.checked)
+                      }
+                    />
+                    Card background
+                  </label>
+                </div>
+              </div>
+            </div>
+          </details>
+
+<details className="design-group" open>
+            <summary>
+              <span className="summary-copy">
+                <span className="summary-title">Background</span>
+                <small>カード背景色と背景画像を設定します。</small>
+              </span>
+            </summary>
+
+            <div className="design-group-body">
+              <fieldset
+                className={`setting-scope ${settings.showCardBackground ? "" : "is-disabled"}`}
+                disabled={!(settings.showCardBackground)}
+              >
               <div className="two-col">
                 <label>
                   Card bg left
@@ -1427,6 +1759,12 @@ export default function Home() {
                 onChange={(v) => update("cardBgOpacity", v)}
               />
 
+              </fieldset>
+
+              <fieldset
+                className={`setting-scope ${settings.showBackgroundImage ? "" : "is-disabled"}`}
+                disabled={!(settings.showBackgroundImage)}
+              >
               <label>
                 Background image / GIF URL
                 <input
@@ -1459,16 +1797,49 @@ export default function Home() {
                 max={250}
                 onChange={(v) => update("bgZoom", v)}
               />
+              </fieldset>
+
             </div>
           </details>
 
           <details className="design-group">
             <summary>
-              <span>Main Text</span>
+              <span className="summary-copy">
+                <span className="summary-title">Main Text</span>
+                <small>名前・レート・ランクの文字と位置を設定します。</small>
+              </span>
             </summary>
 
             <div className="design-group-body">
-              <div className="two-col">
+              <fieldset
+                className={`setting-scope ${settings.showName || settings.showRate || settings.showRankText || settings.showTrackTagText || settings.showRatingLabelText ? "" : "is-disabled"}`}
+                disabled={!(settings.showName || settings.showRate || settings.showRankText || settings.showTrackTagText || settings.showRatingLabelText)}
+              >
+                            <label>
+                Text font
+                <select
+                  value={settings.textFont ?? "DEFAULT"}
+                  onChange={(e) =>
+                    update("textFont", e.target.value as FontChoice)
+                  }
+                >
+                  <option value="DEFAULT">Default</option>
+                  <option value="OEDO_KANTEIRYU">FOT-大江戸勘亭流 Std E</option>
+                  <option value="YU_GOTHIC">Yu Gothic</option>
+                  <option value="MEIRYO">Meiryo</option>
+                  <option value="MINCHO">Yu Mincho</option>
+                  <option value="ARIAL">Arial</option>
+                  <option value="IMPACT">Impact</option>
+                  <option value="TREBUCHET">Trebuchet MS</option>
+                  <option value="VERDANA">Verdana</option>
+                  <option value="GEORGIA">Georgia</option>
+                  <option value="TIMES">Times New Roman</option>
+                  <option value="COURIER">Courier New</option>
+                  <option value="COMIC_SANS">Comic Sans MS</option>
+                </select>
+              </label>
+
+<div className="two-col">
                 <label>
                   Text top color
                   <input
@@ -1500,6 +1871,12 @@ export default function Home() {
                 onChange={(v) => update("textGradientBalance", v)}
               />
 
+              </fieldset>
+
+              <fieldset
+                className={`setting-scope ${settings.showName ? "" : "is-disabled"}`}
+                disabled={!(settings.showName)}
+              >
               <div className="design-subtitle">Name text position</div>
 
               <Slider
@@ -1527,6 +1904,12 @@ export default function Home() {
               />
 
 
+              </fieldset>
+
+              <fieldset
+                className={`setting-scope ${settings.showRate ? "" : "is-disabled"}`}
+                disabled={!(settings.showRate)}
+              >
               <div className="design-subtitle">Rate number layout</div>
 
               <Slider
@@ -1578,6 +1961,12 @@ export default function Home() {
                 </label>
               </div>
 
+              </fieldset>
+
+              <fieldset
+                className={`setting-scope ${settings.showRankText ? "" : "is-disabled"}`}
+                disabled={!(settings.showRankText)}
+              >
               <div className="design-subtitle">Rank text layout</div>
 
               <Slider
@@ -1603,12 +1992,17 @@ export default function Home() {
                 max={28}
                 onChange={(v) => update("rankTextSize", v)}
               />
+              </fieldset>
+
             </div>
           </details>
 
           <details className="design-group">
             <summary>
-              <span>Border / Flow</span>
+              <span className="summary-copy">
+                <span className="summary-title">Border / Flow</span>
+                <small>カード外枠と流れる光を設定します。</small>
+              </span>
             </summary>
 
             <div className="design-group-body">
@@ -1662,46 +2056,18 @@ export default function Home() {
 
           <details className="design-group">
             <summary>
-              <span>Track Tag</span>
+              <span className="summary-copy">
+                <span className="summary-title">Track Tag</span>
+                <small>RT / CTテキストの色・文字サイズ・位置を設定します。</small>
+              </span>
             </summary>
 
             <div className="design-group-body">
-              <div className="design-subtitle">Track tag colors</div>
 
-              <div className="two-col">
-                <label>
-                  Track box top
-                  <input
-                    type="color"
-                    value={settings.tagTopColor ?? "#b90000"}
-                    onChange={(e) => update("tagTopColor", e.target.value)}
-                  />
-                </label>
-
-                <label>
-                  Track box bottom
-                  <input
-                    type="color"
-                    value={settings.tagBottomColor ?? "#000000"}
-                    onChange={(e) => update("tagBottomColor", e.target.value)}
-                  />
-                </label>
-              </div>
-
-              <OptionSlider
-                label="Track box balance"
-                optionLabel="Track box gradient"
-                checked={settings.tagBoxGradientEnabled}
-                onCheckedChange={(checked) =>
-                  update("tagBoxGradientEnabled", checked)
-                }
-                value={settings.tagBoxGradientBalance ?? 50}
-                min={0}
-                max={100}
-                disabled={!settings.tagBoxGradientEnabled}
-                onChange={(v) => update("tagBoxGradientBalance", v)}
-              />
-
+              <fieldset
+                className={`setting-scope ${settings.showTrackTagText ? "" : "is-disabled"}`}
+                disabled={!(settings.showTrackTagText)}
+              >
               <div className="two-col">
                 <label>
                   Track text top
@@ -1738,10 +2104,16 @@ export default function Home() {
                 onChange={(v) => update("tagTextGradientBalance", v)}
               />
 
-              <div className="design-subtitle">Track tag layout</div>
+              </fieldset>
+
+              <fieldset
+                className={`setting-scope ${settings.showTrackTagText ? "" : "is-disabled"}`}
+                disabled={!(settings.showTrackTagText)}
+              >
+              <div className="design-subtitle">Track text layout</div>
 
               <Slider
-                label="Track tag X"
+                label="Track text X"
                 value={settings.tagX}
                 min={0}
                 max={100}
@@ -1749,19 +2121,11 @@ export default function Home() {
               />
 
               <Slider
-                label="Track tag Y"
+                label="Track text Y"
                 value={settings.tagY}
                 min={0}
                 max={100}
                 onChange={(v) => update("tagY", v)}
-              />
-
-              <Slider
-                label="Track tag size"
-                value={settings.tagSize}
-                min={8}
-                max={30}
-                onChange={(v) => update("tagSize", v)}
               />
 
               <Slider
@@ -1780,76 +2144,25 @@ export default function Home() {
                 onChange={(v) => update("tagTextSpacing", v)}
               />
 
-              <div className="design-subtitle">Shared radius</div>
+              </fieldset>
 
-              <Slider
-                label="Track / Rating radius"
-                value={settings.labelRadius}
-                min={0}
-                max={15}
-                onChange={(v) => update("labelRadius", v)}
-              />
-
-              <label>
-                Track / Rating shape
-                <select
-                  value={settings.labelShape ?? "ROUNDED"}
-                  onChange={(e) =>
-                    update("labelShape", e.target.value as LabelShape)
-                  }
-                >
-                  <option value="ROUNDED">Rounded</option>
-                  <option value="STAR">Soft Star</option>
-                  <option value="HEART">Heart</option>
-                </select>
-              </label>
             </div>
           </details>
 
           <details className="design-group">
             <summary>
-              <span>Rating Label</span>
+              <span className="summary-copy">
+                <span className="summary-title">Rating Label</span>
+                <small>MMR / LRテキストの色・文字サイズ・位置を設定します。</small>
+              </span>
             </summary>
 
             <div className="design-group-body">
-              <div className="design-subtitle">Rating label colors</div>
 
-              <div className="two-col">
-                <label>
-                  Rating box top
-                  <input
-                    type="color"
-                    value={settings.ratingBoxTopColor ?? "#b90000"}
-                    onChange={(e) => update("ratingBoxTopColor", e.target.value)}
-                  />
-                </label>
-
-                <label>
-                  Rating box bottom
-                  <input
-                    type="color"
-                    value={settings.ratingBoxBottomColor ?? "#000000"}
-                    onChange={(e) =>
-                      update("ratingBoxBottomColor", e.target.value)
-                    }
-                  />
-                </label>
-              </div>
-
-              <OptionSlider
-                label="Rating box balance"
-                optionLabel="Rating box gradient"
-                checked={settings.ratingBoxGradientEnabled}
-                onCheckedChange={(checked) =>
-                  update("ratingBoxGradientEnabled", checked)
-                }
-                value={settings.ratingBoxGradientBalance ?? 50}
-                min={0}
-                max={100}
-                disabled={!settings.ratingBoxGradientEnabled}
-                onChange={(v) => update("ratingBoxGradientBalance", v)}
-              />
-
+              <fieldset
+                className={`setting-scope ${settings.showRatingLabelText ? "" : "is-disabled"}`}
+                disabled={!(settings.showRatingLabelText)}
+              >
               <div className="two-col">
                 <label>
                   Rating text top
@@ -1904,10 +2217,16 @@ export default function Home() {
                 onChange={(v) => update("ratingTextSpacing", v)}
               />
 
-              <div className="design-subtitle">Rating label layout</div>
+              </fieldset>
+
+              <fieldset
+                className={`setting-scope ${settings.showRatingLabelText ? "" : "is-disabled"}`}
+                disabled={!(settings.showRatingLabelText)}
+              >
+              <div className="design-subtitle">Rating text layout</div>
 
               <Slider
-                label="Rating box X"
+                label="Rating text X"
                 value={settings.ratingBoxX}
                 min={0}
                 max={100}
@@ -1915,30 +2234,64 @@ export default function Home() {
               />
 
               <Slider
-                label="Rating box Y"
+                label="Rating text Y"
                 value={settings.ratingBoxY}
                 min={0}
                 max={100}
                 onChange={(v) => update("ratingBoxY", v)}
               />
 
-              <Slider
-                label="Rating box size"
-                value={settings.ratingBoxSize}
-                min={8}
-                max={30}
-                onChange={(v) => update("ratingBoxSize", v)}
-              />
+              </fieldset>
 
             </div>
           </details>
 
           <details className="design-group">
             <summary>
-              <span>Other</span>
+              <span className="summary-copy">
+                <span className="summary-title">Image Overlay</span>
+                <small>好きな画像の位置・重なり・大きさ・透明度を設定します。</small>
+              </span>
             </summary>
 
             <div className="design-group-body">
+              <fieldset
+                className={`setting-scope ${settings.showCustomImage ? "" : "is-disabled"}`}
+                disabled={!(settings.showCustomImage)}
+              >
+              <label>
+                Image URL
+                <input
+                  value={settings.customImageUrl}
+                  onChange={(e) => update("customImageUrl", e.target.value)}
+                  placeholder="https://example.com/image.png"
+                />
+              </label>
+
+              <Slider label="Image X" value={settings.customImageX} min={0} max={100} onChange={(v) => update("customImageX", v)} />
+              <Slider label="Image Y" value={settings.customImageY} min={0} max={100} onChange={(v) => update("customImageY", v)} />
+              <Slider label="Image Z" value={settings.customImageZ} min={0} max={10} onChange={(v) => update("customImageZ", v)} />
+              <Slider label="Image size" value={settings.customImageSize} min={20} max={500} onChange={(v) => update("customImageSize", v)} />
+              <Slider label="Image transparency" value={settings.customImageGradient} min={0} max={100} onChange={(v) => update("customImageGradient", v)} />
+              <p className="control-note">0 = fully visible / 100 = fully transparent</p>
+              </fieldset>
+
+            </div>
+          </details>
+
+          <details className="design-group">
+            <summary>
+              <span className="summary-copy">
+                <span className="summary-title">Other</span>
+                <small>旗とランクアイコンを設定します。</small>
+              </span>
+            </summary>
+
+            <div className="design-group-body">
+              <fieldset
+                className={`setting-scope ${settings.showFlag ? "" : "is-disabled"}`}
+                disabled={!(settings.showFlag)}
+              >
               <div className="design-subtitle">Flag layout</div>
 
               <Slider
@@ -1965,6 +2318,12 @@ export default function Home() {
                 onChange={(v) => update("flagSize", v)}
               />
 
+              </fieldset>
+
+              <fieldset
+                className={`setting-scope ${settings.showRankIcon ? "" : "is-disabled"}`}
+                disabled={!(settings.showRankIcon)}
+              >
               <div className="design-subtitle">Rank icon layout</div>
 
               <Slider
@@ -1990,6 +2349,8 @@ export default function Home() {
                 max={120}
                 onChange={(v) => update("rankIconSize", v)}
               />
+              </fieldset>
+
             </div>
           </details>
 
@@ -2090,6 +2451,53 @@ export default function Home() {
           >
             Reset settings
           </button>
+
+          <details className="version-history">
+            <summary>Version history</summary>
+            <div className="version-history-body">
+              <div>
+                <b>v1.6.5</b>
+                <span>Changed the default background image URL to blank.</span>
+              </div>
+              <div>
+                <b>v1.6.4</b>
+                <span>Updated the default card preset, background, flag, rank icon, rating, and layout values.</span>
+              </div>
+              <div>
+                <b>v1.6.3</b>
+                <span>Removed the remaining Track Tag and Rating Label visual boxes and box-size controls.</span>
+              </div>
+              <div>
+                <b>v1.6.2</b>
+                <span>Removed Track Tag and Rating Label box color/gradient controls.</span>
+              </div>
+              <div>
+                <b>v1.6.1</b>
+                <span>Removed label box/shape controls and added overall overlay transparency.</span>
+              </div>
+              <div>
+                <b>v1.6.0</b>
+                <span>Rating Label behavior aligned with Track Tag, visibility-linked controls, persistent category descriptions, and corrected FOT-大江戸勘亭流 Std E support.</span>
+              </div>
+              <div>
+                <b>v1.5.0</b>
+                <span>Text / Box visibility split, image transparency fix, and font selector including 大江戸勘亭流 Std.</span>
+              </div>
+              <div>
+                <b>v1.4.0</b>
+                <span>Visibility toggles, custom image overlay, sizing fixes, and display-name fix.</span>
+              </div>
+              <div>
+                <b>v1.3.0</b>
+                <span>Soft Star / Heart labels and independent text spacing controls.</span>
+              </div>
+              <div>
+                <b>v1.2.0</b>
+                <span>JSON design sharing and independent Track / Rating styling.</span>
+              </div>
+              <p>Older OBS URLs and design JSON remain supported. New settings use safe defaults when missing.</p>
+            </div>
+          </details>
 
           <div className="bottom-fetch-block">
             <div className="fetch-button-row">
@@ -2252,13 +2660,21 @@ function Card({
   const cardBgStops = gradientStops(settings.cardBgGradientBalance, 50);
   const cardBgAlpha = alphaHexFromPercent(settings.cardBgOpacity, 86);
 
+  const visibleBackgroundUrl = settings.showBackgroundImage ? settings.bgUrl : "";
+
   const cardBackground = settings.cardBgGradientEnabled
-    ? settings.bgUrl
-      ? `linear-gradient(90deg, ${hexWithAlpha(settings.cardBgLeft, cardBgAlpha)} 0%, ${hexWithAlpha(settings.cardBgLeft, cardBgAlpha)} ${cardBgStops.topStop}%, ${hexWithAlpha(settings.cardBgRight, cardBgAlpha)} ${cardBgStops.bottomStart}%, ${hexWithAlpha(settings.cardBgRight, cardBgAlpha)} 100%), url(${settings.bgUrl})`
+    ? visibleBackgroundUrl
+      ? `linear-gradient(90deg, ${hexWithAlpha(settings.cardBgLeft, cardBgAlpha)} 0%, ${hexWithAlpha(settings.cardBgLeft, cardBgAlpha)} ${cardBgStops.topStop}%, ${hexWithAlpha(settings.cardBgRight, cardBgAlpha)} ${cardBgStops.bottomStart}%, ${hexWithAlpha(settings.cardBgRight, cardBgAlpha)} 100%), url(${visibleBackgroundUrl})`
       : `linear-gradient(90deg, ${settings.cardBgLeft ?? "#130716"} 0%, ${settings.cardBgLeft ?? "#130716"} ${cardBgStops.topStop}%, ${settings.cardBgRight ?? "#0a1024"} ${cardBgStops.bottomStart}%, ${settings.cardBgRight ?? "#0a1024"} 100%)`
-    : settings.bgUrl
-      ? `linear-gradient(90deg, ${hexWithAlpha(settings.cardBgLeft, cardBgAlpha)} 0%, ${hexWithAlpha(settings.cardBgLeft, cardBgAlpha)} 100%), url(${settings.bgUrl})`
+    : visibleBackgroundUrl
+      ? `linear-gradient(90deg, ${hexWithAlpha(settings.cardBgLeft, cardBgAlpha)} 0%, ${hexWithAlpha(settings.cardBgLeft, cardBgAlpha)} 100%), url(${visibleBackgroundUrl})`
       : `linear-gradient(90deg, ${settings.cardBgLeft ?? "#130716"} 0%, ${settings.cardBgLeft ?? "#130716"} 100%)`;
+
+  const customImageTransparency = percent(settings.customImageGradient, 0);
+  const customImageOpacity = Math.max(
+    0,
+    Math.min(1, 1 - customImageTransparency / 100)
+  );
 
   const previewRank = getPreviewRank(settings.rankText, effect, rankOrder);
   const previewRankIcon = previewRank.emblem || settings.rankIconUrl;
@@ -2291,15 +2707,17 @@ function Card({
         !settings.ratingBoxGradientEnabled ? "no-rating-box-gradient" : ""
       } ${!settings.ratingTextGradientEnabled ? "no-rating-text-gradient" : ""} ${
         !settings.textGradientEnabled ? "no-text-gradient" : ""
-      } ${!settings.cardBgGradientEnabled ? "no-card-bg-gradient" : ""} label-shape-${(
-        settings.labelShape ?? "ROUNDED"
-      ).toLowerCase()} ${
+      } ${!settings.cardBgGradientEnabled ? "no-card-bg-gradient" : ""} label-shape-rounded ${
         effect ? `effect-${effect}` : ""
       }`}
       style={
         {
+          opacity: Math.max(
+            0,
+            Math.min(1, 1 - (settings.overallTransparency ?? 0) / 100)
+          ),
           transform: `scale(${settings.cardScale / 100})`,
-          backgroundImage: cardBackground,
+          backgroundImage: settings.showCardBackground ? cardBackground : "none",
           backgroundPosition: `${settings.bgX}% ${settings.bgY}%`,
           backgroundSize: `${settings.bgZoom}%`,
           borderColor: "transparent",
@@ -2327,14 +2745,7 @@ function Card({
           "--rating-text-top-stop": `${ratingTextStops.topStop}%`,
           "--rating-text-bottom-start": `${ratingTextStops.bottomStart}%`,
           "--label-radius": `${settings.labelRadius ?? 10}px`,
-          "--tag-shape-size": `${Math.max(
-            44,
-            Math.round((settings.tagSize ?? 18) * 4.4)
-          )}px`,
-          "--rating-shape-size": `${Math.max(
-            48,
-            Math.round((settings.ratingBoxSize ?? 13) * 5.2)
-          )}px`,
+          "--card-font": fontFamily(settings.textFont),
           "--text-top-color": settings.textTopColor ?? "#ffffff",
           "--text-bottom-color": settings.textBottomColor ?? "#ff3030",
           "--text-top-stop": `${textStops.topStop}%`,
@@ -2359,7 +2770,22 @@ function Card({
         />
       </svg>
 
-      {settings.rankIconUrl && (
+      {settings.showCustomImage && settings.customImageUrl && (
+        <img
+          className="custom-overlay-image"
+          src={settings.customImageUrl}
+          alt=""
+          style={{
+            left: `${settings.customImageX}%`,
+            top: `${settings.customImageY}%`,
+            zIndex: settings.customImageZ,
+            width: settings.customImageSize,
+            opacity: customImageOpacity,
+          }}
+        />
+      )}
+
+      {settings.showRankIcon && settings.rankIconUrl && (
         <img
           className="rank-icon"
           src={settings.rankIconUrl}
@@ -2373,48 +2799,58 @@ function Card({
         />
       )}
 
-      <div
-        className="mode-tag"
-        style={{
-          left: `${settings.tagX}%`,
-          top: `${settings.tagY}%`,
-          fontSize: settings.tagTextSize,
-          letterSpacing: `${(settings.tagTextSpacing ?? 0) / 100}em`,
-        }}
-      >
-        <span className="tag-text">{activeMode}</span>
-      </div>
+      {(settings.showTrackTagText) && (
+        <div
+          className="mode-tag"
+          style={{
+            left: `${settings.tagX}%`,
+            top: `${settings.tagY}%`,
+            fontSize: settings.tagTextSize,
+            letterSpacing: `${(settings.tagTextSpacing ?? 0) / 100}em`,
+          }}
+        >
+          {settings.showTrackTagText && (
+            <span className="tag-text">{activeMode}</span>
+          )}
+        </div>
+      )}
 
-      <div
-        className={`flag-badge ${settings.flagUrl ? "has-image" : ""}`}
-        style={{
-          left: `${settings.flagX}%`,
-          top: `${settings.flagY}%`,
-          fontSize: settings.flagSize,
-          background: settings.flagUrl
-            ? "rgba(255, 255, 255, .92)"
-            : (settings.borderColor ?? "#000000"),
-        }}
-      >
-        {settings.flagUrl ? (
-          <img className="flag-image" src={settings.flagUrl} alt="" />
-        ) : (
-          settings.flag
-        )}
-      </div>
+      {settings.showFlag && (
+        <div
+          className={`flag-badge ${settings.flagUrl ? "has-image" : ""}`}
+          style={{
+            left: `${settings.flagX}%`,
+            top: `${settings.flagY}%`,
+            width: Math.round(settings.flagSize * 1.92),
+            height: Math.round(settings.flagSize * 1.42),
+            fontSize: settings.flagSize,
+            background: settings.flagUrl
+              ? "rgba(255, 255, 255, .92)"
+              : (settings.borderColor ?? "#000000"),
+          }}
+        >
+          {settings.flagUrl ? (
+            <img className="flag-image" src={settings.flagUrl} alt="" />
+          ) : (
+            settings.flag
+          )}
+        </div>
+      )}
 
-      <div
-        className="card-name"
-        style={{
-          left: `${settings.nameX}%`,
-          top: `${settings.nameY}%`,
-          fontSize: settings.nameSize,
-        }}
-      >
-        {name}
-      </div>
+      {settings.showName && (
+        <div
+          className="card-name"
+          style={{
+            left: `${settings.nameX}%`,
+            top: `${settings.nameY}%`,
+            fontSize: settings.nameSize,
+          }}
+        >
+          {name}
+        </div>
+      )}
 
-      {settings.ratingMode === "SWITCH" && previewSwitchAnimationToken > 0 && (
+      {settings.showRate && settings.ratingMode === "SWITCH" && previewSwitchAnimationToken > 0 && (
         <div
           key={`preview-switch-wave-${previewSwitchAnimationToken}`}
           className="rating-switch-wave"
@@ -2425,34 +2861,39 @@ function Card({
         />
       )}
 
-      <RollingNumber
-        key={`preview-score-${activeRating}-${previewSwitchAnimationToken}`}
-        value={shownScore || "0000"}
-        animateToken={previewScoreAnimationToken}
-        className={`card-score ${
-          previewSwitchAnimationToken > 0 ? "rating-score-switch" : ""
-        }`}
-        style={{
-          left: `${settings.scoreX}%`,
-          top: `${settings.scoreY}%`,
-          fontSize: settings.scoreSize,
-        }}
-      />
+      {settings.showRate && (
+        <RollingNumber
+          key={`preview-score-${activeRating}-${previewSwitchAnimationToken}`}
+          value={shownScore || "0000"}
+          animateToken={previewScoreAnimationToken}
+          className={`card-score ${
+            previewSwitchAnimationToken > 0 ? "rating-score-switch" : ""
+          }`}
+          style={{
+            left: `${settings.scoreX}%`,
+            top: `${settings.scoreY}%`,
+            fontSize: settings.scoreSize,
+          }}
+        />
+      )}
 
+      {(settings.showRatingLabelText) && (
       <div
-        key={`label-${activeRating}-${previewSwitchAnimationToken}`}
-        className="rating-label rating-switch-in"
+        className="rating-label"
         style={{
           left: `${settings.ratingBoxX}%`,
           top: `${settings.ratingBoxY}%`,
           fontSize: settings.ratingTextSize,
           letterSpacing: `${(settings.ratingTextSpacing ?? 0) / 100}em`,
-          padding: `${Math.max(2, Math.round((settings.ratingBoxSize ?? 13) * 0.35))}px ${Math.max(5, Math.round((settings.ratingBoxSize ?? 13) * 0.75))}px`,
         }}
       >
-        <span className="tag-text">{activeRating}</span>
+        {settings.showRatingLabelText && (
+          <span className="tag-text">{activeRating}</span>
+        )}
       </div>
+      )}
 
+      {settings.showRankText && (
       <div
         className="rank-line"
         style={{
@@ -2463,6 +2904,7 @@ function Card({
       >
         {cleanRankText(settings.rankText || "MKW Lounge")}
       </div>
+      )}
 
       {effect && <div className={`effect-burst ${effect}`}>{effectText}</div>}
 

@@ -6,6 +6,20 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 type RatingMode = "MMR" | "LR" | "SWITCH";
 type ModeSetting = "RT" | "CT";
 type LabelShape = "ROUNDED" | "STAR" | "HEART";
+type FontChoice =
+  | "DEFAULT"
+  | "OEDO_KANTEIRYU"
+  | "YU_GOTHIC"
+  | "MEIRYO"
+  | "MINCHO"
+  | "ARIAL"
+  | "IMPACT"
+  | "TREBUCHET"
+  | "VERDANA"
+  | "GEORGIA"
+  | "TIMES"
+  | "COURIER"
+  | "COMIC_SANS";
 type ActiveMode = "RT" | "CT";
 type ActiveRating = "MMR" | "LR";
 type EffectKind = "win" | "loss" | "rank-up" | "rank-down";
@@ -63,6 +77,7 @@ type InitialCardSettings = {
   textBottom: string;
   textGradient: boolean;
   textBalance: number;
+  textFont: FontChoice;
   cardBgLeft: string;
   cardBgRight: string;
   cardBgGradient: boolean;
@@ -108,6 +123,29 @@ type InitialCardSettings = {
   iconX: number;
   iconY: number;
   iconSize: number;
+
+  showName: boolean;
+  showRate: boolean;
+  showTrackTag: boolean;
+  showRatingLabel: boolean;
+  showTrackTagText: boolean;
+  showTrackTagBox: boolean;
+  showRatingLabelText: boolean;
+  showRatingLabelBox: boolean;
+  showRankText: boolean;
+  showFlag: boolean;
+  showRankIcon: boolean;
+  showBackgroundImage: boolean;
+  showCardBackground: boolean;
+  showCustomImage: boolean;
+
+  customImageUrl: string;
+  customImageX: number;
+  customImageY: number;
+  customImageZ: number;
+  customImageSize: number;
+  customImageGradient: number;
+  overallTransparency: number;
 
   auto: boolean;
   refresh: number;
@@ -246,6 +284,38 @@ function gradientStops(value: number | undefined, fallback: number) {
     topStop: Math.min(100, Math.max(0, center - blend)),
     bottomStart: Math.min(100, Math.max(0, center + blend)),
   };
+}
+
+
+function fontFamily(value: FontChoice | string | undefined) {
+  switch (value) {
+    case "OEDO_KANTEIRYU":
+      return '"Oedo Kanteiryu Local", "FOT-大江戸勘亭流 Std E", "FOT-大江戸勘亭流 Std", "OedKtrStd-E", serif';
+    case "YU_GOTHIC":
+      return '"Yu Gothic", "YuGothic", "Hiragino Kaku Gothic ProN", sans-serif';
+    case "MEIRYO":
+      return 'Meiryo, "メイリオ", sans-serif';
+    case "MINCHO":
+      return '"Yu Mincho", "YuMincho", "Hiragino Mincho ProN", serif';
+    case "ARIAL":
+      return 'Arial, Helvetica, sans-serif';
+    case "IMPACT":
+      return 'Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif';
+    case "TREBUCHET":
+      return '"Trebuchet MS", Arial, sans-serif';
+    case "VERDANA":
+      return 'Verdana, Geneva, sans-serif';
+    case "GEORGIA":
+      return 'Georgia, "Times New Roman", serif';
+    case "TIMES":
+      return '"Times New Roman", Times, serif';
+    case "COURIER":
+      return '"Courier New", Courier, monospace';
+    case "COMIC_SANS":
+      return '"Comic Sans MS", "Comic Sans", cursive';
+    default:
+      return 'Arial, Helvetica, sans-serif';
+  }
 }
 
 export default function CardClient({
@@ -611,7 +681,7 @@ export default function CardClient({
         lastRankTextRef.current = cleanRankText(data.rankText || initial.rank);
 
         const nextDisplay: DisplayState = {
-          name: data.playerName || initial.name,
+          name: initial.name,
           flag: data.flagEmoji || initial.flag,
           flagUrl: data.flagUrl || initial.flagUrl,
           mmr: String(nextMmr || 0),
@@ -655,13 +725,21 @@ export default function CardClient({
     ? initial.border
     : initial.ratingEffectColor;
 
+  const visibleBackgroundUrl = initial.showBackgroundImage ? initial.bg : "";
+
   const cardBackground = initial.cardBgGradient
-    ? initial.bg
-      ? `linear-gradient(90deg, ${hexWithAlpha(initial.cardBgLeft, cardBgAlpha)} 0%, ${hexWithAlpha(initial.cardBgLeft, cardBgAlpha)} ${cardBgStops.topStop}%, ${hexWithAlpha(initial.cardBgRight, cardBgAlpha)} ${cardBgStops.bottomStart}%, ${hexWithAlpha(initial.cardBgRight, cardBgAlpha)} 100%), url(${initial.bg})`
+    ? visibleBackgroundUrl
+      ? `linear-gradient(90deg, ${hexWithAlpha(initial.cardBgLeft, cardBgAlpha)} 0%, ${hexWithAlpha(initial.cardBgLeft, cardBgAlpha)} ${cardBgStops.topStop}%, ${hexWithAlpha(initial.cardBgRight, cardBgAlpha)} ${cardBgStops.bottomStart}%, ${hexWithAlpha(initial.cardBgRight, cardBgAlpha)} 100%), url(${visibleBackgroundUrl})`
       : `linear-gradient(90deg, ${initial.cardBgLeft || "#130716"} 0%, ${initial.cardBgLeft || "#130716"} ${cardBgStops.topStop}%, ${initial.cardBgRight || "#0a1024"} ${cardBgStops.bottomStart}%, ${initial.cardBgRight || "#0a1024"} 100%)`
-    : initial.bg
-      ? `linear-gradient(90deg, ${hexWithAlpha(initial.cardBgLeft, cardBgAlpha)} 0%, ${hexWithAlpha(initial.cardBgLeft, cardBgAlpha)} 100%), url(${initial.bg})`
+    : visibleBackgroundUrl
+      ? `linear-gradient(90deg, ${hexWithAlpha(initial.cardBgLeft, cardBgAlpha)} 0%, ${hexWithAlpha(initial.cardBgLeft, cardBgAlpha)} 100%), url(${visibleBackgroundUrl})`
       : `linear-gradient(90deg, ${initial.cardBgLeft || "#130716"} 0%, ${initial.cardBgLeft || "#130716"} 100%)`;
+
+  const customImageTransparency = percent(initial.customImageGradient, 0);
+  const customImageOpacity = Math.max(
+    0,
+    Math.min(1, 1 - customImageTransparency / 100)
+  );
 
   return (
     <main className="obs-page">
@@ -679,8 +757,12 @@ export default function CardClient({
         }`}
         style={
           {
+            opacity: Math.max(
+              0,
+              Math.min(1, 1 - (initial.overallTransparency ?? 0) / 100)
+            ),
             transform: `scale(${initial.scale / 100})`,
-            backgroundImage: cardBackground,
+            backgroundImage: initial.showCardBackground ? cardBackground : "none",
             backgroundPosition: `${initial.bgX}% ${initial.bgY}%`,
             backgroundSize: `${initial.bgZoom}%`,
             borderColor: "transparent",
@@ -708,14 +790,7 @@ export default function CardClient({
             "--rating-text-top-stop": `${ratingTextStops.topStop}%`,
             "--rating-text-bottom-start": `${ratingTextStops.bottomStart}%`,
             "--label-radius": `${initial.labelRadius ?? 10}px`,
-            "--tag-shape-size": `${Math.max(
-              44,
-              Math.round((initial.tagSize ?? 18) * 4.4)
-            )}px`,
-            "--rating-shape-size": `${Math.max(
-              48,
-              Math.round((initial.ratingBoxSize ?? 13) * 5.2)
-            )}px`,
+            "--card-font": fontFamily(initial.textFont),
             "--text-top-color": initial.textTop || "#ffffff",
             "--text-bottom-color": initial.textBottom || "#ff3030",
             "--text-top-stop": `${textStops.topStop}%`,
@@ -740,7 +815,22 @@ export default function CardClient({
           />
         </svg>
 
-        {display.icon && (
+        {initial.showCustomImage && initial.customImageUrl && (
+          <img
+            className="custom-overlay-image"
+            src={initial.customImageUrl}
+            alt=""
+            style={{
+              left: `${initial.customImageX}%`,
+              top: `${initial.customImageY}%`,
+              zIndex: initial.customImageZ,
+              width: initial.customImageSize,
+              opacity: customImageOpacity,
+            }}
+          />
+        )}
+
+        {initial.showRankIcon && display.icon && (
           <img
             className="rank-icon"
             src={display.icon}
@@ -754,48 +844,58 @@ export default function CardClient({
           />
         )}
 
-        <div
-          className="mode-tag"
-          style={{
-            left: `${initial.tagX}%`,
-            top: `${initial.tagY}%`,
-            fontSize: initial.tagTextSize,
-            letterSpacing: `${(initial.tagTextSpacing ?? 0) / 100}em`,
-          }}
-        >
-          <span className="tag-text">{activeMode}</span>
-        </div>
+        {initial.showTrackTagText && (
+          <div
+            className="mode-tag"
+            style={{
+              left: `${initial.tagX}%`,
+              top: `${initial.tagY}%`,
+              fontSize: initial.tagTextSize,
+              letterSpacing: `${(initial.tagTextSpacing ?? 0) / 100}em`,
+            }}
+          >
+            {initial.showTrackTagText && (
+              <span className="tag-text">{activeMode}</span>
+            )}
+          </div>
+        )}
 
-        <div
-          className={`flag-badge ${display.flagUrl ? "has-image" : ""}`}
-          style={{
-            left: `${initial.flagX}%`,
-            top: `${initial.flagY}%`,
-            fontSize: initial.flagSize,
-            background: display.flagUrl
-              ? "rgba(255, 255, 255, .92)"
-              : initial.border,
-          }}
-        >
-          {display.flagUrl ? (
-            <img className="flag-image" src={display.flagUrl} alt="" />
-          ) : (
-            display.flag
-          )}
-        </div>
+        {initial.showFlag && (
+          <div
+            className={`flag-badge ${display.flagUrl ? "has-image" : ""}`}
+            style={{
+              left: `${initial.flagX}%`,
+              top: `${initial.flagY}%`,
+              width: Math.round(initial.flagSize * 1.92),
+              height: Math.round(initial.flagSize * 1.42),
+              fontSize: initial.flagSize,
+              background: display.flagUrl
+                ? "rgba(255, 255, 255, .92)"
+                : initial.border,
+            }}
+          >
+            {display.flagUrl ? (
+              <img className="flag-image" src={display.flagUrl} alt="" />
+            ) : (
+              display.flag
+            )}
+          </div>
+        )}
 
-        <div
-          className="card-name"
-          style={{
-            left: `${initial.nameX}%`,
-            top: `${initial.nameY}%`,
-            fontSize: initial.nameSize,
-          }}
-        >
-          {display.name}
-        </div>
+        {initial.showName && (
+          <div
+            className="card-name"
+            style={{
+              left: `${initial.nameX}%`,
+              top: `${initial.nameY}%`,
+              fontSize: initial.nameSize,
+            }}
+          >
+            {display.name}
+          </div>
+        )}
 
-        {initial.ratingMode === "SWITCH" && switchAnimationToken > 0 && (
+        {initial.showRate && initial.ratingMode === "SWITCH" && switchAnimationToken > 0 && (
           <div
             key={`switch-wave-${switchAnimationToken}`}
             className="rating-switch-wave"
@@ -806,34 +906,39 @@ export default function CardClient({
           />
         )}
 
-        <RollingNumber
-          key={`score-${activeRating}-${switchAnimationToken}`}
-          value={shownScore}
-          animateToken={scoreAnimationToken}
-          className={`card-score ${
-            switchAnimationToken > 0 ? "rating-score-switch" : ""
-          }`}
-          style={{
-            left: `${initial.scoreX}%`,
-            top: `${initial.scoreY}%`,
-            fontSize: initial.scoreSize,
-          }}
-        />
+        {initial.showRate && (
+          <RollingNumber
+            key={`score-${activeRating}-${switchAnimationToken}`}
+            value={shownScore}
+            animateToken={scoreAnimationToken}
+            className={`card-score ${
+              switchAnimationToken > 0 ? "rating-score-switch" : ""
+            }`}
+            style={{
+              left: `${initial.scoreX}%`,
+              top: `${initial.scoreY}%`,
+              fontSize: initial.scoreSize,
+            }}
+          />
+        )}
 
+        {initial.showRatingLabelText && (
         <div
-          key={`label-${activeMode}-${activeRating}-${switchAnimationToken}`}
-          className="rating-label rating-switch-in"
+          className="rating-label"
           style={{
             left: `${initial.ratingBoxX}%`,
             top: `${initial.ratingBoxY}%`,
             fontSize: initial.ratingTextSize,
             letterSpacing: `${(initial.ratingTextSpacing ?? 0) / 100}em`,
-            padding: `${Math.max(2, Math.round((initial.ratingBoxSize ?? 13) * 0.35))}px ${Math.max(5, Math.round((initial.ratingBoxSize ?? 13) * 0.75))}px`,
           }}
         >
-          <span className="tag-text">{activeRating}</span>
+          {initial.showRatingLabelText && (
+            <span className="tag-text">{activeRating}</span>
+          )}
         </div>
+        )}
 
+        {initial.showRankText && (
         <div
           className="rank-line"
           style={{
@@ -844,6 +949,7 @@ export default function CardClient({
         >
           {display.rank || "MKW Lounge"}
         </div>
+        )}
 
         {effect && effect.phase === "change" && (
           <div className={`effect-burst ${effect.kind}`}>{effect.text}</div>

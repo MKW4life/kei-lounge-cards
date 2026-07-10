@@ -1,3 +1,17 @@
+
+@font-face {
+  font-family: "Oedo Kanteiryu Local";
+  src:
+    local("FOT-大江戸勘亭流 Std E"),
+    local("FOT-大江戸勘亭流 Std"),
+    local("FOT-OedKtr Std E"),
+    local("OedKtrStd-E"),
+    url("/fonts/FOT-OedoKanteiryuStdE.otf") format("opentype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
 :root {
   --bg: #070912;
   --panel: #141722;
@@ -2212,4 +2226,269 @@ label {
   height: var(--rating-shape-size) !important;
   min-width: var(--rating-shape-size) !important;
   min-height: var(--rating-shape-size) !important;
+}
+
+
+/* v1.4.0 visibility, sizing, custom overlay and history */
+.visibility-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.visibility-grid .checkbox-label {
+  margin: 0;
+}
+
+.custom-overlay-image {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  height: auto;
+  max-width: none;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.flag-badge {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+}
+
+.flag-badge.has-image {
+  padding: 3px;
+}
+
+.card-shell.label-shape-rounded .mode-tag,
+.card-shell:not(.label-shape-star):not(.label-shape-heart) .mode-tag {
+  box-sizing: border-box;
+}
+
+.version-history {
+  margin-top: 22px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-2);
+  overflow: hidden;
+}
+
+.version-history summary {
+  cursor: pointer;
+  padding: 13px 14px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.version-history-body {
+  display: grid;
+  gap: 10px;
+  padding: 0 14px 14px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.version-history-body > div {
+  display: grid;
+  gap: 2px;
+  padding-top: 9px;
+  border-top: 1px solid var(--line);
+}
+
+.version-history-body b {
+  color: var(--text);
+}
+
+.version-history-body p {
+  margin: 2px 0 0;
+}
+
+@media (max-width: 680px) {
+  .visibility-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* v1.5.0 descriptions, fonts, and split label visibility */
+.card-shell {
+  font-family: var(--card-font, Arial, Helvetica, sans-serif);
+}
+
+.category-description {
+  margin: 0 0 15px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.6;
+}
+
+.control-note {
+  margin: -7px 0 14px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.card-shell .label-box-hidden {
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  background: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  clip-path: none !important;
+  -webkit-mask: none !important;
+  mask: none !important;
+}
+
+.custom-overlay-image {
+  transition: opacity 120ms linear;
+}
+
+
+/* v1.6.0 persistent summaries, paired visibility, and disabled scopes */
+.design-group summary {
+  align-items: flex-start;
+}
+
+.summary-copy {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.design-group summary .summary-title {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 950;
+  letter-spacing: .02em;
+}
+
+.design-group summary .summary-copy small {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0;
+  line-height: 1.4;
+}
+
+.visibility-pairs {
+  display: grid;
+  gap: 9px;
+}
+
+.visibility-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  padding: 9px;
+  border: 1px solid rgba(255, 255, 255, .07);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, .025);
+}
+
+.visibility-pair .checkbox-label {
+  min-height: 42px;
+  margin: 0;
+}
+
+.setting-scope {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  transition:
+    opacity 140ms ease,
+    filter 140ms ease;
+}
+
+.setting-scope.is-disabled {
+  opacity: .38;
+  filter: grayscale(.72);
+}
+
+.setting-scope:disabled {
+  pointer-events: none;
+}
+
+.setting-scope + .setting-scope {
+  margin-top: 4px;
+}
+
+/* Rating Label follows Track Tag sizing and has no label animation */
+.card-shell .mode-tag,
+.card-shell .rating-label {
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.card-shell .rating-label,
+.card-shell .rating-label.rating-switch-in {
+  right: auto;
+  transform: translate(-50%, -50%);
+  animation: none !important;
+  transition: none !important;
+}
+
+@media (max-width: 680px) {
+  .visibility-pair {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* v1.6.1 overall transparency */
+.card-shell {
+  transition: opacity 120ms linear;
+}
+
+
+/* v1.6.3 text-only Track / Rating labels */
+.card-shell .mode-tag,
+.card-shell .rating-label,
+.card-shell.label-shape-rounded .mode-tag,
+.card-shell.label-shape-rounded .rating-label,
+.card-shell.label-shape-star .mode-tag,
+.card-shell.label-shape-star .rating-label,
+.card-shell.label-shape-heart .mode-tag,
+.card-shell.label-shape-heart .rating-label {
+  display: block !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  aspect-ratio: auto !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  clip-path: none !important;
+  -webkit-mask: none !important;
+  mask: none !important;
+  overflow: visible !important;
+}
+
+.card-shell.no-tag-box-gradient .mode-tag,
+.card-shell.no-rating-box-gradient .rating-label {
+  background: none !important;
+}
+
+.card-shell .mode-tag::before,
+.card-shell .mode-tag::after,
+.card-shell .rating-label::before,
+.card-shell .rating-label::after {
+  display: none !important;
+  content: none !important;
 }

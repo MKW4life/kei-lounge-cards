@@ -37,6 +37,44 @@ function modeSetting(value: string): "RT" | "CT" {
   return value === "CT" ? "CT" : "RT";
 }
 
+type FontChoice =
+  | "DEFAULT"
+  | "OEDO_KANTEIRYU"
+  | "YU_GOTHIC"
+  | "MEIRYO"
+  | "MINCHO"
+  | "ARIAL"
+  | "IMPACT"
+  | "TREBUCHET"
+  | "VERDANA"
+  | "GEORGIA"
+  | "TIMES"
+  | "COURIER"
+  | "COMIC_SANS";
+
+function fontChoice(value: string): FontChoice {
+  const normalized = value.toUpperCase();
+  const allowed: FontChoice[] = [
+    "DEFAULT",
+    "OEDO_KANTEIRYU",
+    "YU_GOTHIC",
+    "MEIRYO",
+    "MINCHO",
+    "ARIAL",
+    "IMPACT",
+    "TREBUCHET",
+    "VERDANA",
+    "GEORGIA",
+    "TIMES",
+    "COURIER",
+    "COMIC_SANS",
+  ];
+
+  return allowed.includes(normalized as FontChoice)
+    ? (normalized as FontChoice)
+    : "DEFAULT";
+}
+
 function labelShape(value: string): "ROUNDED" | "STAR" | "HEART" {
   const shape = value.toUpperCase();
 
@@ -51,6 +89,8 @@ export default async function CardPage({
   searchParams: SearchParams;
 }) {
   const params = await searchParams;
+  const legacyTrackVisible = getValue(params, "vtrack", "1") !== "0";
+  const legacyRatingVisible = getValue(params, "vrating", "1") !== "0";
 
   const initial = {
     name: getValue(params, "name", "Your Name"),
@@ -63,11 +103,11 @@ export default async function CardPage({
       getNumber(params, "switch", 5)
     ),
     flag: getValue(params, "flag", "🇯🇵"),
-    flagUrl: getValue(params, "flagUrl", ""),
-    mmr: getValue(params, "mmr", "0000"),
-    lr: getValue(params, "lr", "0000"),
-    rank: getValue(params, "rank", "MKW Lounge"),
-    icon: getValue(params, "icon", ""),
+    flagUrl: getValue(params, "flagUrl", "https://flagcdn.com/w80/jp.png"),
+    mmr: getValue(params, "mmr", "1253"),
+    lr: getValue(params, "lr", "770"),
+    rank: getValue(params, "rank", "Iron / Low Tier"),
+    icon: getValue(params, "icon", "https://i.imgur.com/OwhIiNz.png"),
     border: color(
       getValue(params, "border", getValue(params, "main", "000000")),
       "#000000"
@@ -89,7 +129,7 @@ export default async function CardPage({
     ratingTop: color(getValue(params, "ratingTop", "000000"), "#000000"),
     ratingBottom: color(getValue(params, "ratingBottom", "ffffff"), "#ffffff"),
     ratingTextTop: color(getValue(params, "ratingTextTop", "ffffff"), "#ffffff"),
-    ratingTextBottom: color(getValue(params, "ratingTextBottom", "ff0000"), "#ff0000"),
+    ratingTextBottom: color(getValue(params, "ratingTextBottom", "ffffff"), "#ffffff"),
     ratingBoxGradient:
       getValue(params, "ratingBoxGradient", "0") !== "0",
     ratingBoxBalance: getNumber(params, "ratingBoxBalance", 50),
@@ -100,8 +140,9 @@ export default async function CardPage({
     textBottom: color(getValue(params, "textBottom", "000000"), "#000000"),
     textGradient: getValue(params, "textGradient", "0") !== "0",
     textBalance: getNumber(params, "textBalance", 35),
+    textFont: fontChoice(getValue(params, "font", "DEFAULT")),
     cardBgLeft: color(getValue(params, "bgLeft", "000000"), "#000000"),
-    cardBgRight: color(getValue(params, "bgRight", "ff0000"), "#ff0000"),
+    cardBgRight: color(getValue(params, "bgRight", "ffffff"), "#ffffff"),
     cardBgGradient: getValue(params, "bgGradient", "0") !== "0",
     cardBgBalance: getNumber(params, "bgBalance", 34),
     cardBgOpacity: getNumber(params, "bgOpacity", 30),
@@ -119,7 +160,7 @@ export default async function CardPage({
     ratingBoxX: getNumber(params, "rbx", 90),
     ratingBoxY: getNumber(params, "rby", 81),
     ratingBoxSize: getNumber(params, "rbs", 13),
-    ratingTextSize: getNumber(params, "rts", 10),
+    ratingTextSize: getNumber(params, "rts", 15),
     ratingTextSpacing: getNumber(params, "rspace", 0),
     labelRadius: getNumber(params, "radius", 10),
     labelShape: labelShape(getValue(params, "shape", "rounded")),
@@ -137,6 +178,31 @@ export default async function CardPage({
     iconX: getNumber(params, "ix", 12),
     iconY: getNumber(params, "iy", 26),
     iconSize: getNumber(params, "isz", 60),
+    showName: getValue(params, "vname", "1") !== "0",
+    showRate: getValue(params, "vrate", "1") !== "0",
+    showTrackTag: legacyTrackVisible,
+    showRatingLabel: legacyRatingVisible,
+    showTrackTagText:
+      getValue(params, "vtracktext", legacyTrackVisible ? "1" : "0") !== "0",
+    showTrackTagBox:
+      getValue(params, "vtrackbox", legacyTrackVisible ? "1" : "0") !== "0",
+    showRatingLabelText:
+      getValue(params, "vratingtext", legacyRatingVisible ? "1" : "0") !== "0",
+    showRatingLabelBox:
+      getValue(params, "vratingbox", legacyRatingVisible ? "1" : "0") !== "0",
+    showRankText: getValue(params, "vrank", "1") !== "0",
+    showFlag: getValue(params, "vflag", "1") !== "0",
+    showRankIcon: getValue(params, "vicon", "1") !== "0",
+    showBackgroundImage: getValue(params, "vbg", "1") !== "0",
+    showCardBackground: getValue(params, "vcard", "1") !== "0",
+    showCustomImage: getValue(params, "vimage", "1") !== "0",
+    customImageUrl: getValue(params, "overlay", ""),
+    customImageX: getNumber(params, "ox", 50),
+    customImageY: getNumber(params, "oy", 50),
+    customImageZ: getNumber(params, "oz", 1),
+    customImageSize: getNumber(params, "os", 120),
+    customImageGradient: getNumber(params, "ograd", 0),
+    overallTransparency: getNumber(params, "opacity", 0),
     auto: getValue(params, "auto", "1") !== "0",
     refresh: getNumber(params, "refresh", 60),
   } as const;
