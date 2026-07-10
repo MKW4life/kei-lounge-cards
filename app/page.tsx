@@ -195,10 +195,10 @@ const defaultSettings: Settings = {
   flag: "🇯🇵",
   flagUrl: "https://flagcdn.com/w80/jp.png",
 
-  mmr: "1253",
-  lr: "770",
+  mmr: "",
+  lr: "",
 
-  rankText: "Iron / Low Tier",
+  rankText: "",
   rankIconUrl: "https://i.imgur.com/OwhIiNz.png",
 
   borderColor: "#000000",
@@ -2455,6 +2455,10 @@ export default function Home() {
           <details className="version-history">
             <summary>Version history</summary>
             <div className="version-history-body">
+              <div>
+                <b>v1.6.6</b>
+                <span>Changed the default MMR, LR, and Rank Text values to blank.</span>
+              </div>
               <div>
                 <b>v1.6.5</b>
                 <span>Changed the default background image URL to blank.</span>

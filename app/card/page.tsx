@@ -104,9 +104,9 @@ export default async function CardPage({
     ),
     flag: getValue(params, "flag", "🇯🇵"),
     flagUrl: getValue(params, "flagUrl", "https://flagcdn.com/w80/jp.png"),
-    mmr: getValue(params, "mmr", "1253"),
-    lr: getValue(params, "lr", "770"),
-    rank: getValue(params, "rank", "Iron / Low Tier"),
+    mmr: getValue(params, "mmr", ""),
+    lr: getValue(params, "lr", ""),
+    rank: getValue(params, "rank", ""),
     icon: getValue(params, "icon", "https://i.imgur.com/OwhIiNz.png"),
     border: color(
       getValue(params, "border", getValue(params, "main", "000000")),
