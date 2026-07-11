@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 
@@ -306,6 +306,21 @@ export default function RollingNumber({
 
     const startValue = toValue;
     const endValue = nextValue;
+
+    // A minus sign must never participate in the per-place carry math. The
+    // old implementation counted it as an extra digit, which could produce
+    // malformed rolls exactly when a negative MMR crossed a rank boundary.
+    // Keep the signed value intact and let the surrounding rate/rank effect
+    // provide the transition instead.
+    if (Number(startValue) < 0 || Number(endValue) < 0) {
+      lastTokenRef.current = animateToken;
+      setFromValue(endValue);
+      setToValue(endValue);
+      setAnimationKey((prev) => prev + 1);
+      setIsRolling(false);
+      return;
+    }
+
     const nextDirection = getRollDirection(startValue, endValue);
     const width = Math.max(startValue.length, endValue.length, 1);
     const totalTicks = getTotalTicks(startValue, endValue);
@@ -446,9 +461,7 @@ export default function RollingNumber({
 
   return (
     <span
-      className={`${className} rolling-number ${
-        isRolling ? "rolling-number-settle" : ""
-      }`}
+      className={`${className} rolling-number`}
       style={
         {
           ...style,
@@ -504,3 +517,4 @@ export default function RollingNumber({
     </span>
   );
 }
+

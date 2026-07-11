@@ -1,4 +1,4 @@
-import CardClient from "./CardClient";
+﻿import CardClient from "./CardClient";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -83,6 +83,31 @@ function labelShape(value: string): "ROUNDED" | "STAR" | "HEART" {
   return "ROUNDED";
 }
 
+function rankEffectStyle(
+  value: string
+): "CLASSIC" | "FLASH" | "SLIDE" | "BURST" | "STARLIGHT" | "METEOR" {
+  const style = value.toUpperCase();
+  if (
+    style === "FLASH" ||
+    style === "SLIDE" ||
+    style === "BURST" ||
+    style === "STARLIGHT" ||
+    style === "METEOR"
+  ) {
+    return style;
+  }
+
+  return "CLASSIC";
+}
+
+function ratingSwitchEffectStyle(
+  value: string
+): "WAVE" | "FADE" | "FLIP" | "GLITCH" {
+  const style = value.toUpperCase();
+  if (style === "FADE" || style === "FLIP" || style === "GLITCH") return style;
+  return "WAVE";
+}
+
 export default async function CardPage({
   searchParams,
 }: {
@@ -118,10 +143,14 @@ export default async function CardPage({
     flowLength: getNumber(params, "flowLength", 25),
     ratingEffectUseMain: getValue(params, "effectMain", "0") !== "0",
     ratingEffectColor: color(getValue(params, "effectColor", "ffffff"), "#ffffff"),
+    rankEffectStyle: rankEffectStyle(getValue(params, "rankEffect", "CLASSIC")),
+    ratingSwitchEffectStyle: ratingSwitchEffectStyle(
+      getValue(params, "switchEffect", "WAVE")
+    ),
     tagTop: color(getValue(params, "tagTop", "000000"), "#000000"),
     tagBottom: color(getValue(params, "tagBottom", "ffffff"), "#ffffff"),
     tagTextTop: color(getValue(params, "tagTextTop", "ffffff"), "#ffffff"),
-    tagTextBottom: color(getValue(params, "tagTextBottom", "000000"), "#000000"),
+    tagTextBottom: color(getValue(params, "tagTextBottom", "ff0000"), "#000000"),
     tagBoxGradient: getValue(params, "tagBoxGradient", "0") !== "0",
     tagBoxBalance: getNumber(params, "tagBoxBalance", 50),
     tagTextGradient: getValue(params, "tagTextGradient", "0") !== "0",
@@ -129,7 +158,7 @@ export default async function CardPage({
     ratingTop: color(getValue(params, "ratingTop", "000000"), "#000000"),
     ratingBottom: color(getValue(params, "ratingBottom", "ffffff"), "#ffffff"),
     ratingTextTop: color(getValue(params, "ratingTextTop", "ffffff"), "#ffffff"),
-    ratingTextBottom: color(getValue(params, "ratingTextBottom", "ffffff"), "#ffffff"),
+    ratingTextBottom: color(getValue(params, "ratingTextBottom", "ff0000"), "#ffffff"),
     ratingBoxGradient:
       getValue(params, "ratingBoxGradient", "0") !== "0",
     ratingBoxBalance: getNumber(params, "ratingBoxBalance", 50),
@@ -137,37 +166,45 @@ export default async function CardPage({
       getValue(params, "ratingTextGradient", "0") !== "0",
     ratingTextBalance: getNumber(params, "ratingTextBalance", 50),
     textTop: color(getValue(params, "textTop", "ffffff"), "#ffffff"),
-    textBottom: color(getValue(params, "textBottom", "000000"), "#000000"),
+    textBottom: color(getValue(params, "textBottom", "ff0000"), "#000000"),
     textGradient: getValue(params, "textGradient", "0") !== "0",
-    textBalance: getNumber(params, "textBalance", 35),
+    textBalance: getNumber(params, "textBalance", 50),
     textFont: fontChoice(getValue(params, "font", "DEFAULT")),
+    textShadowEnabled: getValue(params, "shadowOn", "0") !== "0",
+    textShadowColor: color(getValue(params, "shadowColor", "000000"), "#000000"),
+    textShadowX: getNumber(params, "shadowX", 50),
+    textShadowY: getNumber(params, "shadowY", 35),
+    textShadowBlur: getNumber(params, "shadowBlur", 35),
+    textShadowOpacity: getNumber(params, "shadowOpacity", 70),
     cardBgLeft: color(getValue(params, "bgLeft", "000000"), "#000000"),
-    cardBgRight: color(getValue(params, "bgRight", "ffffff"), "#ffffff"),
-    cardBgGradient: getValue(params, "bgGradient", "0") !== "0",
-    cardBgBalance: getNumber(params, "bgBalance", 34),
+    cardBgRight: color(getValue(params, "bgRight", "005e70"), "#005e70"),
+    cardBgGradient: getValue(params, "bgGradient", "1") !== "0",
+    cardBgBalance: getNumber(params, "bgBalance", 60),
     cardBgOpacity: getNumber(params, "bgOpacity", 30),
     bg: getValue(params, "bg", ""),
-    bgX: getNumber(params, "bgx", 60),
+    bgX: getNumber(params, "bgx", 50),
     bgY: getNumber(params, "bgy", 50),
-    bgZoom: getNumber(params, "bgz", 100),
+    bgZoom: getNumber(params, "bgz", 106.25),
     scale: getNumber(params, "scale", 100),
     nameX: getNumber(params, "nx", 36),
     nameY: getNumber(params, "ny", 58),
     nameSize: getNumber(params, "ns", 37),
+    nameTextSpacing: getNumber(params, "nspace", 0),
     scoreX: getNumber(params, "sx", 80),
     scoreY: getNumber(params, "sy", 50),
     scoreSize: getNumber(params, "ss", 45),
+    scoreTextSpacing: getNumber(params, "sspace", 0),
     ratingBoxX: getNumber(params, "rbx", 90),
     ratingBoxY: getNumber(params, "rby", 81),
     ratingBoxSize: getNumber(params, "rbs", 13),
-    ratingTextSize: getNumber(params, "rts", 15),
+    ratingTextSize: getNumber(params, "rts", 22.92),
     ratingTextSpacing: getNumber(params, "rspace", 0),
     labelRadius: getNumber(params, "radius", 10),
     labelShape: labelShape(getValue(params, "shape", "rounded")),
     tagX: getNumber(params, "tx", 70),
     tagY: getNumber(params, "ty", 25),
     tagSize: getNumber(params, "ts", 18),
-    tagTextSize: getNumber(params, "tts", getNumber(params, "ts", 18)),
+    tagTextSize: getNumber(params, "tts", getNumber(params, "ts", 25.5)),
     tagTextSpacing: getNumber(params, "tspace", 0),
     rankTextX: getNumber(params, "rx", 67),
     rankTextY: getNumber(params, "ry", 83),
@@ -200,7 +237,7 @@ export default async function CardPage({
     customImageX: getNumber(params, "ox", 50),
     customImageY: getNumber(params, "oy", 50),
     customImageZ: getNumber(params, "oz", 1),
-    customImageSize: getNumber(params, "os", 120),
+    customImageSize: getNumber(params, "os", 325),
     customImageGradient: getNumber(params, "ograd", 0),
     overallTransparency: getNumber(params, "opacity", 0),
     auto: getValue(params, "auto", "1") !== "0",
@@ -209,3 +246,4 @@ export default async function CardPage({
 
   return <CardClient initial={initial} />;
 }
+

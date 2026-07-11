@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import RollingNumber from "@/components/RollingNumber";
 import {
@@ -30,6 +30,14 @@ type FontChoice =
   | "COMIC_SANS";
 type ActiveMode = "RT" | "CT";
 type ActiveRating = "MMR" | "LR";
+type RankEffectStyle =
+  | "CLASSIC"
+  | "FLASH"
+  | "SLIDE"
+  | "BURST"
+  | "STARLIGHT"
+  | "METEOR";
+type RatingSwitchEffectStyle = "WAVE" | "FADE" | "FLIP" | "GLITCH";
 
 type PreviewScoreBump = {
   rating: ActiveRating;
@@ -79,6 +87,8 @@ type Settings = {
   flowLength: number;
   ratingEffectUseMainColor: boolean;
   ratingEffectColor: string;
+  rankEffectStyle: RankEffectStyle;
+  ratingSwitchEffectStyle: RatingSwitchEffectStyle;
   tagTopColor: string;
   tagBottomColor: string;
   tagTextTopColor: string;
@@ -102,6 +112,12 @@ type Settings = {
   textGradientEnabled: boolean;
   textGradientBalance: number;
   textFont: FontChoice;
+  textShadowEnabled: boolean;
+  textShadowColor: string;
+  textShadowX: number;
+  textShadowY: number;
+  textShadowBlur: number;
+  textShadowOpacity: number;
   cardBgLeft: string;
   cardBgRight: string;
   cardBgGradientEnabled: boolean;
@@ -117,10 +133,12 @@ type Settings = {
   nameX: number;
   nameY: number;
   nameSize: number;
+  nameTextSpacing: number;
 
   scoreX: number;
   scoreY: number;
   scoreSize: number;
+  scoreTextSpacing: number;
 
   ratingBoxX: number;
   ratingBoxY: number;
@@ -183,6 +201,18 @@ type PlayerApiResponse = {
   error?: string;
 };
 
+function safeJsonParse<T>(source: string): T | null {
+  const text = source.trim();
+
+  if (!text) return null;
+
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return null;
+  }
+}
+
 const defaultSettings: Settings = {
   loungeName: "",
   displayName: "Your Name",
@@ -208,10 +238,12 @@ const defaultSettings: Settings = {
   flowLength: 25,
   ratingEffectUseMainColor: false,
   ratingEffectColor: "#ffffff",
+  rankEffectStyle: "CLASSIC",
+  ratingSwitchEffectStyle: "WAVE",
   tagTopColor: "#000000",
   tagBottomColor: "#ffffff",
   tagTextTopColor: "#ffffff",
-  tagTextBottomColor: "#000000",
+  tagTextBottomColor: "#ff0000",
   tagBoxGradientEnabled: false,
   tagBoxGradientBalance: 50,
   tagTextGradientEnabled: false,
@@ -220,41 +252,49 @@ const defaultSettings: Settings = {
   ratingBoxTopColor: "#000000",
   ratingBoxBottomColor: "#ffffff",
   ratingTextTopColor: "#ffffff",
-  ratingTextBottomColor: "#ffffff",
+  ratingTextBottomColor: "#ff0000",
   ratingBoxGradientEnabled: false,
   ratingBoxGradientBalance: 50,
   ratingTextGradientEnabled: false,
   ratingTextGradientBalance: 50,
 
   textTopColor: "#ffffff",
-  textBottomColor: "#000000",
+  textBottomColor: "#ff0000",
   textGradientEnabled: false,
-  textGradientBalance: 35,
+  textGradientBalance: 50,
   textFont: "DEFAULT",
+  textShadowEnabled: false,
+  textShadowColor: "#000000",
+  textShadowX: 50,
+  textShadowY: 35,
+  textShadowBlur: 35,
+  textShadowOpacity: 70,
   cardBgLeft: "#000000",
-  cardBgRight: "#ffffff",
-  cardBgGradientEnabled: false,
-  cardBgGradientBalance: 34,
+  cardBgRight: "#005e70",
+  cardBgGradientEnabled: true,
+  cardBgGradientBalance: 60,
   cardBgOpacity: 30,
   bgUrl: "",
 
-  bgX: 60,
+  bgX: 50,
   bgY: 50,
-  bgZoom: 100,
+  bgZoom: 106.25,
   cardScale: 100,
 
   nameX: 36,
   nameY: 58,
   nameSize: 37,
+  nameTextSpacing: 0,
 
   scoreX: 80,
   scoreY: 50,
   scoreSize: 45,
+  scoreTextSpacing: 0,
 
   ratingBoxX: 90,
   ratingBoxY: 81,
   ratingBoxSize: 13,
-  ratingTextSize: 15,
+  ratingTextSize: 22.92,
   ratingTextSpacing: 0,
   labelRadius: 10,
   labelShape: "ROUNDED",
@@ -262,7 +302,7 @@ const defaultSettings: Settings = {
   tagX: 70,
   tagY: 25,
   tagSize: 18,
-  tagTextSize: 18,
+  tagTextSize: 25.5,
   tagTextSpacing: 0,
 
   rankTextX: 67,
@@ -296,7 +336,7 @@ const defaultSettings: Settings = {
   customImageX: 50,
   customImageY: 50,
   customImageZ: 1,
-  customImageSize: 120,
+  customImageSize: 325,
   customImageGradient: 0,
   overallTransparency: 0,
 };
@@ -309,6 +349,8 @@ const designSettingKeys: Array<keyof Settings> = [
   "flowLength",
   "ratingEffectUseMainColor",
   "ratingEffectColor",
+  "rankEffectStyle",
+  "ratingSwitchEffectStyle",
   "tagTextTopColor",
   "tagTextBottomColor",
   "tagTextGradientEnabled",
@@ -321,6 +363,12 @@ const designSettingKeys: Array<keyof Settings> = [
   "textBottomColor",
   "textGradientEnabled",
   "textGradientBalance",
+  "textShadowEnabled",
+  "textShadowColor",
+  "textShadowX",
+  "textShadowY",
+  "textShadowBlur",
+  "textShadowOpacity",
   "cardBgLeft",
   "cardBgRight",
   "cardBgGradientEnabled",
@@ -334,9 +382,11 @@ const designSettingKeys: Array<keyof Settings> = [
   "nameX",
   "nameY",
   "nameSize",
+  "nameTextSpacing",
   "scoreX",
   "scoreY",
   "scoreSize",
+  "scoreTextSpacing",
   "ratingBoxX",
   "ratingBoxY",
   "ratingTextSize",
@@ -393,7 +443,7 @@ function encodeDesignValue(value: Settings[keyof Settings]) {
   }
 
   if (typeof value === "number") {
-    return String(Math.round(value));
+    return String(Math.round(value * 100) / 100);
   }
 
   if (typeof value === "string") {
@@ -423,6 +473,7 @@ function isColorDesignKey(key: keyof Settings) {
     "ratingTextBottomColor",
     "textTopColor",
     "textBottomColor",
+    "textShadowColor",
     "cardBgLeft",
     "cardBgRight",
   ].includes(key);
@@ -441,6 +492,10 @@ function clampDesignNumber(key: keyof Settings, value: number) {
     ratingBoxGradientBalance: [0, 100],
     ratingTextGradientBalance: [0, 100],
     textGradientBalance: [0, 100],
+    textShadowX: [0, 100],
+    textShadowY: [0, 100],
+    textShadowBlur: [0, 100],
+    textShadowOpacity: [0, 100],
     cardBgGradientBalance: [0, 100],
     cardBgOpacity: [0, 100],
     bgX: [0, 100],
@@ -450,9 +505,11 @@ function clampDesignNumber(key: keyof Settings, value: number) {
     nameX: [0, 100],
     nameY: [0, 100],
     nameSize: [16, 60],
+    nameTextSpacing: [0, 100],
     scoreX: [0, 100],
     scoreY: [0, 100],
     scoreSize: [20, 80],
+    scoreTextSpacing: [0, 100],
     ratingBoxX: [0, 100],
     ratingBoxY: [0, 100],
     ratingBoxSize: [8, 30],
@@ -487,7 +544,7 @@ function clampDesignNumber(key: keyof Settings, value: number) {
     return Math.round(value);
   }
 
-  return Math.min(range[1], Math.max(range[0], Math.round(value)));
+  return Math.min(range[1], Math.max(range[0], Math.round(value * 100) / 100));
 }
 
 function decodeDesignValue(key: keyof Settings, token: string) {
@@ -535,6 +592,27 @@ function decodeDesignValue(key: keyof Settings, token: string) {
 
     if (key === "textFont") {
       return normalizeFontChoice(decoded) as never;
+    }
+
+    if (key === "rankEffectStyle") {
+      return ([
+        "CLASSIC",
+        "FLASH",
+        "SLIDE",
+        "BURST",
+        "STARLIGHT",
+        "METEOR",
+      ].includes(decoded.toUpperCase())
+        ? decoded.toUpperCase()
+        : defaultValue) as never;
+    }
+
+    if (key === "ratingSwitchEffectStyle") {
+      return (["WAVE", "FADE", "FLIP", "GLITCH"].includes(
+        decoded.toUpperCase()
+      )
+        ? decoded.toUpperCase()
+        : defaultValue) as never;
     }
 
     if (isColorDesignKey(key)) {
@@ -755,7 +833,7 @@ function fontFamily(value: FontChoice | string | undefined) {
 }
 
 function numberParam(value: number) {
-  return String(Math.round(value));
+  return String(Math.round(value * 100) / 100);
 }
 
 function alphaHexFromPercent(value: number | undefined, fallback: number) {
@@ -792,6 +870,36 @@ function percent(value: number | undefined, fallback: number) {
   return Math.min(100, Math.max(0, Math.round(number)));
 }
 
+function sliderToValue(value: number, minValue: number, maxValue: number) {
+  const normalized = percent(value, 0) / 100;
+  return Math.round((minValue + normalized * (maxValue - minValue)) * 100) / 100;
+}
+
+function valueToSlider(value: number, minValue: number, maxValue: number) {
+  if (maxValue <= minValue) return 0;
+  return percent(((value - minValue) / (maxValue - minValue)) * 100, 0);
+}
+
+function verticalSliderValue(storedTopValue: number) {
+  return 100 - percent(storedTopValue, 50);
+}
+
+function storedTopValue(sliderValue: number) {
+  return 100 - percent(sliderValue, 50);
+}
+
+function shadowOffsetX(value: number) {
+  return sliderToValue(value, -24, 24);
+}
+
+function shadowOffsetY(value: number) {
+  return sliderToValue(100 - percent(value, 50), -24, 24);
+}
+
+function shadowBlur(value: number) {
+  return sliderToValue(value, 0, 32);
+}
+
 function flowDuration(value: number | undefined) {
   const speed = percent(value, 65);
   const seconds = 8 - speed * 0.072;
@@ -804,20 +912,20 @@ function gradientStops(value: number | undefined, fallback: number) {
 
   if (balance <= 0) {
     return {
-      topStop: 100,
-      bottomStart: 100,
-    };
-  }
-
-  if (balance >= 100) {
-    return {
       topStop: 0,
       bottomStart: 0,
     };
   }
 
-  const center = 100 - balance;
-  const blend = 18;
+  if (balance >= 100) {
+    return {
+      topStop: 100,
+      bottomStart: 100,
+    };
+  }
+
+  const center = balance;
+  const blend = 12;
 
   return {
     topStop: Math.min(100, Math.max(0, center - blend)),
@@ -900,7 +1008,9 @@ function applyPreviewBump(
     return value;
   }
 
-  return String(Math.max(0, number + previewScoreBump.diff));
+  // Negative MMR is valid. Clamping the preview to zero made the rate jump to
+  // an unrelated value during Rank Up/Down previews and broke the sequence.
+  return String(number + previewScoreBump.diff);
 }
 
 function getPreviewRank(
@@ -980,6 +1090,8 @@ export default function Home() {
   const [rankStatus, setRankStatus] = useState("ランク一覧を取得中...");
 
   const [previewEffect, setPreviewEffect] = useState<PreviewEffect>(null);
+  const [previewRankRevealVisible, setPreviewRankRevealVisible] =
+    useState(false);
   const [previewScoreBump, setPreviewScoreBump] =
     useState<PreviewScoreBump>(null);
   const [previewScoreAnimationToken, setPreviewScoreAnimationToken] =
@@ -994,6 +1106,7 @@ export default function Home() {
 
   const previewEffectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const previewRankTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const previewRevealTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setOrigin(window.location.origin);
@@ -1004,7 +1117,15 @@ export default function Home() {
     if (!saved) return;
 
     try {
-      const parsed = JSON.parse(saved);
+      const parsed = safeJsonParse<
+        Partial<Settings> & { switchSeconds?: number }
+      >(saved);
+
+      if (!parsed) {
+        localStorage.removeItem("kei-lounge-card-settings");
+        setSettings(defaultSettings);
+        return;
+      }
       const merged = { ...defaultSettings, ...parsed };
 
       merged.mode = parsed.mode === "CT" ? "CT" : "RT";
@@ -1090,9 +1211,9 @@ export default function Home() {
         cache: "no-store",
       });
 
-      const data = (await response.json()) as RankApiResponse;
+      const data = safeJsonParse<RankApiResponse>(await response.text());
 
-      if (!response.ok || !data.available) {
+      if (!response.ok || !data?.available) {
         setRankOrder([]);
         setRankStatus("ランク一覧を取得できませんでした");
         return;
@@ -1140,6 +1261,10 @@ export default function Home() {
       if (previewRankTimer.current) {
         clearTimeout(previewRankTimer.current);
       }
+
+      if (previewRevealTimer.current) {
+        clearTimeout(previewRevealTimer.current);
+      }
     };
   }, []);
 
@@ -1167,9 +1292,19 @@ export default function Home() {
         cache: "no-store",
       });
 
-      const data = (await response.json()) as PlayerApiResponse;
+      const parsedData = safeJsonParse<PlayerApiResponse>(await response.text());
+      const data = parsedData ?? {
+        playerName: "",
+        flagEmoji: "",
+        flagUrl: "",
+        currentMmr: 0,
+        currentLr: 0,
+        rankText: "",
+        emblemUrl: "",
+        error: "Player data could not be read.",
+      };
 
-      if (!response.ok) {
+      if (!response.ok || !parsedData) {
         setApiStatus(data.error ?? "プレイヤーが見つかりませんでした");
         return;
       }
@@ -1210,6 +1345,10 @@ export default function Home() {
     if (previewRankTimer.current) {
       clearTimeout(previewRankTimer.current);
     }
+
+    if (previewRevealTimer.current) {
+      clearTimeout(previewRevealTimer.current);
+    }
   }
 
   function triggerPreviewEffect(effect: PreviewEffect) {
@@ -1218,6 +1357,7 @@ export default function Home() {
     clearPreviewTimers();
 
     setPreviewEffect(null);
+    setPreviewRankRevealVisible(false);
     setPreviewScoreBump(null);
 
     const isRankEffect = effect === "rank-up" || effect === "rank-down";
@@ -1238,15 +1378,23 @@ export default function Home() {
     }, 20);
 
     if (isRankEffect) {
+      // First show the standalone RANK UP / RANK DOWN announcement.
       previewRankTimer.current = setTimeout(() => {
         setPreviewEffect(effect);
+        setPreviewRankRevealVisible(false);
       }, 1700);
+
+      // After the announcement has been readable, start the selected reveal.
+      previewRevealTimer.current = setTimeout(() => {
+        setPreviewRankRevealVisible(true);
+      }, 4000);
     }
 
-    const duration = isRankEffect ? 7600 : 1800;
+    const duration = isRankEffect ? 7100 : 1800;
 
     previewEffectTimer.current = setTimeout(() => {
       setPreviewEffect(null);
+      setPreviewRankRevealVisible(false);
       setPreviewScoreBump(null);
     }, duration);
   }
@@ -1282,6 +1430,8 @@ export default function Home() {
     params.set("flowLength", numberParam(settings.flowLength ?? 16));
     params.set("effectMain", settings.ratingEffectUseMainColor ? "1" : "0");
     params.set("effectColor", (settings.ratingEffectColor ?? "#ff3030").replace("#", ""));
+    params.set("rankEffect", settings.rankEffectStyle);
+    params.set("switchEffect", settings.ratingSwitchEffectStyle);
     params.set("tagTextTop", (settings.tagTextTopColor ?? "#ffffff").replace("#", ""));
     params.set("tagTextBottom", (settings.tagTextBottomColor ?? "#ff3030").replace("#", ""));
     params.set("tagTextGradient", settings.tagTextGradientEnabled ? "1" : "0");
@@ -1297,8 +1447,14 @@ export default function Home() {
     params.set("textGradient", settings.textGradientEnabled ? "1" : "0");
     params.set("textBalance", numberParam(settings.textGradientBalance ?? 40));
     params.set("font", settings.textFont ?? "DEFAULT");
+    params.set("shadowOn", settings.textShadowEnabled ? "1" : "0");
+    params.set("shadowColor", settings.textShadowColor.replace("#", ""));
+    params.set("shadowX", numberParam(settings.textShadowX));
+    params.set("shadowY", numberParam(settings.textShadowY));
+    params.set("shadowBlur", numberParam(settings.textShadowBlur));
+    params.set("shadowOpacity", numberParam(settings.textShadowOpacity));
     params.set("bgLeft", (settings.cardBgLeft ?? "#130716").replace("#", ""));
-    params.set("bgRight", (settings.cardBgRight ?? "#0a1024").replace("#", ""));
+    params.set("bgRight", (settings.cardBgRight ?? "#005e70").replace("#", ""));
     params.set("bgGradient", settings.cardBgGradientEnabled ? "1" : "0");
     params.set("bgBalance", numberParam(settings.cardBgGradientBalance ?? 50));
     params.set("bgOpacity", numberParam(settings.cardBgOpacity ?? 86));
@@ -1317,10 +1473,12 @@ export default function Home() {
     params.set("nx", numberParam(settings.nameX));
     params.set("ny", numberParam(settings.nameY));
     params.set("ns", numberParam(settings.nameSize));
+    params.set("nspace", numberParam(settings.nameTextSpacing));
 
     params.set("sx", numberParam(settings.scoreX));
     params.set("sy", numberParam(settings.scoreY));
     params.set("ss", numberParam(settings.scoreSize));
+    params.set("sspace", numberParam(settings.scoreTextSpacing));
 
     params.set("rbx", numberParam(settings.ratingBoxX));
     params.set("rby", numberParam(settings.ratingBoxY));
@@ -1417,7 +1575,7 @@ export default function Home() {
 
       const designUpdates =
         raw.startsWith("{")
-          ? parseDesignObject(JSON.parse(raw))
+          ? parseDesignObject(safeJsonParse<unknown>(raw))
           : parseCompactDesignPreset(raw);
 
       if (!designUpdates) {
@@ -1731,7 +1889,7 @@ export default function Home() {
                   Card bg right
                   <input
                     type="color"
-                    value={settings.cardBgRight ?? "#0a1024"}
+                    value={settings.cardBgRight ?? "#005e70"}
                     onChange={(e) => update("cardBgRight", e.target.value)}
                   />
                 </label>
@@ -1784,17 +1942,17 @@ export default function Home() {
 
               <Slider
                 label="Background Y"
-                value={settings.bgY}
+                value={verticalSliderValue(settings.bgY)}
                 min={0}
                 max={100}
-                onChange={(v) => update("bgY", v)}
+                onChange={(v) => update("bgY", storedTopValue(v))}
               />
 
-              <Slider
+              <MappedSlider
                 label="Background zoom"
                 value={settings.bgZoom}
-                min={80}
-                max={250}
+                minValue={25}
+                maxValue={350}
                 onChange={(v) => update("bgZoom", v)}
               />
               </fieldset>
@@ -1871,6 +2029,34 @@ export default function Home() {
                 onChange={(v) => update("textGradientBalance", v)}
               />
 
+              <div className="design-subtitle">Text shadow</div>
+
+              <div className="two-col">
+                <label>
+                  Shadow color
+                  <input
+                    type="color"
+                    value={settings.textShadowColor}
+                    disabled={!settings.textShadowEnabled}
+                    onChange={(e) => update("textShadowColor", e.target.value)}
+                  />
+                </label>
+
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={settings.textShadowEnabled}
+                    onChange={(e) => update("textShadowEnabled", e.target.checked)}
+                  />
+                  Text shadow
+                </label>
+              </div>
+
+              <Slider label="Shadow X" value={settings.textShadowX} min={0} max={100} disabled={!settings.textShadowEnabled} onChange={(v) => update("textShadowX", v)} />
+              <Slider label="Shadow Y" value={settings.textShadowY} min={0} max={100} disabled={!settings.textShadowEnabled} onChange={(v) => update("textShadowY", v)} />
+              <Slider label="Shadow blur" value={settings.textShadowBlur} min={0} max={100} disabled={!settings.textShadowEnabled} onChange={(v) => update("textShadowBlur", v)} />
+              <Slider label="Shadow opacity" value={settings.textShadowOpacity} min={0} max={100} disabled={!settings.textShadowEnabled} onChange={(v) => update("textShadowOpacity", v)} />
+
               </fieldset>
 
               <fieldset
@@ -1889,18 +2075,26 @@ export default function Home() {
 
               <Slider
                 label="Name Y"
-                value={settings.nameY}
+                value={verticalSliderValue(settings.nameY)}
                 min={0}
                 max={100}
-                onChange={(v) => update("nameY", v)}
+                onChange={(v) => update("nameY", storedTopValue(v))}
               />
 
-              <Slider
+              <MappedSlider
                 label="Name size"
                 value={settings.nameSize}
-                min={16}
-                max={60}
+                minValue={4}
+                maxValue={120}
                 onChange={(v) => update("nameSize", v)}
+              />
+
+              <MappedSlider
+                label="Name spacing"
+                value={settings.nameTextSpacing}
+                minValue={0}
+                maxValue={40}
+                onChange={(v) => update("nameTextSpacing", v)}
               />
 
 
@@ -1922,44 +2116,27 @@ export default function Home() {
 
               <Slider
                 label="Rate Y"
-                value={settings.scoreY}
+                value={verticalSliderValue(settings.scoreY)}
                 min={0}
                 max={100}
-                onChange={(v) => update("scoreY", v)}
+                onChange={(v) => update("scoreY", storedTopValue(v))}
               />
 
-              <Slider
+              <MappedSlider
                 label="Rate size"
                 value={settings.scoreSize}
-                min={20}
-                max={80}
+                minValue={6}
+                maxValue={160}
                 onChange={(v) => update("scoreSize", v)}
               />
 
-              <div className="design-subtitle">Rate switch effect</div>
-
-              <div className="two-col">
-                <label>
-                  Effect color
-                  <input
-                    type="color"
-                    value={settings.ratingEffectColor ?? "#ff3030"}
-                    disabled={settings.ratingEffectUseMainColor}
-                    onChange={(e) => update("ratingEffectColor", e.target.value)}
-                  />
-                </label>
-
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={settings.ratingEffectUseMainColor}
-                    onChange={(e) =>
-                      update("ratingEffectUseMainColor", e.target.checked)
-                    }
-                  />
-                  Use border color
-                </label>
-              </div>
+              <MappedSlider
+                label="Rate spacing"
+                value={settings.scoreTextSpacing}
+                minValue={0}
+                maxValue={40}
+                onChange={(v) => update("scoreTextSpacing", v)}
+              />
 
               </fieldset>
 
@@ -1979,86 +2156,39 @@ export default function Home() {
 
               <Slider
                 label="Rank text Y"
-                value={settings.rankTextY}
+                value={verticalSliderValue(settings.rankTextY)}
                 min={0}
                 max={100}
-                onChange={(v) => update("rankTextY", v)}
+                onChange={(v) => update("rankTextY", storedTopValue(v))}
               />
 
-              <Slider
+              <MappedSlider
                 label="Rank text size"
                 value={settings.rankTextSize}
-                min={6}
-                max={28}
+                minValue={4}
+                maxValue={90}
                 onChange={(v) => update("rankTextSize", v)}
               />
+              </fieldset>
+
+              <fieldset
+                className={`setting-scope ${settings.showRankIcon ? "" : "is-disabled"}`}
+                disabled={!settings.showRankIcon}
+              >
+                <div className="design-subtitle">Rank icon layout</div>
+                <Slider label="Rank icon X" value={settings.rankIconX} min={0} max={100} onChange={(v) => update("rankIconX", v)} />
+                <Slider label="Rank icon Y" value={verticalSliderValue(settings.rankIconY)} min={0} max={100} onChange={(v) => update("rankIconY", storedTopValue(v))} />
+                <MappedSlider label="Rank icon size" value={settings.rankIconSize} minValue={0} maxValue={150} onChange={(v) => update("rankIconSize", v)} />
               </fieldset>
 
             </div>
           </details>
 
-          <details className="design-group">
+<details className="design-group">
             <summary>
               <span className="summary-copy">
-                <span className="summary-title">Border / Flow</span>
-                <small>カード外枠と流れる光を設定します。</small>
-              </span>
-            </summary>
-
-            <div className="design-group-body">
-              <div className="design-subtitle">Border colors</div>
-              <div className="two-col">
-                <label>
-                  Border color
-                  <input
-                    type="color"
-                    value={settings.borderColor ?? "#ff0000"}
-                    onChange={(e) => update("borderColor", e.target.value)}
-                  />
-                </label>
-
-                <label>
-                  Flowing border color
-                  <input
-                    type="color"
-                    value={settings.flowColor ?? "#ff3030"}
-                    onChange={(e) => update("flowColor", e.target.value)}
-                  />
-                </label>
-              </div>
-
-              <div className="design-subtitle">Flow animation</div>
-
-              <OptionSlider
-                label="Flow speed"
-                optionLabel="Flowing border"
-                checked={settings.flowEnabled}
-                onCheckedChange={(checked) => update("flowEnabled", checked)}
-                value={settings.flowSpeed ?? 65}
-                min={0}
-                max={100}
-                disabled={!settings.flowEnabled}
-                onChange={(v) => update("flowSpeed", v)}
-              />
-
-              <Slider
-                label="Flow length"
-                value={settings.flowLength ?? 16}
-                min={4}
-                max={45}
-                disabled={!settings.flowEnabled}
-                onChange={(v) => update("flowLength", v)}
-              />
-
-
-            </div>
-          </details>
-
-          <details className="design-group">
-            <summary>
-              <span className="summary-copy">
-                <span className="summary-title">Track Tag</span>
-                <small>RT / CTテキストの色・文字サイズ・位置を設定します。</small>
+                <span className="summary-title">Track / Rating Labels</span>
+                <small>RT/CTとMMR/LRの文字スタイルと位置を設定します。</small>
               </span>
             </summary>
 
@@ -2122,42 +2252,31 @@ export default function Home() {
 
               <Slider
                 label="Track text Y"
-                value={settings.tagY}
+                value={verticalSliderValue(settings.tagY)}
                 min={0}
                 max={100}
-                onChange={(v) => update("tagY", v)}
+                onChange={(v) => update("tagY", storedTopValue(v))}
               />
 
-              <Slider
+              <MappedSlider
                 label="Track tag text size"
                 value={settings.tagTextSize}
-                min={8}
-                max={30}
+                minValue={4}
+                maxValue={90}
                 onChange={(v) => update("tagTextSize", v)}
               />
 
-              <Slider
+              <MappedSlider
                 label="Track tag text spacing"
                 value={settings.tagTextSpacing}
-                min={0}
-                max={30}
+                minValue={0}
+                maxValue={50}
                 onChange={(v) => update("tagTextSpacing", v)}
               />
 
               </fieldset>
 
-            </div>
-          </details>
-
-          <details className="design-group">
-            <summary>
-              <span className="summary-copy">
-                <span className="summary-title">Rating Label</span>
-                <small>MMR / LRテキストの色・文字サイズ・位置を設定します。</small>
-              </span>
-            </summary>
-
-            <div className="design-group-body">
+              <div className="design-subtitle">Rating label</div>
 
               <fieldset
                 className={`setting-scope ${settings.showRatingLabelText ? "" : "is-disabled"}`}
@@ -2201,19 +2320,19 @@ export default function Home() {
                 onChange={(v) => update("ratingTextGradientBalance", v)}
               />
 
-              <Slider
+              <MappedSlider
                 label="Rating text size"
                 value={settings.ratingTextSize}
-                min={8}
-                max={30}
+                minValue={4}
+                maxValue={90}
                 onChange={(v) => update("ratingTextSize", v)}
               />
 
-              <Slider
+              <MappedSlider
                 label="Rating text spacing"
                 value={settings.ratingTextSpacing}
-                min={0}
-                max={30}
+                minValue={0}
+                maxValue={50}
                 onChange={(v) => update("ratingTextSpacing", v)}
               />
 
@@ -2235,10 +2354,10 @@ export default function Home() {
 
               <Slider
                 label="Rating text Y"
-                value={settings.ratingBoxY}
+                value={verticalSliderValue(settings.ratingBoxY)}
                 min={0}
                 max={100}
-                onChange={(v) => update("ratingBoxY", v)}
+                onChange={(v) => update("ratingBoxY", storedTopValue(v))}
               />
 
               </fieldset>
@@ -2249,8 +2368,139 @@ export default function Home() {
           <details className="design-group">
             <summary>
               <span className="summary-copy">
-                <span className="summary-title">Image Overlay</span>
-                <small>好きな画像の位置・重なり・大きさ・透明度を設定します。</small>
+                <span className="summary-title">Effects</span>
+                <small>レート切り替えとランク変動の演出を選びます。</small>
+              </span>
+            </summary>
+
+            <div className="design-group-body">
+              <div className="design-subtitle">Rank change effect</div>
+              <label>
+                Rank Up / Down style
+                <select
+                  value={settings.rankEffectStyle}
+                  onChange={(e) =>
+                    update("rankEffectStyle", e.target.value as RankEffectStyle)
+                  }
+                >
+                  <option value="CLASSIC">Classic reveal</option>
+                  <option value="FLASH">Light flash</option>
+                  <option value="SLIDE">Side slide</option>
+                  <option value="BURST">Energy burst</option>
+                  <option value="STARLIGHT">Starlight</option>
+                  <option value="METEOR">Meteor shower</option>
+                </select>
+              </label>
+
+              <div className="design-subtitle">MMR / LR switch effect</div>
+              <label>
+                Switch style
+                <select
+                  value={settings.ratingSwitchEffectStyle}
+                  onChange={(e) =>
+                    update(
+                      "ratingSwitchEffectStyle",
+                      e.target.value as RatingSwitchEffectStyle
+                    )
+                  }
+                >
+                  <option value="WAVE">Wave</option>
+                  <option value="FADE">Soft fade</option>
+                  <option value="FLIP">3D flip</option>
+                  <option value="GLITCH">Digital glitch</option>
+                </select>
+              </label>
+
+              <div className="design-subtitle">Effect color</div>
+              <div className="two-col">
+                <label>
+                  Effect color
+                  <input
+                    type="color"
+                    value={settings.ratingEffectColor ?? "#ff3030"}
+                    disabled={settings.ratingEffectUseMainColor}
+                    onChange={(e) => update("ratingEffectColor", e.target.value)}
+                  />
+                </label>
+
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={settings.ratingEffectUseMainColor}
+                    onChange={(e) =>
+                      update("ratingEffectUseMainColor", e.target.checked)
+                    }
+                  />
+                  Use border color
+                </label>
+              </div>
+            </div>
+          </details>
+
+          <details className="design-group">
+            <summary>
+              <span className="summary-copy">
+                <span className="summary-title">Border / Flow</span>
+                <small>カード外枠と流れる光を設定します。</small>
+              </span>
+            </summary>
+
+            <div className="design-group-body">
+              <div className="design-subtitle">Border colors</div>
+              <div className="two-col">
+                <label>
+                  Border color
+                  <input
+                    type="color"
+                    value={settings.borderColor ?? "#ff0000"}
+                    onChange={(e) => update("borderColor", e.target.value)}
+                  />
+                </label>
+
+                <label>
+                  Flowing border color
+                  <input
+                    type="color"
+                    value={settings.flowColor ?? "#ff3030"}
+                    onChange={(e) => update("flowColor", e.target.value)}
+                  />
+                </label>
+              </div>
+
+              <div className="design-subtitle">Flow animation</div>
+
+              <OptionSlider
+                label="Flow speed"
+                optionLabel="Flowing border"
+                checked={settings.flowEnabled}
+                onCheckedChange={(checked) => update("flowEnabled", checked)}
+                value={settings.flowSpeed ?? 65}
+                min={0}
+                max={100}
+                disabled={!settings.flowEnabled}
+                onChange={(v) => update("flowSpeed", v)}
+              />
+
+              <MappedSlider
+                label="Flow length"
+                value={settings.flowLength ?? 16}
+                minValue={1}
+                maxValue={96}
+                disabled={!settings.flowEnabled}
+                onChange={(v) => update("flowLength", v)}
+              />
+
+
+            </div>
+          </details>
+
+          
+
+          <details className="design-group">
+            <summary>
+              <span className="summary-copy">
+                <span className="summary-title">Other</span>
+                <small>旗と好きな画像の配置を設定します。</small>
               </span>
             </summary>
 
@@ -2269,31 +2519,18 @@ export default function Home() {
               </label>
 
               <Slider label="Image X" value={settings.customImageX} min={0} max={100} onChange={(v) => update("customImageX", v)} />
-              <Slider label="Image Y" value={settings.customImageY} min={0} max={100} onChange={(v) => update("customImageY", v)} />
-              <Slider label="Image Z" value={settings.customImageZ} min={0} max={10} onChange={(v) => update("customImageZ", v)} />
-              <Slider label="Image size" value={settings.customImageSize} min={20} max={500} onChange={(v) => update("customImageSize", v)} />
+              <Slider label="Image Y" value={verticalSliderValue(settings.customImageY)} min={0} max={100} onChange={(v) => update("customImageY", storedTopValue(v))} />
+              <MappedSlider label="Image Z" value={settings.customImageZ} minValue={0} maxValue={100} onChange={(v) => update("customImageZ", v)} />
+              <MappedSlider label="Image size" value={settings.customImageSize} minValue={0} maxValue={650} onChange={(v) => update("customImageSize", v)} />
               <Slider label="Image transparency" value={settings.customImageGradient} min={0} max={100} onChange={(v) => update("customImageGradient", v)} />
               <p className="control-note">0 = fully visible / 100 = fully transparent</p>
               </fieldset>
 
-            </div>
-          </details>
-
-          <details className="design-group">
-            <summary>
-              <span className="summary-copy">
-                <span className="summary-title">Other</span>
-                <small>旗とランクアイコンを設定します。</small>
-              </span>
-            </summary>
-
-            <div className="design-group-body">
+              <div className="design-subtitle">Flag layout</div>
               <fieldset
                 className={`setting-scope ${settings.showFlag ? "" : "is-disabled"}`}
                 disabled={!(settings.showFlag)}
               >
-              <div className="design-subtitle">Flag layout</div>
-
               <Slider
                 label="Flag X"
                 value={settings.flagX}
@@ -2304,51 +2541,20 @@ export default function Home() {
 
               <Slider
                 label="Flag Y"
-                value={settings.flagY}
+                value={verticalSliderValue(settings.flagY)}
                 min={0}
                 max={100}
-                onChange={(v) => update("flagY", v)}
+                onChange={(v) => update("flagY", storedTopValue(v))}
               />
 
-              <Slider
+              <MappedSlider
                 label="Flag size"
                 value={settings.flagSize}
-                min={12}
-                max={50}
+                minValue={4}
+                maxValue={100}
                 onChange={(v) => update("flagSize", v)}
               />
 
-              </fieldset>
-
-              <fieldset
-                className={`setting-scope ${settings.showRankIcon ? "" : "is-disabled"}`}
-                disabled={!(settings.showRankIcon)}
-              >
-              <div className="design-subtitle">Rank icon layout</div>
-
-              <Slider
-                label="Rank icon X"
-                value={settings.rankIconX}
-                min={0}
-                max={100}
-                onChange={(v) => update("rankIconX", v)}
-              />
-
-              <Slider
-                label="Rank icon Y"
-                value={settings.rankIconY}
-                min={0}
-                max={100}
-                onChange={(v) => update("rankIconY", v)}
-              />
-
-              <Slider
-                label="Rank icon size"
-                value={settings.rankIconSize}
-                min={20}
-                max={120}
-                onChange={(v) => update("rankIconSize", v)}
-              />
               </fieldset>
 
             </div>
@@ -2363,6 +2569,7 @@ export default function Home() {
             <Card
               settings={settings}
               effect={previewEffect}
+              rankRevealVisible={previewRankRevealVisible}
               activeMode={settings.mode === "CT" ? "CT" : "RT"}
               activeRating={previewActiveRating}
               previewScoreBump={previewScoreBump}
@@ -2455,6 +2662,62 @@ export default function Home() {
           <details className="version-history">
             <summary>Version history</summary>
             <div className="version-history-body">
+              <div>
+                <b>v1.9.3</b>
+                <span>Reduced all MMR / LR Switch effects to quieter, smaller transitions with softer movement, glow, flip, and glitch intensity.</span>
+              </div>
+              <div>
+                <b>v1.9.2</b>
+                <span>Fixed the MMR / LR Switch effect styles and changed the default Card bg right color to RGB 0, 94, 112.</span>
+              </div>
+              <div>
+                <b>v1.9.1</b>
+                <span>Reduced the full-card rate arrows from 24 to 12 while keeping their larger, thicker appearance and full-width coverage.</span>
+              </div>
+              <div>
+                <b>v1.9.0</b>
+                <span>Made the full-card rate arrows substantially larger and thicker by switching to filled arrow glyphs and stronger outlines.</span>
+              </div>
+              <div>
+                <b>v1.8.9</b>
+                <span>Expanded the rate-change arrows across the full card, increased their size and count, and fixed the colors to green for gains and red for losses.</span>
+              </div>
+              <div>
+                <b>v1.8.8</b>
+                <span>Fixed the invisible rate arrows and corrected Meteor Shower so each meteor travels from the upper right toward the lower left with the glowing head leading.</span>
+              </div>
+              <div>
+                <b>v1.8.7</b>
+                <span>Added a directional arrow stream during rate changes while preserving the rate change → rank announcement → new rank reveal sequence.</span>
+              </div>
+              <div>
+                <b>v1.8.6</b>
+                <span>Restored the RANK UP / RANK DOWN announcement and delayed the selected rank reveal until after the announcement finishes.</span>
+              </div>
+              <div>
+                <b>v1.8.5</b>
+                <span>Separated the rank reveal from the RANK UP / DOWN text to prevent overlap, added Starlight and Meteor Shower reveal styles, and expanded star-based rank visuals.</span>
+              </div>
+              <div>
+                <b>v1.8.3</b>
+                <span>Removed the score settle artifact, moved Track / Rating Labels directly after Main Text, and added direction-specific Rank Up / Rank Down reveal effects.</span>
+              </div>
+              <div>
+                <b>v1.8.2</b>
+                <span>Updated the default design preset, preserved decimal mapped values, and removed the stray Win/Loss floating text while keeping the score and card animations.</span>
+              </div>
+              <div>
+                <b>v1.8.1</b>
+                <span>Hardened saved/design/API JSON parsing and switched local development to Webpack to prevent stale Turbopack JSON runtime failures.</span>
+              </div>
+              <div>
+                <b>v1.8.0</b>
+                <span>Fixed negative-MMR rank transitions, added selectable rank and rating-switch effects, added name/rate spacing controls, and introduced a black multi-accent builder theme.</span>
+              </div>
+              <div>
+                <b>v1.7.0</b>
+                <span>Normalized all sliders to 0–100, expanded placement and sizing ranges, fixed text gradients, merged label controls, added configurable text shadows, reorganized design groups, and refreshed the builder theme.</span>
+              </div>
               <div>
                 <b>v1.6.8</b>
                 <span>Registered the remade font file as 大江戸勘亭流 using public/fonts/remake.otf.</span>
@@ -2603,6 +2866,28 @@ function Slider(props: {
   );
 }
 
+function MappedSlider(props: {
+  label: string;
+  value: number;
+  minValue: number;
+  maxValue: number;
+  disabled?: boolean;
+  onChange: (value: number) => void;
+}) {
+  return (
+    <Slider
+      label={props.label}
+      value={valueToSlider(props.value, props.minValue, props.maxValue)}
+      min={0}
+      max={100}
+      disabled={props.disabled}
+      onChange={(value) =>
+        props.onChange(sliderToValue(value, props.minValue, props.maxValue))
+      }
+    />
+  );
+}
+
 function OptionSlider(props: {
   label: string;
   optionLabel: string;
@@ -2645,6 +2930,7 @@ function OptionSlider(props: {
 function Card({
   settings,
   effect,
+  rankRevealVisible,
   activeMode,
   activeRating,
   previewScoreBump,
@@ -2654,6 +2940,7 @@ function Card({
 }: {
   settings: Settings;
   effect: PreviewEffect;
+  rankRevealVisible: boolean;
   activeMode: ActiveMode;
   activeRating: ActiveRating;
   previewScoreBump: PreviewScoreBump;
@@ -2677,7 +2964,7 @@ function Card({
   const cardBackground = settings.cardBgGradientEnabled
     ? visibleBackgroundUrl
       ? `linear-gradient(90deg, ${hexWithAlpha(settings.cardBgLeft, cardBgAlpha)} 0%, ${hexWithAlpha(settings.cardBgLeft, cardBgAlpha)} ${cardBgStops.topStop}%, ${hexWithAlpha(settings.cardBgRight, cardBgAlpha)} ${cardBgStops.bottomStart}%, ${hexWithAlpha(settings.cardBgRight, cardBgAlpha)} 100%), url(${visibleBackgroundUrl})`
-      : `linear-gradient(90deg, ${settings.cardBgLeft ?? "#130716"} 0%, ${settings.cardBgLeft ?? "#130716"} ${cardBgStops.topStop}%, ${settings.cardBgRight ?? "#0a1024"} ${cardBgStops.bottomStart}%, ${settings.cardBgRight ?? "#0a1024"} 100%)`
+      : `linear-gradient(90deg, ${settings.cardBgLeft ?? "#130716"} 0%, ${settings.cardBgLeft ?? "#130716"} ${cardBgStops.topStop}%, ${settings.cardBgRight ?? "#005e70"} ${cardBgStops.bottomStart}%, ${settings.cardBgRight ?? "#005e70"} 100%)`
     : visibleBackgroundUrl
       ? `linear-gradient(90deg, ${hexWithAlpha(settings.cardBgLeft, cardBgAlpha)} 0%, ${hexWithAlpha(settings.cardBgLeft, cardBgAlpha)} 100%), url(${visibleBackgroundUrl})`
       : `linear-gradient(90deg, ${settings.cardBgLeft ?? "#130716"} 0%, ${settings.cardBgLeft ?? "#130716"} 100%)`;
@@ -2699,17 +2986,13 @@ function Card({
   const ratingEffectColor = settings.ratingEffectUseMainColor
     ? settings.borderColor
     : settings.ratingEffectColor;
+  const textShadowColor = settings.textShadowEnabled
+    ? hexWithAlpha(
+        settings.textShadowColor,
+        alphaHexFromPercent(settings.textShadowOpacity, 70)
+      )
+    : "transparent";
 
-  const effectText =
-    effect === "win"
-      ? `+100 ${activeRating}`
-      : effect === "loss"
-        ? `-100 ${activeRating}`
-        : effect === "rank-up"
-          ? "RANK UP"
-          : effect === "rank-down"
-            ? "RANK DOWN"
-            : "";
 
   return (
     <div
@@ -2722,6 +3005,8 @@ function Card({
       } ${!settings.ratingTextGradientEnabled ? "no-rating-text-gradient" : ""} ${
         !settings.textGradientEnabled ? "no-text-gradient" : ""
       } ${!settings.cardBgGradientEnabled ? "no-card-bg-gradient" : ""} label-shape-rounded ${
+        `rank-effect-style-${settings.rankEffectStyle.toLowerCase()} rating-switch-style-${settings.ratingSwitchEffectStyle.toLowerCase()}`
+      } ${
         effect ? `effect-${effect}` : ""
       }`}
       style={
@@ -2764,6 +3049,10 @@ function Card({
           "--text-bottom-color": settings.textBottomColor ?? "#ff3030",
           "--text-top-stop": `${textStops.topStop}%`,
           "--text-bottom-start": `${textStops.bottomStart}%`,
+          "--text-shadow-x": `${shadowOffsetX(settings.textShadowX)}px`,
+          "--text-shadow-y": `${shadowOffsetY(settings.textShadowY)}px`,
+          "--text-shadow-blur": `${shadowBlur(settings.textShadowBlur)}px`,
+          "--text-shadow-color": textShadowColor,
         } as CSSProperties
       }
     >
@@ -2858,6 +3147,7 @@ function Card({
             left: `${settings.nameX}%`,
             top: `${settings.nameY}%`,
             fontSize: settings.nameSize,
+            letterSpacing: `${(settings.nameTextSpacing ?? 0) / 100}em`,
           }}
         >
           {name}
@@ -2867,12 +3157,49 @@ function Card({
       {settings.showRate && settings.ratingMode === "SWITCH" && previewSwitchAnimationToken > 0 && (
         <div
           key={`preview-switch-wave-${previewSwitchAnimationToken}`}
-          className="rating-switch-wave"
+          className={`rating-switch-effect rating-switch-effect-${settings.ratingSwitchEffectStyle.toLowerCase()}`}
           style={{
             left: `${settings.scoreX}%`,
             top: `${settings.scoreY}%`,
           }}
         />
+      )}
+
+      {(effect === "win" || effect === "loss") && (
+        <div
+          className={`rating-arrow-stream ${
+            effect === "win" ? "is-up" : "is-down"
+          }`}
+          style={{
+            left: `${settings.scoreX}%`,
+            top: `${settings.scoreY}%`,
+          }}
+          aria-hidden="true"
+        >
+          {Array.from({ length: 12 }, (_, index) => {
+            const x = 5 + index * 8.18;
+            const delay = index * 0.075;
+            const duration = 1.25 + (index % 4) * 0.14;
+            const size = [42, 50, 60, 46, 56, 44][index % 6];
+
+            return (
+              <span
+                className="rating-arrow-particle"
+                key={`preview-rating-arrow-${index}`}
+                style={
+                  {
+                    "--arrow-x": `${x}%`,
+                    "--arrow-delay": `${delay}s`,
+                    "--arrow-duration": `${duration}s`,
+                    "--arrow-size": `${size}px`,
+                  } as CSSProperties
+                }
+              >
+                {effect === "win" ? "⬆" : "⬇"}
+              </span>
+            );
+          })}
+        </div>
       )}
 
       {settings.showRate && (
@@ -2881,19 +3208,28 @@ function Card({
           value={shownScore || "0000"}
           animateToken={previewScoreAnimationToken}
           className={`card-score ${
-            previewSwitchAnimationToken > 0 ? "rating-score-switch" : ""
+            previewSwitchAnimationToken > 0
+              ? `rating-score-switch rating-score-switch-${settings.ratingSwitchEffectStyle.toLowerCase()}`
+              : ""
           }`}
           style={{
             left: `${settings.scoreX}%`,
             top: `${settings.scoreY}%`,
             fontSize: settings.scoreSize,
+            letterSpacing: `${(settings.scoreTextSpacing ?? 0) / 100}em`,
+            columnGap: `${(settings.scoreTextSpacing ?? 0) / 100}em`,
           }}
         />
       )}
 
       {(settings.showRatingLabelText) && (
       <div
-        className="rating-label"
+        key={`preview-rating-label-${activeRating}-${previewSwitchAnimationToken}`}
+        className={`rating-label ${
+          previewSwitchAnimationToken > 0
+            ? `rating-label-switch rating-label-switch-${settings.ratingSwitchEffectStyle.toLowerCase()}`
+            : ""
+        }`}
         style={{
           left: `${settings.ratingBoxX}%`,
           top: `${settings.ratingBoxY}%`,
@@ -2920,10 +3256,30 @@ function Card({
       </div>
       )}
 
-      {effect && <div className={`effect-burst ${effect}`}>{effectText}</div>}
+      {(effect === "rank-up" || effect === "rank-down") &&
+        !rankRevealVisible && (
+          <div className={`effect-burst rank-announcement ${effect}`}>
+            {effect === "rank-up" ? "RANK UP" : "RANK DOWN"}
+          </div>
+        )}
 
-      {(effect === "rank-up" || effect === "rank-down") && (
-        <div className={`rank-reveal ${effect} preview-rank-reveal`}>
+      {(effect === "rank-up" || effect === "rank-down") &&
+        rankRevealVisible && (
+        <div
+          className={`rank-reveal ${effect} preview-rank-reveal rank-reveal-style-${settings.rankEffectStyle.toLowerCase()}`}
+        >
+          <div className="rank-reveal-stars" aria-hidden="true">
+            {Array.from({ length: 12 }, (_, index) => (
+              <span key={`preview-rank-star-${index}`} />
+            ))}
+          </div>
+
+          <div className="rank-reveal-meteors" aria-hidden="true">
+            {Array.from({ length: 4 }, (_, index) => (
+              <span key={`preview-rank-meteor-${index}`} />
+            ))}
+          </div>
+
           {previewRankIcon && (
             <img className="rank-reveal-bg" src={previewRankIcon} alt="" />
           )}
@@ -2938,3 +3294,5 @@ function Card({
     </div>
   );
 }
+
+

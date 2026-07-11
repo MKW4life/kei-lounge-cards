@@ -22,6 +22,14 @@ type FontChoice =
   | "COMIC_SANS";
 type ActiveMode = "RT" | "CT";
 type ActiveRating = "MMR" | "LR";
+type RankEffectStyle =
+  | "CLASSIC"
+  | "FLASH"
+  | "SLIDE"
+  | "BURST"
+  | "STARLIGHT"
+  | "METEOR";
+type RatingSwitchEffectStyle = "WAVE" | "FADE" | "FLIP" | "GLITCH";
 type EffectKind = "win" | "loss" | "rank-up" | "rank-down";
 type EffectPhase = "change" | "rank-reveal";
 
@@ -57,6 +65,8 @@ type InitialCardSettings = {
   flowLength: number;
   ratingEffectUseMain: boolean;
   ratingEffectColor: string;
+  rankEffectStyle: RankEffectStyle;
+  ratingSwitchEffectStyle: RatingSwitchEffectStyle;
   tagTop: string;
   tagBottom: string;
   tagTextTop: string;
@@ -78,6 +88,12 @@ type InitialCardSettings = {
   textGradient: boolean;
   textBalance: number;
   textFont: FontChoice;
+  textShadowEnabled: boolean;
+  textShadowColor: string;
+  textShadowX: number;
+  textShadowY: number;
+  textShadowBlur: number;
+  textShadowOpacity: number;
   cardBgLeft: string;
   cardBgRight: string;
   cardBgGradient: boolean;
@@ -253,6 +269,23 @@ function percent(value: number | undefined, fallback: number) {
   return Math.min(100, Math.max(0, Math.round(number)));
 }
 
+function sliderToValue(value: number, minValue: number, maxValue: number) {
+  const normalized = percent(value, 0) / 100;
+  return Math.round((minValue + normalized * (maxValue - minValue)) * 100) / 100;
+}
+
+function shadowOffsetX(value: number) {
+  return sliderToValue(value, -24, 24);
+}
+
+function shadowOffsetY(value: number) {
+  return sliderToValue(100 - percent(value, 50), -24, 24);
+}
+
+function shadowBlur(value: number) {
+  return sliderToValue(value, 0, 32);
+}
+
 function flowDuration(value: number | undefined) {
   const speed = percent(value, 65);
   const seconds = 8 - speed * 0.072;
@@ -265,20 +298,20 @@ function gradientStops(value: number | undefined, fallback: number) {
 
   if (balance <= 0) {
     return {
-      topStop: 100,
-      bottomStart: 100,
-    };
-  }
-
-  if (balance >= 100) {
-    return {
       topStop: 0,
       bottomStart: 0,
     };
   }
 
-  const center = 100 - balance;
-  const blend = 18;
+  if (balance >= 100) {
+    return {
+      topStop: 100,
+      bottomStart: 100,
+    };
+  }
+
+  const center = balance;
+  const blend = 12;
 
   return {
     topStop: Math.min(100, Math.max(0, center - blend)),
@@ -502,11 +535,11 @@ export default function CardClient({
         rankText: rankText || "NEW RANK",
         rankIcon,
       });
-    }, 3800);
+    }, 2400);
 
     effectTimerRef.current = setTimeout(() => {
       setEffect(null);
-    }, 7000);
+    }, 5500);
   }
 
   function triggerRateThenRankEffect(
@@ -547,11 +580,11 @@ export default function CardClient({
         rankText: rankText || "NEW RANK",
         rankIcon,
       });
-    }, 5200);
+    }, 4100);
 
     effectTimerRef.current = setTimeout(() => {
       setEffect(null);
-    }, 8200);
+    }, 7200);
   }
 
   useEffect(() => {
@@ -724,13 +757,19 @@ export default function CardClient({
   const ratingEffectColor = initial.ratingEffectUseMain
     ? initial.border
     : initial.ratingEffectColor;
+  const textShadowColor = initial.textShadowEnabled
+    ? hexWithAlpha(
+        initial.textShadowColor,
+        alphaHexFromPercent(initial.textShadowOpacity, 70)
+      )
+    : "transparent";
 
   const visibleBackgroundUrl = initial.showBackgroundImage ? initial.bg : "";
 
   const cardBackground = initial.cardBgGradient
     ? visibleBackgroundUrl
       ? `linear-gradient(90deg, ${hexWithAlpha(initial.cardBgLeft, cardBgAlpha)} 0%, ${hexWithAlpha(initial.cardBgLeft, cardBgAlpha)} ${cardBgStops.topStop}%, ${hexWithAlpha(initial.cardBgRight, cardBgAlpha)} ${cardBgStops.bottomStart}%, ${hexWithAlpha(initial.cardBgRight, cardBgAlpha)} 100%), url(${visibleBackgroundUrl})`
-      : `linear-gradient(90deg, ${initial.cardBgLeft || "#130716"} 0%, ${initial.cardBgLeft || "#130716"} ${cardBgStops.topStop}%, ${initial.cardBgRight || "#0a1024"} ${cardBgStops.bottomStart}%, ${initial.cardBgRight || "#0a1024"} 100%)`
+      : `linear-gradient(90deg, ${initial.cardBgLeft || "#130716"} 0%, ${initial.cardBgLeft || "#130716"} ${cardBgStops.topStop}%, ${initial.cardBgRight || "#005e70"} ${cardBgStops.bottomStart}%, ${initial.cardBgRight || "#005e70"} 100%)`
     : visibleBackgroundUrl
       ? `linear-gradient(90deg, ${hexWithAlpha(initial.cardBgLeft, cardBgAlpha)} 0%, ${hexWithAlpha(initial.cardBgLeft, cardBgAlpha)} 100%), url(${visibleBackgroundUrl})`
       : `linear-gradient(90deg, ${initial.cardBgLeft || "#130716"} 0%, ${initial.cardBgLeft || "#130716"} 100%)`;
@@ -756,6 +795,10 @@ export default function CardClient({
           !initial.textGradient ? "no-text-gradient" : ""
         } ${!initial.cardBgGradient ? "no-card-bg-gradient" : ""} label-shape-${(
           initial.labelShape ?? "ROUNDED"
+        ).toLowerCase()} rank-effect-style-${(
+          initial.rankEffectStyle ?? "CLASSIC"
+        ).toLowerCase()} rating-switch-style-${(
+          initial.ratingSwitchEffectStyle ?? "WAVE"
         ).toLowerCase()} ${
           effect ? `effect-${effect.kind} effect-phase-${effect.phase}` : ""
         }`}
@@ -799,6 +842,10 @@ export default function CardClient({
             "--text-bottom-color": initial.textBottom || "#ff3030",
             "--text-top-stop": `${textStops.topStop}%`,
             "--text-bottom-start": `${textStops.bottomStart}%`,
+            "--text-shadow-x": `${shadowOffsetX(initial.textShadowX)}px`,
+            "--text-shadow-y": `${shadowOffsetY(initial.textShadowY)}px`,
+            "--text-shadow-blur": `${shadowBlur(initial.textShadowBlur)}px`,
+            "--text-shadow-color": textShadowColor,
           } as CSSProperties
         }
       >
@@ -902,7 +949,7 @@ export default function CardClient({
         {initial.showRate && initial.ratingMode === "SWITCH" && switchAnimationToken > 0 && (
           <div
             key={`switch-wave-${switchAnimationToken}`}
-            className="rating-switch-wave"
+            className={`rating-switch-effect rating-switch-effect-${initial.ratingSwitchEffectStyle.toLowerCase()}`}
             style={{
               left: `${initial.scoreX}%`,
               top: `${initial.scoreY}%`,
@@ -910,13 +957,54 @@ export default function CardClient({
           />
         )}
 
+        {effect &&
+          effect.phase === "change" &&
+          (effect.kind === "win" || effect.kind === "loss") && (
+            <div
+              className={`rating-arrow-stream ${
+                effect.kind === "win" ? "is-up" : "is-down"
+              }`}
+              style={{
+                left: `${initial.scoreX}%`,
+                top: `${initial.scoreY}%`,
+              }}
+              aria-hidden="true"
+            >
+              {Array.from({ length: 12 }, (_, index) => {
+                const x = 5 + index * 8.18;
+                const delay = index * 0.075;
+                const duration = 1.25 + (index % 4) * 0.14;
+                const size = [42, 50, 60, 46, 56, 44][index % 6];
+
+                return (
+                  <span
+                    className="rating-arrow-particle"
+                    key={`rating-arrow-${index}`}
+                    style={
+                      {
+                        "--arrow-x": `${x}%`,
+                        "--arrow-delay": `${delay}s`,
+                        "--arrow-duration": `${duration}s`,
+                        "--arrow-size": `${size}px`,
+                      } as CSSProperties
+                    }
+                  >
+                    {effect.kind === "win" ? "⬆" : "⬇"}
+                  </span>
+                );
+              })}
+            </div>
+          )}
+
         {initial.showRate && (
           <RollingNumber
             key={`score-${activeRating}-${switchAnimationToken}`}
             value={shownScore}
             animateToken={scoreAnimationToken}
             className={`card-score ${
-              switchAnimationToken > 0 ? "rating-score-switch" : ""
+              switchAnimationToken > 0
+                ? `rating-score-switch rating-score-switch-${initial.ratingSwitchEffectStyle.toLowerCase()}`
+                : ""
             }`}
             style={{
               left: `${initial.scoreX}%`,
@@ -928,7 +1016,12 @@ export default function CardClient({
 
         {initial.showRatingLabelText && (
         <div
-          className="rating-label"
+          key={`rating-label-${activeRating}-${switchAnimationToken}`}
+          className={`rating-label ${
+            switchAnimationToken > 0
+              ? `rating-label-switch rating-label-switch-${initial.ratingSwitchEffectStyle.toLowerCase()}`
+              : ""
+          }`}
           style={{
             left: `${initial.ratingBoxX}%`,
             top: `${initial.ratingBoxY}%`,
@@ -955,12 +1048,32 @@ export default function CardClient({
         </div>
         )}
 
-        {effect && effect.phase === "change" && (
-          <div className={`effect-burst ${effect.kind}`}>{effect.text}</div>
-        )}
+        {effect &&
+          effect.phase === "change" &&
+          (effect.kind === "rank-up" || effect.kind === "rank-down") && (
+            <div className={`effect-burst rank-announcement ${effect.kind}`}>
+              {effect.text}
+            </div>
+          )}
 
         {effect && effect.phase === "rank-reveal" && (
-          <div className={`rank-reveal ${effect.kind}`}>
+          <div
+            className={`rank-reveal ${effect.kind} rank-reveal-style-${(
+              initial.rankEffectStyle ?? "CLASSIC"
+            ).toLowerCase()}`}
+          >
+            <div className="rank-reveal-stars" aria-hidden="true">
+              {Array.from({ length: 12 }, (_, index) => (
+                <span key={`rank-star-${index}`} />
+              ))}
+            </div>
+
+            <div className="rank-reveal-meteors" aria-hidden="true">
+              {Array.from({ length: 4 }, (_, index) => (
+                <span key={`rank-meteor-${index}`} />
+              ))}
+            </div>
+
             {effect.rankIcon && (
               <img className="rank-reveal-bg" src={effect.rankIcon} alt="" />
             )}
