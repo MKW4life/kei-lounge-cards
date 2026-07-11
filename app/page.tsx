@@ -2663,6 +2663,10 @@ export default function Home() {
             <summary>Version history</summary>
             <div className="version-history-body">
               <div>
+                <b>v1.9.4</b>
+                <span>Increased the opacity and contrast of the Rank Up / Rank Down announcement and New Rank reveal so the text, emblem, stars, and meteor effects remain clearly visible.</span>
+              </div>
+              <div>
                 <b>v1.9.3</b>
                 <span>Reduced all MMR / LR Switch effects to quieter, smaller transitions with softer movement, glow, flip, and glitch intensity.</span>
               </div>
