@@ -1237,9 +1237,9 @@ function getPreviewRank(
 
 const VERSION_HISTORY = [
   {
-    version: "v2.0.5–v2.1.3",
-    en: "Improved Undo / Redo, Lounge-name autocomplete, JP / EN wording, Preview / OBS parity, and selectable Win / Loss opening effects. Full Throttle! was refined again, Sky Trip and Heaven / Hell were retired, and Neon Rush plus Shockwave were added.",
-    jp: "Undo / Redo、Lounge名予測変換、JP / EN表記、Preview / OBSの一致を改善しました。勝利 / 敗北の前半演出ではアクセル全開！をさらに調整し、空の旅と天国と地獄を廃止、代わりにネオンラッシュとショックウェーブを追加しました。v2.1.3では公開ビルドを妨げていた模擬数文字間隔の設定キー表記を修正しました。",
+    version: "v2.0.5–v2.1.4",
+    en: "Improved Undo / Redo, Lounge-name autocomplete, JP / EN wording, Preview / OBS parity, and selectable Win / Loss effects. Autocomplete now uses fresh prefix-only matches and changing the Lounge name automatically refreshes the player card.",
+    jp: "Undo / Redo、Lounge名予測変換、JP / EN表記、Preview / OBSの一致、勝利 / 敗北演出を改善しました。Lounge名候補は最新の先頭一致のみとし、Lounge名変更時に表示名・MMR/LR・ランク等を自動更新するよう改善しました。",
   },
   {
     version: "v2.0.0–v2.0.4",
@@ -1566,6 +1566,7 @@ export default function Home() {
   const [playerNameIndex, setPlayerNameIndex] = useState<string[]>([]);
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
   const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+  const playerFetchRequestRef = useRef(0);
   const historyMetaRef = useRef<{ key: keyof Settings | "__bulk__" | null; time: number }>({
     key: null,
     time: 0,
@@ -1936,15 +1937,19 @@ export default function Home() {
     let cancelled = false;
 
     const loadNameIndex = async () => {
-      const sessionKey = "kei-lounge-player-name-index-v1";
+      const sessionKey = "kei-lounge-player-name-index-v2";
+      const sessionTtlMs = 5 * 60 * 1000;
 
       try {
         const cached = sessionStorage.getItem(sessionKey);
         if (cached) {
-          const parsed = safeJsonParse<string[]>(cached);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setPlayerNameIndex(parsed);
-            return;
+          const parsed = safeJsonParse<{ savedAt?: number; names?: string[] }>(cached);
+          const isFresh =
+            typeof parsed?.savedAt === "number" &&
+            Date.now() - parsed.savedAt < sessionTtlMs;
+
+          if (isFresh && Array.isArray(parsed?.names) && parsed.names.length > 0) {
+            setPlayerNameIndex(parsed.names);
           }
         }
       } catch {
@@ -1953,7 +1958,7 @@ export default function Home() {
 
       try {
         const response = await fetch("/api/player?suggestAll=1", {
-          cache: "force-cache",
+          cache: "no-store",
         });
 
         const data = safeJsonParse<{ names?: string[] }>(await response.text());
@@ -1967,12 +1972,15 @@ export default function Home() {
         setPlayerNameIndex(names);
 
         try {
-          sessionStorage.setItem(sessionKey, JSON.stringify(names));
+          sessionStorage.setItem(
+            sessionKey,
+            JSON.stringify({ savedAt: Date.now(), names })
+          );
         } catch {
           // In-memory index still works.
         }
       } catch {
-        // The fast direct-query fallback below still works.
+        // The fresh direct-query fallback below still works.
       }
     };
 
@@ -1994,30 +2002,17 @@ export default function Home() {
     }
 
     const lowerQuery = query.toLowerCase();
+    const localSuggestions = playerNameIndex
+      .filter((name) => name.toLowerCase().startsWith(lowerQuery))
+      .sort((a, b) => a.length - b.length || a.localeCompare(b))
+      .slice(0, 8);
 
-    if (playerNameIndex.length > 0) {
-      const suggestions = playerNameIndex
-        .filter((name) => name.toLowerCase().includes(lowerQuery))
-        .sort((a, b) => {
-          const aLower = a.toLowerCase();
-          const bLower = b.toLowerCase();
-          const aStarts = aLower.startsWith(lowerQuery) ? 0 : 1;
-          const bStarts = bLower.startsWith(lowerQuery) ? 0 : 1;
-
-          if (aStarts !== bStarts) return aStarts - bStarts;
-          return a.length - b.length || a.localeCompare(b);
-        })
-        .slice(0, 8);
-
-      setPlayerSuggestions(suggestions);
-      setSuggestionsOpen(
-        suggestions.length > 0 &&
-          !(suggestions.length === 1 &&
-            suggestions[0].toLowerCase() === lowerQuery)
-      );
-      setSuggestionsLoading(false);
-      return;
-    }
+    setPlayerSuggestions(localSuggestions);
+    setSuggestionsOpen(
+      localSuggestions.length > 0 &&
+        !(localSuggestions.length === 1 &&
+          localSuggestions[0].toLowerCase() === lowerQuery)
+    );
 
     let cancelled = false;
     const controller = new AbortController();
@@ -2041,32 +2036,39 @@ export default function Home() {
           await response.text()
         );
 
-        if (cancelled) return;
+        if (cancelled || !response.ok) return;
 
         const suggestions = Array.isArray(data?.suggestions)
           ? data!.suggestions
               .filter(
                 (name) =>
                   typeof name === "string" &&
-                  name.toLowerCase().includes(lowerQuery)
+                  name.toLowerCase().startsWith(lowerQuery)
               )
+              .sort((a, b) => a.length - b.length || a.localeCompare(b))
               .slice(0, 8)
           : [];
 
+        // Fresh live results replace the cached list, so old names disappear quickly.
         setPlayerSuggestions(suggestions);
-        setSuggestionsOpen(suggestions.length > 0);
+        setSuggestionsOpen(
+          suggestions.length > 0 &&
+            !(suggestions.length === 1 &&
+              suggestions[0].toLowerCase() === lowerQuery)
+        );
       } catch (error) {
         if (
           !cancelled &&
           !(error instanceof DOMException && error.name === "AbortError")
         ) {
-          setPlayerSuggestions([]);
-          setSuggestionsOpen(false);
+          // Keep the instant local prefix matches if the live lookup fails.
+          setPlayerSuggestions(localSuggestions);
+          setSuggestionsOpen(localSuggestions.length > 0);
         }
       } finally {
         if (!cancelled) setSuggestionsLoading(false);
       }
-    }, 80);
+    }, 120);
 
     return () => {
       cancelled = true;
@@ -2075,75 +2077,121 @@ export default function Home() {
     };
   }, [playerNameIndex, settings.loungeName, settings.mode]);
 
-  const fetchPlayer = useCallback(async () => {
-    const name = settings.loungeName.trim();
+  const fetchPlayerData = useCallback(
+    async (
+      name: string,
+      mode: ModeSetting,
+      options?: { silent?: boolean; exactOnly?: boolean }
+    ) => {
+      const trimmedName = name.trim();
+      const silent = options?.silent ?? false;
+      const exactOnly = options?.exactOnly ?? false;
 
-    if (name.length < 2) {
-      setApiStatus(text("Enter a Lounge name", "Lounge名を入力してください"));
-      return;
-    }
-
-    setApiStatus(text("Fetching...", "取得中..."));
-
-    try {
-      const params = new URLSearchParams({
-        name,
-        mode: settings.mode,
-      });
-
-      const response = await fetch(`/api/player?${params.toString()}`, {
-        cache: "no-store",
-      });
-
-      const parsedData = safeJsonParse<PlayerApiResponse>(await response.text());
-      const data = parsedData ?? {
-        playerName: "",
-        flagEmoji: "",
-        flagUrl: "",
-        currentMmr: 0,
-        currentLr: 0,
-        totalEvents: 0,
-        rankText: "",
-        emblemUrl: "",
-        error: "Player data could not be read.",
-      };
-
-      if (!response.ok || !parsedData) {
-        setApiStatus(data.error ?? text("Player not found", "プレイヤーが見つかりませんでした"));
-        return;
+      if (trimmedName.length < 2) {
+        if (!silent) {
+          setApiStatus(text("Enter a Lounge name", "Lounge名を入力してください"));
+        }
+        return false;
       }
 
-      applySettingsWithoutHistory((prev) => ({
-        ...prev,
-        displayName:
-          prev.displayName.trim() && prev.displayName !== "Your Name"
-            ? prev.displayName
-            : data.playerName || prev.displayName,
-        flag: data.flagEmoji || prev.flag,
-        flagUrl: data.flagUrl || prev.flagUrl,
-        mmr: String(data.currentMmr || 0),
-        lr: String(data.currentLr || 0),
-        events:
-          data.totalEvents !== undefined && data.totalEvents !== null
-            ? String(data.totalEvents)
-            : prev.events,
-        rankText: cleanRankText(data.rankText || prev.rankText),
-        rankIconUrl: data.emblemUrl || prev.rankIconUrl,
-      }));
+      const requestId = playerFetchRequestRef.current + 1;
+      playerFetchRequestRef.current = requestId;
 
-      setApiStatus(text(`${data.playerName} / ${settings.mode} applied`, `${data.playerName} / ${settings.mode} を反映しました`));
-    } catch {
-      setApiStatus(text("Fetch failed", "取得に失敗しました"));
-    }
-  }, [applySettingsWithoutHistory, settings.loungeName, settings.mode, text]);
+      if (!silent) setApiStatus(text("Fetching...", "取得中..."));
+
+      try {
+        const params = new URLSearchParams({
+          name: trimmedName,
+          mode,
+        });
+
+        const response = await fetch(`/api/player?${params.toString()}`, {
+          cache: "no-store",
+        });
+
+        const parsedData = safeJsonParse<PlayerApiResponse>(await response.text());
+        const data = parsedData ?? {
+          playerName: "",
+          flagEmoji: "",
+          flagUrl: "",
+          currentMmr: 0,
+          currentLr: 0,
+          totalEvents: 0,
+          rankText: "",
+          emblemUrl: "",
+          error: "Player data could not be read.",
+        };
+
+        if (requestId !== playerFetchRequestRef.current) return false;
+
+        if (!response.ok || !parsedData) {
+          if (!silent) {
+            setApiStatus(
+              data.error ?? text("Player not found", "プレイヤーが見つかりませんでした")
+            );
+          }
+          return false;
+        }
+
+        if (
+          exactOnly &&
+          data.playerName.trim().toLowerCase() !== trimmedName.toLowerCase()
+        ) {
+          return false;
+        }
+
+        applySettingsWithoutHistory((prev) => ({
+          ...prev,
+          displayName: data.playerName || prev.displayName,
+          flag: data.flagEmoji || prev.flag,
+          flagUrl: data.flagUrl || prev.flagUrl,
+          mmr: String(data.currentMmr || 0),
+          lr: String(data.currentLr || 0),
+          events:
+            data.totalEvents !== undefined && data.totalEvents !== null
+              ? String(data.totalEvents)
+              : prev.events,
+          rankText: cleanRankText(data.rankText || prev.rankText),
+          rankIconUrl: data.emblemUrl || prev.rankIconUrl,
+        }));
+
+        setApiStatus(
+          text(
+            `${data.playerName} / ${mode} applied`,
+            `${data.playerName} / ${mode} を反映しました`
+          )
+        );
+        return true;
+      } catch {
+        if (requestId === playerFetchRequestRef.current && !silent) {
+          setApiStatus(text("Fetch failed", "取得に失敗しました"));
+        }
+        return false;
+      }
+    },
+    [applySettingsWithoutHistory, text]
+  );
+
+  const fetchPlayer = useCallback(async () => {
+    await fetchPlayerData(settings.loungeName, settings.mode, {
+      silent: false,
+      exactOnly: false,
+    });
+  }, [fetchPlayerData, settings.loungeName, settings.mode]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchPlayer();
-    }, 800);
+    const name = settings.loungeName.trim();
+    if (name.length < 2) return;
 
-    return () => clearTimeout(timer);
-  }, [fetchPlayer]);
+    const timer = window.setTimeout(() => {
+      void fetchPlayerData(name, settings.mode, {
+        silent: true,
+        exactOnly: true,
+      });
+    }, 600);
+
+    return () => window.clearTimeout(timer);
+  }, [fetchPlayerData, settings.loungeName, settings.mode]);
 
   function clearPreviewTimers() {
     if (previewEffectTimer.current) {
@@ -2550,6 +2598,10 @@ export default function Home() {
                               onClick={() => {
                                 update("loungeName", name);
                                 setSuggestionsOpen(false);
+                                void fetchPlayerData(name, settings.mode, {
+                                  silent: true,
+                                  exactOnly: true,
+                                });
                               }}
                             >
                               {name}

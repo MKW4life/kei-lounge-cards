@@ -150,7 +150,7 @@ function extractNamesFromCsv(csv: string) {
 async function fetchNameCsv(url: string) {
   try {
     const response = await fetch(url, {
-      next: { revalidate: 3600 },
+      next: { revalidate: 300 },
       headers: { Accept: "text/csv,text/plain,*/*" },
     });
 
@@ -179,7 +179,7 @@ async function loadPlayerNameIndex() {
       .sort((a, b) => a.localeCompare(b));
 
     playerNameCache = {
-      expiresAt: Date.now() + 60 * 60 * 1000,
+      expiresAt: Date.now() + 5 * 60 * 1000,
       names,
     };
 
@@ -197,16 +197,8 @@ function filterNames(names: string[], query: string) {
   const lowerQuery = query.toLowerCase();
 
   return names
-    .filter((name) => name.toLowerCase().includes(lowerQuery))
-    .sort((a, b) => {
-      const aLower = a.toLowerCase();
-      const bLower = b.toLowerCase();
-      const aStarts = aLower.startsWith(lowerQuery) ? 0 : 1;
-      const bStarts = bLower.startsWith(lowerQuery) ? 0 : 1;
-
-      if (aStarts !== bStarts) return aStarts - bStarts;
-      return a.length - b.length || a.localeCompare(b);
-    })
+    .filter((name) => name.toLowerCase().startsWith(lowerQuery))
+    .sort((a, b) => a.length - b.length || a.localeCompare(b))
     .slice(0, 8);
 }
 
@@ -251,7 +243,7 @@ async function fetchFilteredLeaderboardSuggestions(
       );
 
       const candidate = cells.find((cell) =>
-        cell.toLowerCase().includes(lowerQuery)
+        cell.toLowerCase().startsWith(lowerQuery)
       );
 
       if (
@@ -320,7 +312,7 @@ export async function GET(request: NextRequest) {
       { names },
       {
         headers: {
-          "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+          "Cache-Control": "public, s-maxage=300, stale-while-revalidate=60",
         },
       }
     );
@@ -338,18 +330,20 @@ export async function GET(request: NextRequest) {
   }
 
   if (suggest) {
-    if (playerNameCache && playerNameCache.expiresAt > Date.now()) {
-      return NextResponse.json({
-        suggestions: filterNames(playerNameCache.names, name),
-      });
-    }
-
+    // Always query the live ladder first so recent name changes are reflected.
     const direct = await fetchFilteredLeaderboardSuggestions(name, mode);
 
-    // Warm the full name list for the next keystroke without blocking this reply.
+    // Refresh the full prefix index in the background for instant local matches.
     void loadPlayerNameIndex();
 
-    return NextResponse.json({ suggestions: direct });
+    return NextResponse.json(
+      { suggestions: direct },
+      {
+        headers: {
+          "Cache-Control": "no-store, max-age=0",
+        },
+      }
+    );
   }
 
   const results = await fetchPlayerResults(mode, name);
