@@ -1237,9 +1237,9 @@ function getPreviewRank(
 
 const VERSION_HISTORY = [
   {
-    version: "v2.0.5–v2.1.2",
+    version: "v2.0.5–v2.1.3",
     en: "Improved Undo / Redo, Lounge-name autocomplete, JP / EN wording, Preview / OBS parity, and selectable Win / Loss opening effects. Full Throttle! was refined again, Sky Trip and Heaven / Hell were retired, and Neon Rush plus Shockwave were added.",
-    jp: "Undo / Redo、Lounge名予測変換、JP / EN表記、Preview / OBSの一致を改善しました。勝利 / 敗北の前半演出ではアクセル全開！をさらに調整し、空の旅と天国と地獄を廃止、代わりにネオンラッシュとショックウェーブを追加しました。",
+    jp: "Undo / Redo、Lounge名予測変換、JP / EN表記、Preview / OBSの一致を改善しました。勝利 / 敗北の前半演出ではアクセル全開！をさらに調整し、空の旅と天国と地獄を廃止、代わりにネオンラッシュとショックウェーブを追加しました。v2.1.3では公開ビルドを妨げていた模擬数文字間隔の設定キー表記を修正しました。",
   },
   {
     version: "v2.0.0–v2.0.4",
@@ -1481,7 +1481,7 @@ const SETTING_LABELS: Partial<Record<keyof Settings, { en: string; jp: string }>
   eventsX: { en: "Events X", jp: "模擬数 X" },
   eventsY: { en: "Events Y", jp: "模擬数 Y" },
   eventsSize: { en: "Events size", jp: "模擬数サイズ" },
-  eventsTextSpacing: { en: "Events spacing", jp: "模擬数文字間隔" },
+  eventsSpacing: { en: "Events spacing", jp: "模擬数文字間隔" },
   otherText: { en: "Extra text", jp: "追加テキスト" },
   otherTextUseMainColor: { en: "Other text color source", jp: "追加テキスト色" },
   otherTextColor: { en: "Other text color", jp: "追加テキスト色" },
@@ -1511,7 +1511,7 @@ const SETTING_LABELS: Partial<Record<keyof Settings, { en: string; jp: string }>
   nameTransparency: { en: "Name transparency", jp: "名前透明度" },
   rateTransparency: { en: "Rate transparency", jp: "レート透明度" },
   trackTransparency: { en: "RT/CT transparency", jp: "RT/CT透明度" },
-  ratingLabelTransparency: { en: "MMR/LR transparency", jp: "MMR/LR透明度" },
+  ratingTransparency: { en: "MMR/LR transparency", jp: "MMR/LR透明度" },
   rankTextTransparency: { en: "Rank text transparency", jp: "ランク透明度" },
   rankIconTransparency: { en: "Rank icon transparency", jp: "ランク画像透明度" },
   flagTransparency: { en: "Flag transparency", jp: "国旗透明度" },
