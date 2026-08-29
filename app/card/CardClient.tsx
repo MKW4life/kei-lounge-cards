@@ -30,6 +30,8 @@ type RankEffectStyle =
   | "STARLIGHT"
   | "METEOR";
 type RatingSwitchEffectStyle = "WAVE" | "FADE" | "FLIP" | "GLITCH";
+type ResultEffectStyle = "DEFAULT" | "THROTTLE" | "SKY" | "REINCARNATION" | "STARSTRUCK" | "NEONRUSH" | "SHOCKWAVE";
+type EventFormat = "EVENTS" | "PREFIX" | "HASH" | "NUMBER";
 type EffectKind = "win" | "loss" | "rank-up" | "rank-down";
 type EffectPhase = "change" | "rank-reveal";
 
@@ -57,6 +59,9 @@ type InitialCardSettings = {
 
   rank: string;
   icon: string;
+  events: string;
+  eventFormat: EventFormat;
+  otherText: string;
 
   border: string;
   flow: string;
@@ -67,6 +72,12 @@ type InitialCardSettings = {
   ratingEffectColor: string;
   rankEffectStyle: RankEffectStyle;
   ratingSwitchEffectStyle: RatingSwitchEffectStyle;
+  resultEffectStyle: ResultEffectStyle;
+  labelIndependentColors: boolean;
+  eventsUseMainColor: boolean;
+  eventsColor: string;
+  otherTextUseMainColor: boolean;
+  otherTextColor: string;
   tagTop: string;
   tagBottom: string;
   tagTextTop: string;
@@ -109,10 +120,12 @@ type InitialCardSettings = {
   nameX: number;
   nameY: number;
   nameSize: number;
+  nameTextSpacing: number;
 
   scoreX: number;
   scoreY: number;
   scoreSize: number;
+  scoreTextSpacing: number;
 
   ratingBoxX: number;
   ratingBoxY: number;
@@ -131,6 +144,14 @@ type InitialCardSettings = {
   rankTextX: number;
   rankTextY: number;
   rankTextSize: number;
+  eventsX: number;
+  eventsY: number;
+  eventsSize: number;
+  eventsSpacing: number;
+  otherTextX: number;
+  otherTextY: number;
+  otherTextSize: number;
+  otherTextSpacing: number;
 
   flagX: number;
   flagY: number;
@@ -154,6 +175,19 @@ type InitialCardSettings = {
   showBackgroundImage: boolean;
   showCardBackground: boolean;
   showCustomImage: boolean;
+  showEvents: boolean;
+  showOtherText: boolean;
+  nameTransparency: number;
+  rateTransparency: number;
+  trackTransparency: number;
+  ratingTransparency: number;
+  rankTextTransparency: number;
+  rankIconTransparency: number;
+  flagTransparency: number;
+  backgroundImageTransparency: number;
+  cardBackgroundTransparency: number;
+  eventsTransparency: number;
+  otherTextTransparency: number;
 
   customImageUrl: string;
   customImageX: number;
@@ -201,8 +235,137 @@ function getSafeRatingMode(_mode: ModeSetting, ratingMode: RatingMode): RatingMo
 }
 
 
+
+function ResultOpeningEffect({
+  kind,
+  style,
+}: {
+  kind: "win" | "loss";
+  style: ResultEffectStyle;
+}) {
+  const isWin = kind === "win";
+  const normalizedStyle =
+    style === "SKY" ? "NEONRUSH" : style === "REINCARNATION" ? "SHOCKWAVE" : style;
+
+  if (normalizedStyle === "DEFAULT") {
+    return (
+      <div className={`rating-arrow-stream ${isWin ? "is-up" : "is-down"}`} aria-hidden="true">
+        {Array.from({ length: 12 }, (_, index) => {
+          const x = 5 + index * 8.18;
+          const delay = index * 0.075;
+          const duration = 1.25 + (index % 4) * 0.14;
+          const size = [42, 50, 60, 46, 56, 44][index % 6];
+
+          return (
+            <span
+              className="rating-arrow-particle"
+              key={`result-arrow-${index}`}
+              style={{
+                "--arrow-x": `${x}%`,
+                "--arrow-delay": `${delay}s`,
+                "--arrow-duration": `${duration}s`,
+                "--arrow-size": `${size}px`,
+              } as CSSProperties}
+            >
+              {isWin ? "⬆" : "⬇"}
+            </span>
+          );
+        })}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`result-opening-fx result-opening-${normalizedStyle.toLowerCase()} ${
+        isWin ? "is-win" : "is-loss"
+      }`}
+      aria-hidden="true"
+    >
+      {normalizedStyle === "THROTTLE" && (
+        <>
+          <div className="throttle-dim" />
+          <div className="throttle-aura" />
+          <div className="throttle-overscan-ring" />
+          <div className="throttle-streaks">
+            {Array.from({ length: 8 }, (_, index) => (
+              <span key={`throttle-streak-${index}`} />
+            ))}
+          </div>
+          <div className="throttle-gauge">
+            <div className="throttle-gauge-inner">
+              <span className="throttle-gauge-status">{isWin ? "WIN" : "LOSS"}</span>
+              <div className="throttle-marks">
+                {Array.from({ length: 13 }, (_, index) => (
+                  <span key={`throttle-mark-${index}`} />
+                ))}
+              </div>
+              <div className="throttle-red-zone" />
+              <span className="throttle-needle" />
+              <span className="throttle-hub" />
+            </div>
+          </div>
+        </>
+      )}
+
+      {normalizedStyle === "NEONRUSH" && (
+        <>
+          <div className="neon-rush-glow" />
+          <div className="neon-rush-lines">
+            {Array.from({ length: 8 }, (_, index) => (
+              <span key={`neon-rush-line-${index}`} />
+            ))}
+          </div>
+          <div className="neon-rush-rings">
+            <span />
+            <span />
+            <span />
+          </div>
+        </>
+      )}
+
+      {normalizedStyle === "SHOCKWAVE" && (
+        <>
+          <div className="shockwave-core" />
+          <div className="shockwave-rings">
+            <span />
+            <span />
+            <span />
+          </div>
+          <div className="shockwave-shards">
+            {Array.from({ length: 10 }, (_, index) => (
+              <span key={`shockwave-shard-${index}`} />
+            ))}
+          </div>
+        </>
+      )}
+
+      {normalizedStyle === "STARSTRUCK" && (
+        <div className="starstruck-particles">
+          {Array.from({ length: 16 }, (_, index) => (
+            <span key={`starstruck-${index}`}>{index % 3 === 0 ? "♥" : index % 2 === 0 ? "✦" : "★"}</span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function cleanRankText(text: string) {
   return text.replace(/\s*,\s*/g, " / ");
+}
+
+function opacityFromTransparency(value: number | undefined) {
+  return Math.max(0, Math.min(1, 1 - percent(value, 0) / 100));
+}
+
+function formatEvents(value: string, format: EventFormat) {
+  const text = String(value ?? "").trim();
+  if (!text) return "";
+  if (format === "PREFIX") return `Events ${text}`;
+  if (format === "HASH") return `#${text}`;
+  if (format === "NUMBER") return text;
+  return `${text} Events`;
 }
 
 function normalizeRankText(text: string) {
@@ -748,31 +911,29 @@ export default function CardClient({
   const shownScore = activeRating === "MMR" ? display.mmr : display.lr;
 
   const cardBgStops = gradientStops(initial.cardBgBalance, 50);
-  const cardBgAlpha = alphaHexFromPercent(initial.cardBgOpacity, 86);
   const tagBoxStops = gradientStops(initial.tagBoxBalance, 50);
-  const tagTextStops = gradientStops(initial.tagTextBalance, 40);
   const ratingBoxStops = gradientStops(initial.ratingBoxBalance, 50);
-  const ratingTextStops = gradientStops(initial.ratingTextBalance, 40);
-  const textStops = gradientStops(initial.textBalance, 40);
-  const ratingEffectColor = initial.ratingEffectUseMain
-    ? initial.border
-    : initial.ratingEffectColor;
+  const effectiveTagTop = initial.textTop;
+  const effectiveTagBottom = initial.textBottom;
+  const effectiveTagGradient = initial.textGradient;
+  const effectiveTagBalance = initial.textBalance;
+  const effectiveRatingTop = initial.textTop;
+  const effectiveRatingBottom = initial.textBottom;
+  const effectiveRatingGradient = initial.textGradient;
+  const effectiveRatingBalance = initial.textBalance;
+  const textStops = gradientStops(initial.textBalance, 50);
+  const effectiveTagTextStops = gradientStops(effectiveTagBalance, 50);
+  const effectiveRatingTextStops = gradientStops(effectiveRatingBalance, 50);
+  const ratingEffectColor = initial.ratingEffectUseMain ? initial.border : initial.ratingEffectColor;
   const textShadowColor = initial.textShadowEnabled
-    ? hexWithAlpha(
-        initial.textShadowColor,
-        alphaHexFromPercent(initial.textShadowOpacity, 70)
-      )
+    ? hexWithAlpha(initial.textShadowColor, alphaHexFromPercent(initial.textShadowOpacity, 70))
     : "transparent";
 
-  const visibleBackgroundUrl = initial.showBackgroundImage ? initial.bg : "";
-
+  const effectiveCardBgOpacity = (initial.cardBgOpacity ?? 86) * opacityFromTransparency(initial.cardBackgroundTransparency);
+  const cardBgAlpha = alphaHexFromPercent(effectiveCardBgOpacity, 86);
   const cardBackground = initial.cardBgGradient
-    ? visibleBackgroundUrl
-      ? `linear-gradient(90deg, ${hexWithAlpha(initial.cardBgLeft, cardBgAlpha)} 0%, ${hexWithAlpha(initial.cardBgLeft, cardBgAlpha)} ${cardBgStops.topStop}%, ${hexWithAlpha(initial.cardBgRight, cardBgAlpha)} ${cardBgStops.bottomStart}%, ${hexWithAlpha(initial.cardBgRight, cardBgAlpha)} 100%), url(${visibleBackgroundUrl})`
-      : `linear-gradient(90deg, ${initial.cardBgLeft || "#130716"} 0%, ${initial.cardBgLeft || "#130716"} ${cardBgStops.topStop}%, ${initial.cardBgRight || "#005e70"} ${cardBgStops.bottomStart}%, ${initial.cardBgRight || "#005e70"} 100%)`
-    : visibleBackgroundUrl
-      ? `linear-gradient(90deg, ${hexWithAlpha(initial.cardBgLeft, cardBgAlpha)} 0%, ${hexWithAlpha(initial.cardBgLeft, cardBgAlpha)} 100%), url(${visibleBackgroundUrl})`
-      : `linear-gradient(90deg, ${initial.cardBgLeft || "#130716"} 0%, ${initial.cardBgLeft || "#130716"} 100%)`;
+    ? `linear-gradient(90deg, ${hexWithAlpha(initial.cardBgLeft, cardBgAlpha)} 0%, ${hexWithAlpha(initial.cardBgLeft, cardBgAlpha)} ${cardBgStops.topStop}%, ${hexWithAlpha(initial.cardBgRight, cardBgAlpha)} ${cardBgStops.bottomStart}%, ${hexWithAlpha(initial.cardBgRight, cardBgAlpha)} 100%)`
+    : `linear-gradient(90deg, ${hexWithAlpha(initial.cardBgLeft, cardBgAlpha)} 0%, ${hexWithAlpha(initial.cardBgLeft, cardBgAlpha)} 100%)`;
 
   const customImageTransparency = percent(initial.customImageGradient, 0);
   const customImageOpacity = Math.max(
@@ -789,9 +950,9 @@ export default function CardClient({
             : ""
         } ${!initial.flowOn ? "no-flow" : ""} ${
           !initial.tagBoxGradient ? "no-tag-box-gradient" : ""
-        } ${!initial.tagTextGradient ? "no-tag-text-gradient" : ""} ${
+        } ${!effectiveTagGradient ? "no-tag-text-gradient" : ""} ${
           !initial.ratingBoxGradient ? "no-rating-box-gradient" : ""
-        } ${!initial.ratingTextGradient ? "no-rating-text-gradient" : ""} ${
+        } ${!effectiveRatingGradient ? "no-rating-text-gradient" : ""} ${
           !initial.textGradient ? "no-text-gradient" : ""
         } ${!initial.cardBgGradient ? "no-card-bg-gradient" : ""} label-shape-${(
           initial.labelShape ?? "ROUNDED"
@@ -808,10 +969,8 @@ export default function CardClient({
               0,
               Math.min(1, 1 - (initial.overallTransparency ?? 0) / 100)
             ),
-            transform: `scale(${initial.scale / 100})`,
+            transform: "scale(0.98)",
             backgroundImage: initial.showCardBackground ? cardBackground : "none",
-            backgroundPosition: `${initial.bgX}% ${initial.bgY}%`,
-            backgroundSize: `${initial.bgZoom}%`,
             borderColor: "transparent",
             boxShadow: `0 0 28px ${initial.border}44, inset 0 0 24px #ffffff10`,
             "--border-color": initial.border,
@@ -822,24 +981,27 @@ export default function CardClient({
             "--flow-gap": String(100 - percent(initial.flowLength, 16)),
             "--tag-top-color": initial.tagTop || "#b90000",
             "--tag-bottom-color": initial.tagBottom || "#000000",
-            "--tag-text-top-color": initial.tagTextTop || "#ffffff",
-            "--tag-text-bottom-color": initial.tagTextBottom || "#ff3030",
+            "--tag-text-top-color": effectiveTagTop || "#ffffff",
+            "--tag-text-bottom-color": effectiveTagBottom || "#ff3030",
             "--tag-box-top-stop": `${tagBoxStops.topStop}%`,
             "--tag-box-bottom-start": `${tagBoxStops.bottomStart}%`,
-            "--tag-text-top-stop": `${tagTextStops.topStop}%`,
-            "--tag-text-bottom-start": `${tagTextStops.bottomStart}%`,
+            "--tag-text-gradient-balance": `${effectiveTagBalance}%`,
+            "--tag-text-top-stop": `${effectiveTagTextStops.topStop}%`,
+            "--tag-text-bottom-start": `${effectiveTagTextStops.bottomStart}%`,
             "--rating-top-color": initial.ratingTop || "#b90000",
             "--rating-bottom-color": initial.ratingBottom || "#000000",
-            "--rating-text-top-color": initial.ratingTextTop || "#ffffff",
-            "--rating-text-bottom-color": initial.ratingTextBottom || "#ff3030",
+            "--rating-text-top-color": effectiveRatingTop || "#ffffff",
+            "--rating-text-bottom-color": effectiveRatingBottom || "#ff3030",
             "--rating-box-top-stop": `${ratingBoxStops.topStop}%`,
             "--rating-box-bottom-start": `${ratingBoxStops.bottomStart}%`,
-            "--rating-text-top-stop": `${ratingTextStops.topStop}%`,
-            "--rating-text-bottom-start": `${ratingTextStops.bottomStart}%`,
+            "--rating-text-gradient-balance": `${effectiveRatingBalance}%`,
+            "--rating-text-top-stop": `${effectiveRatingTextStops.topStop}%`,
+            "--rating-text-bottom-start": `${effectiveRatingTextStops.bottomStart}%`,
             "--label-radius": `${initial.labelRadius ?? 10}px`,
             "--card-font": fontFamily(initial.textFont),
             "--text-top-color": initial.textTop || "#ffffff",
             "--text-bottom-color": initial.textBottom || "#ff3030",
+            "--text-gradient-balance": `${initial.textBalance}%`,
             "--text-top-stop": `${textStops.topStop}%`,
             "--text-bottom-start": `${textStops.bottomStart}%`,
             "--text-shadow-x": `${shadowOffsetX(initial.textShadowX)}px`,
@@ -849,6 +1011,19 @@ export default function CardClient({
           } as CSSProperties
         }
       >
+        {initial.showBackgroundImage && initial.bg && (
+          <div
+            className="card-background-image-layer"
+            style={{
+              backgroundImage: `url(${initial.bg})`,
+              backgroundPosition: `${initial.bgX}% ${initial.bgY}%`,
+              backgroundSize: `${initial.bgZoom}%`,
+              opacity: opacityFromTransparency(initial.backgroundImageTransparency),
+            }}
+            aria-hidden="true"
+          />
+        )}
+
         <svg
           className="flow-border-svg"
           viewBox="0 0 650 150"
@@ -891,6 +1066,7 @@ export default function CardClient({
               top: `${initial.iconY}%`,
               width: initial.iconSize,
               height: initial.iconSize,
+              opacity: opacityFromTransparency(initial.rankIconTransparency),
             }}
           />
         )}
@@ -903,6 +1079,7 @@ export default function CardClient({
               top: `${initial.tagY}%`,
               fontSize: initial.tagTextSize,
               letterSpacing: `${(initial.tagTextSpacing ?? 0) / 100}em`,
+              opacity: opacityFromTransparency(initial.trackTransparency),
             }}
           >
             {initial.showTrackTagText && (
@@ -920,6 +1097,7 @@ export default function CardClient({
               width: Math.round(initial.flagSize * 1.92),
               height: Math.round(initial.flagSize * 1.42),
               fontSize: initial.flagSize,
+              opacity: opacityFromTransparency(initial.flagTransparency),
               background: display.flagUrl
                 ? "rgba(255, 255, 255, .92)"
                 : initial.border,
@@ -940,6 +1118,8 @@ export default function CardClient({
               left: `${initial.nameX}%`,
               top: `${initial.nameY}%`,
               fontSize: initial.nameSize,
+              letterSpacing: `${(initial.nameTextSpacing ?? 0) / 100}em`,
+              opacity: opacityFromTransparency(initial.nameTransparency),
             }}
           >
             {display.name}
@@ -960,40 +1140,7 @@ export default function CardClient({
         {effect &&
           effect.phase === "change" &&
           (effect.kind === "win" || effect.kind === "loss") && (
-            <div
-              className={`rating-arrow-stream ${
-                effect.kind === "win" ? "is-up" : "is-down"
-              }`}
-              style={{
-                left: `${initial.scoreX}%`,
-                top: `${initial.scoreY}%`,
-              }}
-              aria-hidden="true"
-            >
-              {Array.from({ length: 12 }, (_, index) => {
-                const x = 5 + index * 8.18;
-                const delay = index * 0.075;
-                const duration = 1.25 + (index % 4) * 0.14;
-                const size = [42, 50, 60, 46, 56, 44][index % 6];
-
-                return (
-                  <span
-                    className="rating-arrow-particle"
-                    key={`rating-arrow-${index}`}
-                    style={
-                      {
-                        "--arrow-x": `${x}%`,
-                        "--arrow-delay": `${delay}s`,
-                        "--arrow-duration": `${duration}s`,
-                        "--arrow-size": `${size}px`,
-                      } as CSSProperties
-                    }
-                  >
-                    {effect.kind === "win" ? "⬆" : "⬇"}
-                  </span>
-                );
-              })}
-            </div>
+            <ResultOpeningEffect kind={effect.kind} style={initial.resultEffectStyle} />
           )}
 
         {initial.showRate && (
@@ -1010,6 +1157,9 @@ export default function CardClient({
               left: `${initial.scoreX}%`,
               top: `${initial.scoreY}%`,
               fontSize: initial.scoreSize,
+              letterSpacing: `${(initial.scoreTextSpacing ?? 0) / 100}em`,
+              columnGap: `${(initial.scoreTextSpacing ?? 0) / 100}em`,
+              opacity: opacityFromTransparency(initial.rateTransparency),
             }}
           />
         )}
@@ -1027,6 +1177,7 @@ export default function CardClient({
             top: `${initial.ratingBoxY}%`,
             fontSize: initial.ratingTextSize,
             letterSpacing: `${(initial.ratingTextSpacing ?? 0) / 100}em`,
+            opacity: opacityFromTransparency(initial.ratingTransparency),
           }}
         >
           {initial.showRatingLabelText && (
@@ -1042,6 +1193,7 @@ export default function CardClient({
             left: `${initial.rankTextX}%`,
             top: `${initial.rankTextY}%`,
             fontSize: initial.rankTextSize,
+            opacity: opacityFromTransparency(initial.rankTextTransparency),
           }}
         >
           {display.rank || "MKW Lounge"}
@@ -1055,6 +1207,30 @@ export default function CardClient({
               {effect.text}
             </div>
           )}
+
+        {initial.showEvents && formatEvents(initial.events, initial.eventFormat) && (
+          <div
+            className={`event-line ${initial.eventsUseMainColor ? "main-gradient-text" : "solid-custom-text"}`}
+            style={{
+              left: `${initial.eventsX}%`, top: `${initial.eventsY}%`, fontSize: initial.eventsSize,
+              letterSpacing: `${(initial.eventsSpacing ?? 0) / 100}em`,
+              color: initial.eventsUseMainColor ? undefined : initial.eventsColor,
+              opacity: opacityFromTransparency(initial.eventsTransparency),
+            }}
+          >{formatEvents(initial.events, initial.eventFormat)}</div>
+        )}
+
+        {initial.showOtherText && initial.otherText && (
+          <div
+            className={`other-text-line ${initial.otherTextUseMainColor ? "main-gradient-text" : "solid-custom-text"}`}
+            style={{
+              left: `${initial.otherTextX}%`, top: `${initial.otherTextY}%`, fontSize: initial.otherTextSize,
+              letterSpacing: `${(initial.otherTextSpacing ?? 0) / 100}em`,
+              color: initial.otherTextUseMainColor ? undefined : initial.otherTextColor,
+              opacity: opacityFromTransparency(initial.otherTextTransparency),
+            }}
+          >{initial.otherText}</div>
+        )}
 
         {effect && effect.phase === "rank-reveal" && (
           <div

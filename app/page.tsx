@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import RollingNumber from "@/components/RollingNumber";
 import {
@@ -38,6 +38,8 @@ type RankEffectStyle =
   | "STARLIGHT"
   | "METEOR";
 type RatingSwitchEffectStyle = "WAVE" | "FADE" | "FLIP" | "GLITCH";
+type ResultEffectStyle = "DEFAULT" | "THROTTLE" | "SKY" | "REINCARNATION" | "STARSTRUCK" | "NEONRUSH" | "SHOCKWAVE";
+type EventFormat = "EVENTS" | "PREFIX" | "HASH" | "NUMBER";
 
 type PreviewScoreBump = {
   rating: ActiveRating;
@@ -79,6 +81,8 @@ type Settings = {
 
   rankText: string;
   rankIconUrl: string;
+  events: string;
+  otherText: string;
 
   borderColor: string;
   flowColor: string;
@@ -89,6 +93,13 @@ type Settings = {
   ratingEffectColor: string;
   rankEffectStyle: RankEffectStyle;
   ratingSwitchEffectStyle: RatingSwitchEffectStyle;
+  resultEffectStyle: ResultEffectStyle;
+  labelIndependentColors: boolean;
+  eventsFormat: EventFormat;
+  eventsUseMainColor: boolean;
+  eventsColor: string;
+  otherTextUseMainColor: boolean;
+  otherTextColor: string;
   tagTopColor: string;
   tagBottomColor: string;
   tagTextTopColor: string;
@@ -158,6 +169,16 @@ type Settings = {
   rankTextY: number;
   rankTextSize: number;
 
+  eventsX: number;
+  eventsY: number;
+  eventsSize: number;
+  eventsSpacing: number;
+
+  otherTextX: number;
+  otherTextY: number;
+  otherTextSize: number;
+  otherTextSpacing: number;
+
   flagX: number;
   flagY: number;
   flagSize: number;
@@ -180,6 +201,20 @@ type Settings = {
   showBackgroundImage: boolean;
   showCardBackground: boolean;
   showCustomImage: boolean;
+  showEvents: boolean;
+  showOtherText: boolean;
+
+  nameTransparency: number;
+  rateTransparency: number;
+  trackTransparency: number;
+  ratingTransparency: number;
+  rankTextTransparency: number;
+  rankIconTransparency: number;
+  flagTransparency: number;
+  backgroundImageTransparency: number;
+  cardBackgroundTransparency: number;
+  eventsTransparency: number;
+  otherTextTransparency: number;
 
   customImageUrl: string;
   customImageX: number;
@@ -196,6 +231,7 @@ type PlayerApiResponse = {
   flagUrl: string;
   currentMmr: number;
   currentLr: number;
+  totalEvents?: number;
   rankText: string;
   emblemUrl: string;
   error?: string;
@@ -230,6 +266,8 @@ const defaultSettings: Settings = {
 
   rankText: "",
   rankIconUrl: "https://i.imgur.com/OwhIiNz.png",
+  events: "",
+  otherText: "",
 
   borderColor: "#000000",
   flowColor: "#ffffff",
@@ -240,6 +278,13 @@ const defaultSettings: Settings = {
   ratingEffectColor: "#ffffff",
   rankEffectStyle: "CLASSIC",
   ratingSwitchEffectStyle: "WAVE",
+  resultEffectStyle: "DEFAULT",
+  labelIndependentColors: false,
+  eventsFormat: "EVENTS",
+  eventsUseMainColor: true,
+  eventsColor: "#ffffff",
+  otherTextUseMainColor: true,
+  otherTextColor: "#ffffff",
   tagTopColor: "#000000",
   tagBottomColor: "#ffffff",
   tagTextTopColor: "#ffffff",
@@ -279,7 +324,7 @@ const defaultSettings: Settings = {
   bgX: 50,
   bgY: 50,
   bgZoom: 106.25,
-  cardScale: 100,
+  cardScale: 98,
 
   nameX: 36,
   nameY: 58,
@@ -309,6 +354,16 @@ const defaultSettings: Settings = {
   rankTextY: 83,
   rankTextSize: 20,
 
+  eventsX: 84,
+  eventsY: 22,
+  eventsSize: 18,
+  eventsSpacing: 0,
+
+  otherTextX: 50,
+  otherTextY: 50,
+  otherTextSize: 18,
+  otherTextSpacing: 0,
+
   flagX: 22,
   flagY: 25,
   flagSize: 24,
@@ -331,6 +386,20 @@ const defaultSettings: Settings = {
   showBackgroundImage: true,
   showCardBackground: true,
   showCustomImage: true,
+  showEvents: false,
+  showOtherText: false,
+
+  nameTransparency: 0,
+  rateTransparency: 0,
+  trackTransparency: 0,
+  ratingTransparency: 0,
+  rankTextTransparency: 0,
+  rankIconTransparency: 0,
+  flagTransparency: 0,
+  backgroundImageTransparency: 0,
+  cardBackgroundTransparency: 0,
+  eventsTransparency: 0,
+  otherTextTransparency: 0,
 
   customImageUrl: "",
   customImageX: 50,
@@ -351,6 +420,7 @@ const designSettingKeys: Array<keyof Settings> = [
   "ratingEffectColor",
   "rankEffectStyle",
   "ratingSwitchEffectStyle",
+  "resultEffectStyle",
   "tagTextTopColor",
   "tagTextBottomColor",
   "tagTextGradientEnabled",
@@ -424,6 +494,34 @@ const designSettingKeys: Array<keyof Settings> = [
   "showTrackTagText",
   "showRatingLabelText",
   "overallTransparency",
+  "labelIndependentColors",
+  "eventsFormat",
+  "eventsUseMainColor",
+  "eventsColor",
+  "eventsX",
+  "eventsY",
+  "eventsSize",
+  "eventsSpacing",
+  "showEvents",
+  "eventsTransparency",
+  "otherText",
+  "otherTextUseMainColor",
+  "otherTextColor",
+  "otherTextX",
+  "otherTextY",
+  "otherTextSize",
+  "otherTextSpacing",
+  "showOtherText",
+  "otherTextTransparency",
+  "nameTransparency",
+  "rateTransparency",
+  "trackTransparency",
+  "ratingTransparency",
+  "rankTextTransparency",
+  "rankIconTransparency",
+  "flagTransparency",
+  "backgroundImageTransparency",
+  "cardBackgroundTransparency",
 ];
 
 
@@ -476,6 +574,8 @@ function isColorDesignKey(key: keyof Settings) {
     "textShadowColor",
     "cardBgLeft",
     "cardBgRight",
+    "eventsColor",
+    "otherTextColor",
   ].includes(key);
 }
 
@@ -523,7 +623,26 @@ function clampDesignNumber(key: keyof Settings, value: number) {
     tagTextSpacing: [0, 30],
     rankTextX: [0, 100],
     rankTextY: [0, 100],
-    rankTextSize: [6, 28],
+    rankTextSize: [6, 90],
+    eventsX: [0, 100],
+    eventsY: [0, 100],
+    eventsSize: [4, 100],
+    eventsSpacing: [0, 50],
+    otherTextX: [0, 100],
+    otherTextY: [0, 100],
+    otherTextSize: [4, 100],
+    otherTextSpacing: [0, 50],
+    nameTransparency: [0, 100],
+    rateTransparency: [0, 100],
+    trackTransparency: [0, 100],
+    ratingTransparency: [0, 100],
+    rankTextTransparency: [0, 100],
+    rankIconTransparency: [0, 100],
+    flagTransparency: [0, 100],
+    backgroundImageTransparency: [0, 100],
+    cardBackgroundTransparency: [0, 100],
+    eventsTransparency: [0, 100],
+    otherTextTransparency: [0, 100],
     flagX: [0, 100],
     flagY: [0, 100],
     flagSize: [12, 50],
@@ -612,6 +731,28 @@ function decodeDesignValue(key: keyof Settings, token: string) {
         decoded.toUpperCase()
       )
         ? decoded.toUpperCase()
+        : defaultValue) as never;
+    }
+
+    if (key === "resultEffectStyle") {
+      return (["DEFAULT", "THROTTLE", "SKY", "REINCARNATION", "STARSTRUCK", "NEONRUSH", "SHOCKWAVE"].includes(
+        decoded.toUpperCase()
+      )
+        ? decoded.toUpperCase()
+        : defaultValue) as never;
+    }
+
+    if (key === "eventsFormat") {
+      const normalized = decoded.toUpperCase();
+      const migrated =
+        normalized === "SHORT"
+          ? "PREFIX"
+          : normalized === "COMPACT"
+            ? "NUMBER"
+            : normalized;
+
+      return (["EVENTS", "PREFIX", "HASH", "NUMBER"].includes(migrated)
+        ? migrated
         : defaultValue) as never;
     }
 
@@ -937,6 +1078,26 @@ function cleanRankText(text: string) {
   return text.replace(/\s*,\s*/g, " / ");
 }
 
+function opacityFromTransparency(value: number | undefined) {
+  return Math.max(0, Math.min(1, 1 - percent(value, 0) / 100));
+}
+
+function formatEvents(value: string, format: EventFormat) {
+  const text = String(value ?? "").trim();
+  if (!text) return "";
+
+  switch (format) {
+    case "PREFIX":
+      return `Events ${text}`;
+    case "HASH":
+      return `#${text}`;
+    case "NUMBER":
+      return text;
+    default:
+      return `${text} Events`;
+  }
+}
+
 function normalizeRankForCompare(text: string) {
   return cleanRankText(text)
     .replace(/\s+/g, " ")
@@ -1074,20 +1235,346 @@ function getPreviewRank(
   };
 }
 
+const VERSION_HISTORY = [
+  {
+    version: "v2.0.5–v2.1.2",
+    en: "Improved Undo / Redo, Lounge-name autocomplete, JP / EN wording, Preview / OBS parity, and selectable Win / Loss opening effects. Full Throttle! was refined again, Sky Trip and Heaven / Hell were retired, and Neon Rush plus Shockwave were added.",
+    jp: "Undo / Redo、Lounge名予測変換、JP / EN表記、Preview / OBSの一致を改善しました。勝利 / 敗北の前半演出ではアクセル全開！をさらに調整し、空の旅と天国と地獄を廃止、代わりにネオンラッシュとショックウェーブを追加しました。",
+  },
+  {
+    version: "v2.0.0–v2.0.4",
+    en: "Added Events, extra text, per-element transparency, project navigation, full JP / EN UI, automatic Lounge data fetch, clipboard design import, and reorganized the Design panel.",
+    jp: "模擬数、追加テキスト、要素別透明度、プロジェクトナビ、JP / EN UI、Loungeデータ自動取得、クリップボードからのデザイン読込を追加し、Design画面を再構成しました。",
+  },
+  {
+    version: "v1.9.0–v1.9.4",
+    en: "Refined rate-change arrows, MMR / LR switch effects, Rank Up / Rank Down visibility, and New Rank presentation.",
+    jp: "レート変動矢印、MMR / LR切替演出、Rank Up / Rank DownとNew Rank演出の見やすさを改善しました。",
+  },
+  {
+    version: "v1.8.5–v1.8.9",
+    en: "Built the Rank Up / Rank Down → New Rank sequence and added Starlight, Meteor Shower, and directional rate-change effects.",
+    jp: "Rank Up / Rank Down → New Rankの演出順を整備し、Starlight・Meteor Shower・方向付きレート変動演出を追加しました。",
+  },
+  {
+    version: "v1.8.0–v1.8.3",
+    en: "Improved rank transitions, MMR / LR switching, spacing, initial design settings, JSON handling, and RT/CT / MMR/LR placement.",
+    jp: "ランク変動、MMR / LR切替、文字間隔、初期デザイン、JSON処理、RT/CT・MMR/LR配置を改善しました。",
+  },
+  {
+    version: "v1.7.0",
+    en: "Standardized sliders to 0–100 and reorganized position, size, text-gradient, shadow, and design categories.",
+    jp: "スライダーを0–100へ統一し、配置・サイズ・文字グラデーション・影・設定カテゴリを大幅に整理しました。",
+  },
+  {
+    version: "v1.6.0–v1.6.8",
+    en: "Simplified RT/CT and MMR/LR styling, improved visibility and transparency, updated defaults, and expanded font support.",
+    jp: "RT/CT・MMR/LR表示を簡素化し、表示設定・透明度・初期プリセット・フォント対応を改善しました。",
+  },
+  {
+    version: "v1.4.0–v1.5.0",
+    en: "Expanded core card customization with visibility, custom images, image transparency, and font selection.",
+    jp: "表示切替、追加画像、画像透明度、フォント選択などカードデザインの基本機能を拡充しました。",
+  },
+  {
+    version: "v1.2.0–v1.3.0",
+    en: "Added design sharing, early RT/CT and MMR/LR styling, label designs, and independent text-spacing controls.",
+    jp: "デザイン共有、初期のRT/CT・MMR/LRスタイル、ラベルデザイン、文字間隔設定を追加しました。",
+  },
+] as const;
+
+
+
+function ResultOpeningEffect({
+  kind,
+  style,
+}: {
+  kind: "win" | "loss";
+  style: ResultEffectStyle;
+}) {
+  const isWin = kind === "win";
+  const normalizedStyle =
+    style === "SKY" ? "NEONRUSH" : style === "REINCARNATION" ? "SHOCKWAVE" : style;
+
+  if (normalizedStyle === "DEFAULT") {
+    return (
+      <div className={`rating-arrow-stream ${isWin ? "is-up" : "is-down"}`} aria-hidden="true">
+        {Array.from({ length: 12 }, (_, index) => {
+          const x = 5 + index * 8.18;
+          const delay = index * 0.075;
+          const duration = 1.25 + (index % 4) * 0.14;
+          const size = [42, 50, 60, 46, 56, 44][index % 6];
+
+          return (
+            <span
+              className="rating-arrow-particle"
+              key={`result-arrow-${index}`}
+              style={{
+                "--arrow-x": `${x}%`,
+                "--arrow-delay": `${delay}s`,
+                "--arrow-duration": `${duration}s`,
+                "--arrow-size": `${size}px`,
+              } as CSSProperties}
+            >
+              {isWin ? "⬆" : "⬇"}
+            </span>
+          );
+        })}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`result-opening-fx result-opening-${normalizedStyle.toLowerCase()} ${
+        isWin ? "is-win" : "is-loss"
+      }`}
+      aria-hidden="true"
+    >
+      {normalizedStyle === "THROTTLE" && (
+        <>
+          <div className="throttle-dim" />
+          <div className="throttle-aura" />
+          <div className="throttle-overscan-ring" />
+          <div className="throttle-streaks">
+            {Array.from({ length: 8 }, (_, index) => (
+              <span key={`throttle-streak-${index}`} />
+            ))}
+          </div>
+          <div className="throttle-gauge">
+            <div className="throttle-gauge-inner">
+              <span className="throttle-gauge-status">{isWin ? "WIN" : "LOSS"}</span>
+              <div className="throttle-marks">
+                {Array.from({ length: 13 }, (_, index) => (
+                  <span key={`throttle-mark-${index}`} />
+                ))}
+              </div>
+              <div className="throttle-red-zone" />
+              <span className="throttle-needle" />
+              <span className="throttle-hub" />
+            </div>
+          </div>
+        </>
+      )}
+
+      {normalizedStyle === "NEONRUSH" && (
+        <>
+          <div className="neon-rush-glow" />
+          <div className="neon-rush-lines">
+            {Array.from({ length: 8 }, (_, index) => (
+              <span key={`neon-rush-line-${index}`} />
+            ))}
+          </div>
+          <div className="neon-rush-rings">
+            <span />
+            <span />
+            <span />
+          </div>
+        </>
+      )}
+
+      {normalizedStyle === "SHOCKWAVE" && (
+        <>
+          <div className="shockwave-core" />
+          <div className="shockwave-rings">
+            <span />
+            <span />
+            <span />
+          </div>
+          <div className="shockwave-shards">
+            {Array.from({ length: 10 }, (_, index) => (
+              <span key={`shockwave-shard-${index}`} />
+            ))}
+          </div>
+        </>
+      )}
+
+      {normalizedStyle === "STARSTRUCK" && (
+        <div className="starstruck-particles">
+          {Array.from({ length: 16 }, (_, index) => (
+            <span key={`starstruck-${index}`}>{index % 3 === 0 ? "♥" : index % 2 === 0 ? "✦" : "★"}</span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+type UiLanguage = "JP" | "EN";
+
+const SETTING_LABELS: Partial<Record<keyof Settings, { en: string; jp: string }>> = {
+  loungeName: { en: "Lounge name", jp: "Lounge名" },
+  displayName: { en: "Display name", jp: "表示名" },
+  mode: { en: "Track", jp: "トラック" },
+  ratingMode: { en: "Rating display", jp: "レート表示" },
+  ratingSwitchSeconds: { en: "MMR / LR interval", jp: "MMR / LR切替間隔" },
+  flag: { en: "Flag text", jp: "国旗テキスト" },
+  flagUrl: { en: "Flag image", jp: "国旗画像" },
+  mmr: { en: "MMR", jp: "MMR" },
+  lr: { en: "LR", jp: "LR" },
+  events: { en: "Events", jp: "Events" },
+  rankText: { en: "Rank text", jp: "ランク文字" },
+  rankIconUrl: { en: "Rank icon", jp: "ランク画像" },
+  borderColor: { en: "Border color", jp: "枠線色" },
+  flowColor: { en: "Flow color", jp: "枠線カラー" },
+  flowEnabled: { en: "Flowing border", jp: "枠線" },
+  flowSpeed: { en: "Flow speed", jp: "枠線速度" },
+  flowLength: { en: "Flow length", jp: "枠線長さ" },
+  ratingEffectUseMainColor: { en: "Effect color source", jp: "エフェクト色" },
+  ratingEffectColor: { en: "Effect color", jp: "エフェクト色" },
+  rankEffectStyle: { en: "Rank effect", jp: "ランク演出" },
+  ratingSwitchEffectStyle: { en: "MMR / LR switch effect", jp: "MMR / LR切替演出" },
+  resultEffectStyle: { en: "Win / Loss opening effect", jp: "勝利 / 敗北 前半演出" },
+  labelIndependentColors: { en: "Track / Rating colors", jp: "Track / Rating色" },
+  tagTextTopColor: { en: "Track top color", jp: "Track上色" },
+  tagTextBottomColor: { en: "Track bottom color", jp: "Track下色" },
+  ratingTextTopColor: { en: "Rating top color", jp: "Rating上色" },
+  ratingTextBottomColor: { en: "Rating bottom color", jp: "Rating下色" },
+  textTopColor: { en: "Text top color", jp: "文字上色" },
+  textBottomColor: { en: "Text bottom color", jp: "文字下色" },
+  textGradientEnabled: { en: "Text gradient", jp: "文字グラデーション" },
+  textGradientBalance: { en: "Gradient balance", jp: "グラデーション比率" },
+  textFont: { en: "Text font", jp: "文字フォント" },
+  textShadowEnabled: { en: "Text shadow", jp: "文字影" },
+  textShadowColor: { en: "Shadow color", jp: "影色" },
+  textShadowX: { en: "Shadow X", jp: "影 X" },
+  textShadowY: { en: "Shadow Y", jp: "影 Y" },
+  textShadowBlur: { en: "Shadow blur", jp: "影ぼかし" },
+  textShadowOpacity: { en: "Shadow opacity", jp: "影透明度" },
+  cardBgLeft: { en: "Card background left", jp: "カード背景 左" },
+  cardBgRight: { en: "Card background right", jp: "カード背景 右" },
+  cardBgGradientEnabled: { en: "Card background gradient", jp: "カード背景グラデーション" },
+  cardBgGradientBalance: { en: "Card background balance", jp: "カード背景カラー比率" },
+  cardBgOpacity: { en: "Card background opacity", jp: "カード背景不透明度" },
+  bgUrl: { en: "Background image", jp: "背景画像" },
+  bgX: { en: "Background X", jp: "背景 X" },
+  bgY: { en: "Background Y", jp: "背景 Y" },
+  bgZoom: { en: "Background zoom", jp: "背景ズーム" },
+  nameX: { en: "Name X", jp: "名前 X" },
+  nameY: { en: "Name Y", jp: "名前 Y" },
+  nameSize: { en: "Name size", jp: "名前サイズ" },
+  nameTextSpacing: { en: "Name spacing", jp: "名前文字間隔" },
+  scoreX: { en: "Rate X", jp: "レート X" },
+  scoreY: { en: "Rate Y", jp: "レート Y" },
+  scoreSize: { en: "Rate size", jp: "レートサイズ" },
+  scoreTextSpacing: { en: "Rate spacing", jp: "レート文字間隔" },
+  ratingBoxX: { en: "MMR/LR X", jp: "MMR/LR X" },
+  ratingBoxY: { en: "MMR/LR Y", jp: "MMR/LR Y" },
+  ratingTextSize: { en: "MMR/LR size", jp: "MMR/LR サイズ" },
+  ratingTextSpacing: { en: "MMR/LR spacing", jp: "MMR/LR 文字間隔" },
+  tagX: { en: "RT/CT X", jp: "RT/CT X" },
+  tagY: { en: "RT/CT Y", jp: "RT/CT Y" },
+  tagTextSize: { en: "RT/CT size", jp: "RT/CT サイズ" },
+  tagTextSpacing: { en: "RT/CT spacing", jp: "RT/CT 文字間隔" },
+  rankTextX: { en: "Rank text X", jp: "ランク X" },
+  rankTextY: { en: "Rank text Y", jp: "ランク Y" },
+  rankTextSize: { en: "Rank text size", jp: "ランクサイズ" },
+  flagX: { en: "Flag X", jp: "国旗 X" },
+  flagY: { en: "Flag Y", jp: "国旗 Y" },
+  flagSize: { en: "Flag size", jp: "国旗サイズ" },
+  rankIconX: { en: "Rank icon X", jp: "ランク画像 X" },
+  rankIconY: { en: "Rank icon Y", jp: "ランク画像 Y" },
+  rankIconSize: { en: "Rank icon size", jp: "ランク画像サイズ" },
+  eventsFormat: { en: "Events format", jp: "Events形式" },
+  eventsUseMainColor: { en: "Events color source", jp: "Events色" },
+  eventsColor: { en: "Events color", jp: "Events色" },
+  eventsX: { en: "Events X", jp: "模擬数 X" },
+  eventsY: { en: "Events Y", jp: "模擬数 Y" },
+  eventsSize: { en: "Events size", jp: "模擬数サイズ" },
+  eventsTextSpacing: { en: "Events spacing", jp: "模擬数文字間隔" },
+  otherText: { en: "Extra text", jp: "追加テキスト" },
+  otherTextUseMainColor: { en: "Other text color source", jp: "追加テキスト色" },
+  otherTextColor: { en: "Other text color", jp: "追加テキスト色" },
+  otherTextX: { en: "Other text X", jp: "追加テキスト X" },
+  otherTextY: { en: "Other text Y", jp: "追加テキスト Y" },
+  otherTextSize: { en: "Other text size", jp: "追加テキストサイズ" },
+  otherTextSpacing: { en: "Other text spacing", jp: "追加テキスト文字間隔" },
+  showName: { en: "Display name visibility", jp: "表示名の表示" },
+  showRate: { en: "Rate visibility", jp: "レートの表示" },
+  showTrackTagText: { en: "RT/CT visibility", jp: "RT/CTの表示" },
+  showRatingLabelText: { en: "MMR/LR visibility", jp: "MMR/LRの表示" },
+  showRankText: { en: "Rank text visibility", jp: "ランクの表示" },
+  showFlag: { en: "Flag visibility", jp: "国旗の表示" },
+  showRankIcon: { en: "Rank icon visibility", jp: "ランク画像の表示" },
+  showBackgroundImage: { en: "Background image visibility", jp: "背景画像の表示" },
+  showCardBackground: { en: "Card background visibility", jp: "カード背景の表示" },
+  showCustomImage: { en: "Custom image visibility", jp: "追加画像の表示" },
+  showEvents: { en: "Events visibility", jp: "模擬数の表示" },
+  showOtherText: { en: "Other text visibility", jp: "追加テキストの表示" },
+  customImageUrl: { en: "Custom image", jp: "追加画像" },
+  customImageX: { en: "Custom image X", jp: "追加画像 X" },
+  customImageY: { en: "Custom image Y", jp: "追加画像 Y" },
+  customImageZ: { en: "Custom image layer", jp: "追加画像レイヤー" },
+  customImageSize: { en: "Custom image size", jp: "追加画像サイズ" },
+  customImageGradient: { en: "Custom image transparency", jp: "追加画像透明度" },
+  overallTransparency: { en: "Overall transparency", jp: "全体透明度" },
+  nameTransparency: { en: "Name transparency", jp: "名前透明度" },
+  rateTransparency: { en: "Rate transparency", jp: "レート透明度" },
+  trackTransparency: { en: "RT/CT transparency", jp: "RT/CT透明度" },
+  ratingLabelTransparency: { en: "MMR/LR transparency", jp: "MMR/LR透明度" },
+  rankTextTransparency: { en: "Rank text transparency", jp: "ランク透明度" },
+  rankIconTransparency: { en: "Rank icon transparency", jp: "ランク画像透明度" },
+  flagTransparency: { en: "Flag transparency", jp: "国旗透明度" },
+  backgroundImageTransparency: { en: "Background transparency", jp: "背景画像透明度" },
+  cardBackgroundTransparency: { en: "Card background transparency", jp: "カード背景透明度" },
+  eventsTransparency: { en: "Events transparency", jp: "模擬数透明度" },
+  otherTextTransparency: { en: "Other text transparency", jp: "追加テキスト透明度" },
+};
+
+function describeSettingsDifference(
+  current: Settings,
+  target: Settings,
+  language: UiLanguage
+) {
+  const changed = (Object.keys(current) as Array<keyof Settings>).filter(
+    (key) => current[key] !== target[key]
+  );
+
+  if (changed.length === 0) return "";
+
+  if (changed.length > 3) {
+    return language === "JP"
+      ? `${changed.length}項目の変更`
+      : `${changed.length} setting changes`;
+  }
+
+  return changed
+    .map((key) => {
+      const label = SETTING_LABELS[key];
+      if (!label) return String(key);
+      return language === "JP" ? label.jp : label.en;
+    })
+    .join(" / ");
+}
+
 export default function Home() {
   const [settings, setSettings] = useState<Settings>(defaultSettings);
+  const settingsRef = useRef<Settings>(defaultSettings);
   const [copied, setCopied] = useState(false);
   const [settingsCopied, setSettingsCopied] = useState(false);
   const [showImportSettings, setShowImportSettings] = useState(false);
   const [importSettingsText, setImportSettingsText] = useState("");
   const [importSettingsStatus, setImportSettingsStatus] = useState("");
-  const [apiStatus, setApiStatus] = useState(
-    "Lounge nameを入れると自動取得します"
-  );
+  const [uiLanguage, setUiLanguage] = useState<UiLanguage>("JP");
+  const [showVersionHistory, setShowVersionHistory] = useState(false);
+  const [undoStack, setUndoStack] = useState<Settings[]>([]);
+  const [redoStack, setRedoStack] = useState<Settings[]>([]);
+  const undoStackRef = useRef<Settings[]>([]);
+  const redoStackRef = useRef<Settings[]>([]);
+  const [historyLog, setHistoryLog] = useState("");
+  const [playerSuggestions, setPlayerSuggestions] = useState<string[]>([]);
+  const [playerNameIndex, setPlayerNameIndex] = useState<string[]>([]);
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+  const historyMetaRef = useRef<{ key: keyof Settings | "__bulk__" | null; time: number }>({
+    key: null,
+    time: 0,
+  });
+  const [apiStatus, setApiStatus] = useState("");
 
   const [origin, setOrigin] = useState("");
   const [rankOrder, setRankOrder] = useState<RankEntry[]>([]);
-  const [rankStatus, setRankStatus] = useState("ランク一覧を取得中...");
+  const [rankStatus, setRankStatus] = useState("");
 
   const [previewEffect, setPreviewEffect] = useState<PreviewEffect>(null);
   const [previewRankRevealVisible, setPreviewRankRevealVisible] =
@@ -1108,9 +1595,27 @@ export default function Home() {
   const previewRankTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const previewRevealTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const text = useCallback(
+    (en: string, jp: string) => (uiLanguage === "JP" ? jp : en),
+    [uiLanguage]
+  );
+
+
   useEffect(() => {
     setOrigin(window.location.origin);
+    const savedLanguage = localStorage.getItem("kei-lounge-cards-language");
+    if (savedLanguage === "EN" || savedLanguage === "JP") {
+      setUiLanguage(savedLanguage);
+    }
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem("kei-lounge-cards-language", uiLanguage);
+  }, [uiLanguage]);
+
+  useEffect(() => {
+    settingsRef.current = settings;
+  }, [settings]);
 
   useEffect(() => {
     const saved = localStorage.getItem("kei-lounge-card-settings");
@@ -1200,7 +1705,7 @@ export default function Home() {
   }, [settings]);
 
   const fetchRanks = useCallback(async () => {
-    setRankStatus("ランク一覧を取得中...");
+    setRankStatus(text("Fetching rank list...", "ランク一覧を取得中..."));
 
     try {
       const params = new URLSearchParams({
@@ -1215,17 +1720,17 @@ export default function Home() {
 
       if (!response.ok || !data?.available) {
         setRankOrder([]);
-        setRankStatus("ランク一覧を取得できませんでした");
+        setRankStatus(text("Could not fetch rank list", "ランク一覧を取得できませんでした"));
         return;
       }
 
       setRankOrder(data.ranks || []);
-      setRankStatus(`${settings.mode} のランク一覧を反映しました`);
+      setRankStatus(text(`${settings.mode} rank list applied`, `${settings.mode} のランク一覧を反映しました`));
     } catch {
       setRankOrder([]);
-      setRankStatus("ランク一覧を取得できませんでした");
+      setRankStatus(text("Could not fetch rank list", "ランク一覧を取得できませんでした"));
     }
-  }, [settings.mode]);
+  }, [settings.mode, text]);
 
   useEffect(() => {
     fetchRanks();
@@ -1268,19 +1773,317 @@ export default function Home() {
     };
   }, []);
 
+  const pushUndoSnapshot = useCallback((snapshot: Settings) => {
+    const lastSnapshot = undoStackRef.current[undoStackRef.current.length - 1];
+
+    if (lastSnapshot && JSON.stringify(lastSnapshot) === JSON.stringify(snapshot)) {
+      return;
+    }
+
+    const nextUndo = [...undoStackRef.current.slice(-59), snapshot];
+    undoStackRef.current = nextUndo;
+    redoStackRef.current = [];
+
+    setUndoStack(nextUndo);
+    setRedoStack([]);
+  }, []);
+
+  const settingActionLabel = useCallback(
+    (key: keyof Settings) => {
+      const label = SETTING_LABELS[key];
+      if (!label) return String(key);
+      return uiLanguage === "JP" ? label.jp : label.en;
+    },
+    [uiLanguage]
+  );
+
   const update = <K extends keyof Settings>(key: K, value: Settings[K]) => {
-    setSettings((prev) => ({ ...prev, [key]: value }));
+    const now = Date.now();
+    const last = historyMetaRef.current;
+    const current = settingsRef.current;
+
+    // Slider drags and typing on the same field are grouped into one undo step.
+    if (last.key !== key || now - last.time > 650) {
+      pushUndoSnapshot(current);
+    }
+
+    const next = { ...current, [key]: value };
+    historyMetaRef.current = { key, time: now };
+    settingsRef.current = next;
+    setSettings(next);
+    setHistoryLog(
+      text(
+        `Changed: ${settingActionLabel(key)}`,
+        `変更: ${settingActionLabel(key)}`
+      )
+    );
   };
+
+  const applySettingsWithoutHistory = useCallback(
+    (
+      next:
+        | Settings
+        | ((previous: Settings) => Settings)
+    ) => {
+      const current = settingsRef.current;
+      const resolved =
+        typeof next === "function" ? next(current) : next;
+
+      settingsRef.current = resolved;
+      setSettings(resolved);
+    },
+    []
+  );
+
+  const applySettingsWithHistory = useCallback(
+    (
+      next:
+        | Settings
+        | ((previous: Settings) => Settings)
+    ) => {
+      const current = settingsRef.current;
+      pushUndoSnapshot(current);
+      historyMetaRef.current = { key: "__bulk__", time: Date.now() };
+
+      const resolved =
+        typeof next === "function" ? next(current) : next;
+
+      settingsRef.current = resolved;
+      setSettings(resolved);
+      setHistoryLog(
+        text("Changed: design settings", "変更: デザイン設定")
+      );
+    },
+    [pushUndoSnapshot, text]
+  );
+
+  const undoSettings = useCallback(() => {
+    const currentUndo = undoStackRef.current;
+    if (currentUndo.length === 0) return;
+
+    const previous = currentUndo[currentUndo.length - 1];
+    const current = settingsRef.current;
+    const nextUndo = currentUndo.slice(0, -1);
+    const nextRedo = [...redoStackRef.current.slice(-59), current];
+
+    undoStackRef.current = nextUndo;
+    redoStackRef.current = nextRedo;
+    setUndoStack(nextUndo);
+    setRedoStack(nextRedo);
+
+    const actionName =
+      describeSettingsDifference(current, previous, uiLanguage) ||
+      text("settings", "設定");
+
+    historyMetaRef.current = { key: null, time: 0 };
+    settingsRef.current = previous;
+    setSettings(previous);
+    setHistoryLog(text(`Undo: ${actionName}`, `戻す: ${actionName}`));
+  }, [text, uiLanguage]);
+
+  const redoSettings = useCallback(() => {
+    const currentRedo = redoStackRef.current;
+    if (currentRedo.length === 0) return;
+
+    const next = currentRedo[currentRedo.length - 1];
+    const current = settingsRef.current;
+    const nextRedo = currentRedo.slice(0, -1);
+    const nextUndo = [...undoStackRef.current.slice(-59), current];
+
+    redoStackRef.current = nextRedo;
+    undoStackRef.current = nextUndo;
+    setRedoStack(nextRedo);
+    setUndoStack(nextUndo);
+
+    const actionName =
+      describeSettingsDifference(current, next, uiLanguage) ||
+      text("settings", "設定");
+
+    historyMetaRef.current = { key: null, time: 0 };
+    settingsRef.current = next;
+    setSettings(next);
+    setHistoryLog(text(`Redo: ${actionName}`, `進む: ${actionName}`));
+  }, [text, uiLanguage]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const isTextField =
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.tagName === "SELECT";
+
+      if (isTextField || !(event.ctrlKey || event.metaKey)) {
+        return;
+      }
+
+      const key = event.key.toLowerCase();
+
+      if (key === "z" && !event.shiftKey) {
+        event.preventDefault();
+        undoSettings();
+      } else if (key === "y" || (key === "z" && event.shiftKey)) {
+        event.preventDefault();
+        redoSettings();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [redoSettings, undoSettings]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadNameIndex = async () => {
+      const sessionKey = "kei-lounge-player-name-index-v1";
+
+      try {
+        const cached = sessionStorage.getItem(sessionKey);
+        if (cached) {
+          const parsed = safeJsonParse<string[]>(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setPlayerNameIndex(parsed);
+            return;
+          }
+        }
+      } catch {
+        // Continue with the network preload.
+      }
+
+      try {
+        const response = await fetch("/api/player?suggestAll=1", {
+          cache: "force-cache",
+        });
+
+        const data = safeJsonParse<{ names?: string[] }>(await response.text());
+
+        if (cancelled || !response.ok || !Array.isArray(data?.names)) return;
+
+        const names = data!.names
+          .filter((name) => typeof name === "string" && name.trim())
+          .map((name) => name.trim());
+
+        setPlayerNameIndex(names);
+
+        try {
+          sessionStorage.setItem(sessionKey, JSON.stringify(names));
+        } catch {
+          // In-memory index still works.
+        }
+      } catch {
+        // The fast direct-query fallback below still works.
+      }
+    };
+
+    void loadNameIndex();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    const query = settings.loungeName.trim();
+
+    if (query.length < 2) {
+      setPlayerSuggestions([]);
+      setSuggestionsOpen(false);
+      setSuggestionsLoading(false);
+      return;
+    }
+
+    const lowerQuery = query.toLowerCase();
+
+    if (playerNameIndex.length > 0) {
+      const suggestions = playerNameIndex
+        .filter((name) => name.toLowerCase().includes(lowerQuery))
+        .sort((a, b) => {
+          const aLower = a.toLowerCase();
+          const bLower = b.toLowerCase();
+          const aStarts = aLower.startsWith(lowerQuery) ? 0 : 1;
+          const bStarts = bLower.startsWith(lowerQuery) ? 0 : 1;
+
+          if (aStarts !== bStarts) return aStarts - bStarts;
+          return a.length - b.length || a.localeCompare(b);
+        })
+        .slice(0, 8);
+
+      setPlayerSuggestions(suggestions);
+      setSuggestionsOpen(
+        suggestions.length > 0 &&
+          !(suggestions.length === 1 &&
+            suggestions[0].toLowerCase() === lowerQuery)
+      );
+      setSuggestionsLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    const controller = new AbortController();
+
+    const timer = window.setTimeout(async () => {
+      setSuggestionsLoading(true);
+
+      try {
+        const params = new URLSearchParams({
+          name: query,
+          mode: settings.mode,
+          suggest: "1",
+        });
+
+        const response = await fetch(`/api/player?${params.toString()}`, {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+
+        const data = safeJsonParse<{ suggestions?: string[] }>(
+          await response.text()
+        );
+
+        if (cancelled) return;
+
+        const suggestions = Array.isArray(data?.suggestions)
+          ? data!.suggestions
+              .filter(
+                (name) =>
+                  typeof name === "string" &&
+                  name.toLowerCase().includes(lowerQuery)
+              )
+              .slice(0, 8)
+          : [];
+
+        setPlayerSuggestions(suggestions);
+        setSuggestionsOpen(suggestions.length > 0);
+      } catch (error) {
+        if (
+          !cancelled &&
+          !(error instanceof DOMException && error.name === "AbortError")
+        ) {
+          setPlayerSuggestions([]);
+          setSuggestionsOpen(false);
+        }
+      } finally {
+        if (!cancelled) setSuggestionsLoading(false);
+      }
+    }, 80);
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+      window.clearTimeout(timer);
+    };
+  }, [playerNameIndex, settings.loungeName, settings.mode]);
 
   const fetchPlayer = useCallback(async () => {
     const name = settings.loungeName.trim();
 
     if (name.length < 2) {
-      setApiStatus("Lounge nameを入れると自動取得します");
+      setApiStatus(text("Enter a Lounge name", "Lounge名を入力してください"));
       return;
     }
 
-    setApiStatus("取得中...");
+    setApiStatus(text("Fetching...", "取得中..."));
 
     try {
       const params = new URLSearchParams({
@@ -1299,17 +2102,18 @@ export default function Home() {
         flagUrl: "",
         currentMmr: 0,
         currentLr: 0,
+        totalEvents: 0,
         rankText: "",
         emblemUrl: "",
         error: "Player data could not be read.",
       };
 
       if (!response.ok || !parsedData) {
-        setApiStatus(data.error ?? "プレイヤーが見つかりませんでした");
+        setApiStatus(data.error ?? text("Player not found", "プレイヤーが見つかりませんでした"));
         return;
       }
 
-      setSettings((prev) => ({
+      applySettingsWithoutHistory((prev) => ({
         ...prev,
         displayName:
           prev.displayName.trim() && prev.displayName !== "Your Name"
@@ -1319,15 +2123,19 @@ export default function Home() {
         flagUrl: data.flagUrl || prev.flagUrl,
         mmr: String(data.currentMmr || 0),
         lr: String(data.currentLr || 0),
+        events:
+          data.totalEvents !== undefined && data.totalEvents !== null
+            ? String(data.totalEvents)
+            : prev.events,
         rankText: cleanRankText(data.rankText || prev.rankText),
         rankIconUrl: data.emblemUrl || prev.rankIconUrl,
       }));
 
-      setApiStatus(`${data.playerName} / ${settings.mode} を反映しました`);
+      setApiStatus(text(`${data.playerName} / ${settings.mode} applied`, `${data.playerName} / ${settings.mode} を反映しました`));
     } catch {
-      setApiStatus("取得に失敗しました");
+      setApiStatus(text("Fetch failed", "取得に失敗しました"));
     }
-  }, [settings.loungeName, settings.mode]);
+  }, [applySettingsWithoutHistory, settings.loungeName, settings.mode, text]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -1422,6 +2230,9 @@ export default function Home() {
     params.set("lr", settings.lr);
 
     params.set("rank", cleanRankText(settings.rankText));
+    params.set("events", settings.events);
+    params.set("eventFormat", settings.eventsFormat);
+    params.set("otherText", settings.otherText);
 
     params.set("border", (settings.borderColor ?? "#ff0000").replace("#", ""));
     params.set("flow", (settings.flowColor ?? "#ff3030").replace("#", ""));
@@ -1432,11 +2243,23 @@ export default function Home() {
     params.set("effectColor", (settings.ratingEffectColor ?? "#ff3030").replace("#", ""));
     params.set("rankEffect", settings.rankEffectStyle);
     params.set("switchEffect", settings.ratingSwitchEffectStyle);
+    params.set("resultEffect", settings.resultEffectStyle);
+    params.set("labelIndependent", "0");
+    params.set("eventMain", settings.eventsUseMainColor ? "1" : "0");
+    params.set("eventColor", settings.eventsColor.replace("#", ""));
+    params.set("otherMain", settings.otherTextUseMainColor ? "1" : "0");
+    params.set("otherColor", settings.otherTextColor.replace("#", ""));
+    params.set("tagTop", (settings.tagTopColor ?? "#000000").replace("#", ""));
+    params.set("tagBottom", (settings.tagBottomColor ?? "#ffffff").replace("#", ""));
+    params.set("tagBoxGradient", settings.tagBoxGradientEnabled ? "1" : "0");
+    params.set("tagBoxBalance", numberParam(settings.tagBoxGradientBalance ?? 50));
     params.set("tagTextTop", (settings.tagTextTopColor ?? "#ffffff").replace("#", ""));
     params.set("tagTextBottom", (settings.tagTextBottomColor ?? "#ff3030").replace("#", ""));
     params.set("tagTextGradient", settings.tagTextGradientEnabled ? "1" : "0");
     params.set("tagTextBalance", numberParam(settings.tagTextGradientBalance ?? 40));
     params.set("ratingTop", (settings.ratingBoxTopColor ?? "#b90000").replace("#", ""));
+    params.set("ratingBoxGradient", settings.ratingBoxGradientEnabled ? "1" : "0");
+    params.set("ratingBoxBalance", numberParam(settings.ratingBoxGradientBalance ?? 50));
     params.set("ratingBottom", (settings.ratingBoxBottomColor ?? "#000000").replace("#", ""));
     params.set("ratingTextTop", (settings.ratingTextTopColor ?? "#ffffff").replace("#", ""));
     params.set("ratingTextBottom", (settings.ratingTextBottomColor ?? "#ff3030").replace("#", ""));
@@ -1468,7 +2291,7 @@ export default function Home() {
     params.set("bgx", numberParam(settings.bgX));
     params.set("bgy", numberParam(settings.bgY));
     params.set("bgz", numberParam(settings.bgZoom));
-    params.set("scale", numberParam(settings.cardScale));
+    params.set("scale", "98");
 
     params.set("nx", numberParam(settings.nameX));
     params.set("ny", numberParam(settings.nameY));
@@ -1485,6 +2308,9 @@ export default function Home() {
     params.set("rts", numberParam(settings.ratingTextSize));
     params.set("rspace", numberParam(settings.ratingTextSpacing));
 
+    params.set("radius", numberParam(settings.labelRadius ?? 10));
+    params.set("shape", settings.labelShape ?? "ROUNDED");
+
     params.set("tx", numberParam(settings.tagX));
     params.set("ty", numberParam(settings.tagY));
     params.set("tts", numberParam(settings.tagTextSize));
@@ -1493,6 +2319,16 @@ export default function Home() {
     params.set("rx", numberParam(settings.rankTextX));
     params.set("ry", numberParam(settings.rankTextY));
     params.set("rs", numberParam(settings.rankTextSize));
+
+    params.set("ex", numberParam(settings.eventsX));
+    params.set("ey", numberParam(settings.eventsY));
+    params.set("esz", numberParam(settings.eventsSize));
+    params.set("espace", numberParam(settings.eventsSpacing));
+
+    params.set("otx", numberParam(settings.otherTextX));
+    params.set("oty", numberParam(settings.otherTextY));
+    params.set("ots", numberParam(settings.otherTextSize));
+    params.set("otspace", numberParam(settings.otherTextSpacing));
 
     params.set("fx", numberParam(settings.flagX));
     params.set("fy", numberParam(settings.flagY));
@@ -1520,6 +2356,20 @@ export default function Home() {
     params.set("vbg", settings.showBackgroundImage ? "1" : "0");
     params.set("vcard", settings.showCardBackground ? "1" : "0");
     params.set("vimage", settings.showCustomImage ? "1" : "0");
+    params.set("vevents", settings.showEvents ? "1" : "0");
+    params.set("vothertext", settings.showOtherText ? "1" : "0");
+
+    params.set("nameOpacity", numberParam(settings.nameTransparency));
+    params.set("rateOpacity", numberParam(settings.rateTransparency));
+    params.set("trackOpacity", numberParam(settings.trackTransparency));
+    params.set("ratingOpacity", numberParam(settings.ratingTransparency));
+    params.set("rankOpacity", numberParam(settings.rankTextTransparency));
+    params.set("iconOpacity", numberParam(settings.rankIconTransparency));
+    params.set("flagOpacity", numberParam(settings.flagTransparency));
+    params.set("bgImageOpacity", numberParam(settings.backgroundImageTransparency));
+    params.set("cardLayerOpacity", numberParam(settings.cardBackgroundTransparency));
+    params.set("eventsOpacity", numberParam(settings.eventsTransparency));
+    params.set("otherTextOpacity", numberParam(settings.otherTextTransparency));
 
     if (settings.customImageUrl) params.set("overlay", settings.customImageUrl);
     params.set("ox", numberParam(settings.customImageX));
@@ -1559,44 +2409,101 @@ export default function Home() {
     setTimeout(() => setSettingsCopied(false), 1200);
   };
 
-  const toggleImportSettings = () => {
-    setShowImportSettings((prev) => !prev);
-    setImportSettingsStatus("");
-  };
+  const applyDesignText = useCallback(
+    (source: string) => {
+      try {
+        const raw = source.trim();
+
+        if (!raw) {
+          setImportSettingsStatus(text("No design data found in the clipboard", "クリップボードにデザイン設定がありません"));
+          return false;
+        }
+
+        const designUpdates =
+          raw.startsWith("{")
+            ? parseDesignObject(safeJsonParse<unknown>(raw))
+            : parseCompactDesignPreset(raw);
+
+        if (!designUpdates) {
+          setImportSettingsStatus(text("Unsupported design data format", "設定データの形式が違います"));
+          return false;
+        }
+
+        applySettingsWithHistory((prev) => ({
+          ...prev,
+          ...designUpdates,
+        }));
+
+        setImportSettingsText(raw);
+        setImportSettingsStatus(text("Clipboard design applied", "クリップボードのデザインを反映しました"));
+        setShowImportSettings(false);
+        setTimeout(() => setImportSettingsStatus(""), 1800);
+        return true;
+      } catch {
+        setImportSettingsStatus(text("Could not read design data", "設定データを読み込めませんでした"));
+        return false;
+      }
+    },
+    [applySettingsWithHistory, text]
+  );
+
+  const pasteDesignFromClipboard = useCallback(async () => {
+    try {
+      if (!navigator.clipboard?.readText) {
+        throw new Error("Clipboard API unavailable");
+      }
+
+      const raw = await navigator.clipboard.readText();
+
+      if (!applyDesignText(raw)) {
+        setShowImportSettings(true);
+      }
+    } catch {
+      // Browsers can deny clipboard reads. Keep the manual box as a fallback.
+      setShowImportSettings(true);
+      setImportSettingsStatus(
+        text(
+          "Clipboard access was blocked. Paste the design below.",
+          "クリップボードを直接読めませんでした。下の欄に貼り付けてください"
+        )
+      );
+    }
+  }, [applyDesignText, text]);
 
   const importSettings = () => {
-    try {
-      const raw = importSettingsText.trim();
-
-      if (!raw) {
-        setImportSettingsStatus("設定テキストを入力してください");
-        return;
-      }
-
-      const designUpdates =
-        raw.startsWith("{")
-          ? parseDesignObject(safeJsonParse<unknown>(raw))
-          : parseCompactDesignPreset(raw);
-
-      if (!designUpdates) {
-        setImportSettingsStatus("設定データの形式が違います");
-        return;
-      }
-
-      setSettings((prev) => ({
-        ...prev,
-        ...designUpdates,
-      }));
-
-      setImportSettingsStatus("デザイン設定を読み込みました");
-      setTimeout(() => setImportSettingsStatus(""), 1600);
-    } catch {
-      setImportSettingsStatus("設定データを読み込めませんでした");
-    }
+    applyDesignText(importSettingsText);
   };
 
   return (
     <main className="builder-page">
+      <nav className="project-nav" aria-label="Kei projects">
+        <details>
+          <summary>Kei Projects</summary>
+          <div className="project-nav-menu">
+            <a href="/">Kei Lounge Cards</a>
+            <a href="https://kei-brstm-hub.vercel.app/" target="_blank" rel="noreferrer">Kei Music Hub</a>
+          </div>
+        </details>
+      </nav>
+
+      <div className="top-page-actions">
+        <button
+          type="button"
+          className="language-toggle-button"
+          onClick={() => setUiLanguage((current) => current === "JP" ? "EN" : "JP")}
+          title={text("Switch language", "言語を切り替え")}
+        >
+          {uiLanguage === "JP" ? "EN" : "JP"}
+        </button>
+        <button
+          type="button"
+          className="history-top-button"
+          onClick={() => setShowVersionHistory(true)}
+        >
+          {text("Version history", "バージョン履歴")}
+        </button>
+      </div>
+
       <section className="hero">
         <h1>
           Kei <span>Lounge Cards</span>
@@ -1605,31 +2512,67 @@ export default function Home() {
 
       <div className="builder-layout">
         <section className="panel settings-panel">
-          <h2>Basic</h2>
+          <details className="basic-settings-group" open>
+            <summary>{text("Basic", "基本設定")}</summary>
+            <div className="basic-settings-body">
+              <div className="two-col">
+                <label>
+                  {text("Lounge name", "Lounge名")}
+                  <div className="player-suggest-field">
+                    <input
+                      value={settings.loungeName}
+                      onChange={(e) => {
+                        update("loungeName", e.target.value);
+                        setSuggestionsOpen(true);
+                      }}
+                      onFocus={() => {
+                        if (playerSuggestions.length > 0) setSuggestionsOpen(true);
+                      }}
+                      onBlur={() => {
+                        window.setTimeout(() => setSuggestionsOpen(false), 140);
+                      }}
+                      placeholder={text("Type a Lounge name", "Lounge名を入力")}
+                      autoComplete="off"
+                    />
+                    {(suggestionsOpen || suggestionsLoading) && (
+                      <div className="player-suggestion-menu">
+                        {suggestionsLoading && (
+                          <div className="player-suggestion-status">
+                            {text("Searching...", "候補を検索中...")}
+                          </div>
+                        )}
+                        {!suggestionsLoading &&
+                          playerSuggestions.map((name) => (
+                            <button
+                              type="button"
+                              key={name}
+                              onMouseDown={(event) => event.preventDefault()}
+                              onClick={() => {
+                                update("loungeName", name);
+                                setSuggestionsOpen(false);
+                              }}
+                            >
+                              {name}
+                            </button>
+                          ))}
+                      </div>
+                    )}
+                  </div>
+                </label>
 
-          <div className="two-col">
-            <label>
-              Lounge name
-              <input
-                value={settings.loungeName}
-                onChange={(e) => update("loungeName", e.target.value)}
-                placeholder="exact lounge name"
-              />
-            </label>
-
-            <label>
-              Display name
-              <input
-                value={settings.displayName}
-                onChange={(e) => update("displayName", e.target.value)}
-                placeholder="shown name"
-              />
-            </label>
-          </div>
+                <label>
+                  {text("Display name", "表示名")}
+                  <input
+                    value={settings.displayName}
+                    onChange={(e) => update("displayName", e.target.value)}
+                    placeholder={text("Shown name", "カードに表示する名前")}
+                  />
+                </label>
+              </div>
 
           <div className="basic-rating-row">
             <label>
-              Track
+              {text("Track", "トラック")}
               <select
                 value={settings.mode}
                 onChange={(e) => update("mode", e.target.value as ModeSetting)}
@@ -1640,21 +2583,21 @@ export default function Home() {
             </label>
 
             <label>
-              Rating display
+              {text("Rating display", "レート表示")}
               <select
                 value={settings.ratingMode}
                 onChange={(e) =>
                   update("ratingMode", e.target.value as RatingMode)
                 }
               >
-                <option value="MMR">MMR only</option>
-                <option value="LR">LR only</option>
-                <option value="SWITCH">MMR / LR switch</option>
+                <option value="MMR">{text("MMR only", "MMRのみ")}</option>
+                <option value="LR">{text("LR only", "LRのみ")}</option>
+                <option value="SWITCH">{text("MMR / LR switch", "MMR / LR切替")}</option>
               </select>
             </label>
 
             <label>
-              MMR / LR sec
+              {text("MMR / LR sec", "MMR / LR 秒")}
               <NumberStepper
                 min={3}
                 max={60}
@@ -1665,905 +2608,261 @@ export default function Home() {
             </label>
           </div>
 
-          <div className="two-col">
-            <label>
-              Flag text
-              <input
-                value={settings.flag}
-                onChange={(e) => update("flag", e.target.value)}
-                placeholder="🇯🇵"
-              />
-            </label>
-
-            <label>
-              Flag image URL
-              <input
-                value={settings.flagUrl}
-                onChange={(e) => update("flagUrl", e.target.value)}
-                placeholder="auto fetched"
-              />
-            </label>
-          </div>
-
-          <div className="two-col">
+          <div className="basic-rating-row basic-stat-row">
             <label>
               MMR
-              <input
-                value={settings.mmr}
-                onChange={(e) => update("mmr", e.target.value)}
-                placeholder="0000"
-              />
+              <input value={settings.mmr} onChange={(e) => update("mmr", e.target.value)} placeholder="0000" />
             </label>
-
             <label>
               LR
-              <input
-                value={settings.lr}
-                onChange={(e) => update("lr", e.target.value)}
-                placeholder="0000"
-              />
+              <input value={settings.lr} onChange={(e) => update("lr", e.target.value)} placeholder="0000" />
+            </label>
+            <label>
+              {text("Events", "模擬数")}
+              <input value={settings.events} onChange={(e) => update("events", e.target.value)} placeholder={text("Auto fetched", "自動取得")} />
             </label>
           </div>
 
           <div className="two-col">
             <label>
-              Rank text
+              {text("Flag text", "国旗テキスト")}
+              <input value={settings.flag} onChange={(e) => update("flag", e.target.value)} placeholder="🇯🇵" />
+            </label>
+            <label>
+              {text("Rank text", "ランク")}
               <input
                 value={settings.rankText}
-                onChange={(e) =>
-                  update("rankText", cleanRankText(e.target.value))
-                }
-                placeholder="Iron / Low Tier"
-              />
-            </label>
-
-            <label>
-              Rank icon URL
-              <input
-                value={settings.rankIconUrl}
-                onChange={(e) => update("rankIconUrl", e.target.value)}
-                placeholder="auto fetched"
+                onChange={(e) => update("rankText", cleanRankText(e.target.value))}
+                placeholder={text("Iron / Low Tier", "Iron / Low Tier")}
               />
             </label>
           </div>
-
-          <h2>Design</h2>
-
-                              <details className="design-group" open>
-            <summary>
-              <span className="summary-copy">
-                <span className="summary-title">Visibility</span>
-                <small>表示する要素と、オーバーレイ全体の透明度を設定します。</small>
-              </span>
-            </summary>
-
-            <div className="design-group-body">
-              <Slider
-                label="Overall transparency"
-                value={settings.overallTransparency}
-                min={0}
-                max={100}
-                onChange={(v) => update("overallTransparency", v)}
-              />
-              <p className="control-note">
-                0 = fully visible / 100 = fully transparent
-              </p>
-
-              <div className="visibility-pairs">
-                <div className="visibility-pair">
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={settings.showName}
-                      onChange={(e) => update("showName", e.target.checked)}
-                    />
-                    Display name
-                  </label>
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={settings.showRate}
-                      onChange={(e) => update("showRate", e.target.checked)}
-                    />
-                    Rate number
-                  </label>
-                </div>
-
-                <div className="visibility-pair">
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={settings.showTrackTagText}
-                      onChange={(e) =>
-                        update("showTrackTagText", e.target.checked)
-                      }
-                    />
-                    Track tag
-                  </label>
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={settings.showRatingLabelText}
-                      onChange={(e) =>
-                        update("showRatingLabelText", e.target.checked)
-                      }
-                    />
-                    Rating label
-                  </label>
-                </div>
-
-                <div className="visibility-pair">
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={settings.showRankText}
-                      onChange={(e) =>
-                        update("showRankText", e.target.checked)
-                      }
-                    />
-                    Rank text
-                  </label>
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={settings.showRankIcon}
-                      onChange={(e) =>
-                        update("showRankIcon", e.target.checked)
-                      }
-                    />
-                    Rank icon
-                  </label>
-                </div>
-
-                <div className="visibility-pair">
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={settings.showFlag}
-                      onChange={(e) => update("showFlag", e.target.checked)}
-                    />
-                    Flag
-                  </label>
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={settings.showCustomImage}
-                      onChange={(e) =>
-                        update("showCustomImage", e.target.checked)
-                      }
-                    />
-                    Custom image
-                  </label>
-                </div>
-
-                <div className="visibility-pair">
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={settings.showBackgroundImage}
-                      onChange={(e) =>
-                        update("showBackgroundImage", e.target.checked)
-                      }
-                    />
-                    Background image
-                  </label>
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={settings.showCardBackground}
-                      onChange={(e) =>
-                        update("showCardBackground", e.target.checked)
-                      }
-                    />
-                    Card background
-                  </label>
-                </div>
-              </div>
             </div>
           </details>
 
-<details className="design-group" open>
+          <div className="design-heading-row">
+            <h2>{text("Design", "デザイン")}</h2>
+          </div>
+
+          <details className="design-group" open>
             <summary>
               <span className="summary-copy">
-                <span className="summary-title">Background</span>
-                <small>カード背景色と背景画像を設定します。</small>
+                <span className="summary-title">{text("Card / Global", "カード / 全体")}</span>
+                
+              </span>
+              <SummaryToggle label={text("BG", "背景")} checked={settings.showCardBackground} onChange={(v) => update("showCardBackground", v)} />
+            </summary>
+            <div className="design-group-body">
+              <Slider label={text("Overall transparency", "全体透明度")} value={settings.overallTransparency} min={0} max={100} onChange={(v) => update("overallTransparency", v)} />
+
+              <div className="design-subtitle">{text("Card background", "カード背景")}</div>
+              <TransparencyControl language={uiLanguage} label={text("Card background", "カード背景")} value={settings.cardBackgroundTransparency} onChange={(v) => update("cardBackgroundTransparency", v)} disabled={!settings.showCardBackground} />
+              <fieldset className={`setting-scope ${settings.showCardBackground ? "" : "is-disabled"}`} disabled={!settings.showCardBackground}>
+                <div className="two-col">
+                  <label>{text("Card bg left", "カード背景 左")}<input type="color" value={settings.cardBgLeft ?? "#000000"} onChange={(e) => update("cardBgLeft", e.target.value)} /></label>
+                  <label>{text("Card bg right", "カード背景 右")}<input type="color" value={settings.cardBgRight ?? "#005e70"} onChange={(e) => update("cardBgRight", e.target.value)} /></label>
+                </div>
+                <OptionSlider label={text("Card bg balance", "カード背景カラー比率")} optionLabel="Card bg gradient" checked={settings.cardBgGradientEnabled} onCheckedChange={(checked) => update("cardBgGradientEnabled", checked)} value={settings.cardBgGradientBalance ?? 50} min={0} max={100} disabled={!settings.cardBgGradientEnabled} onChange={(v) => update("cardBgGradientBalance", v)} />
+                <Slider label={text("Card bg opacity", "カード背景不透明度")} value={settings.cardBgOpacity ?? 86} min={0} max={100} onChange={(v) => update("cardBgOpacity", v)} />
+              </fieldset>
+            </div>
+          </details>
+
+          <details className="design-group" open>
+            <summary>
+              <span className="summary-copy">
+                <span className="summary-title">{text("Main Text Style", "メイン文字スタイル")}</span>
+                
               </span>
             </summary>
-
             <div className="design-group-body">
-              <fieldset
-                className={`setting-scope ${settings.showCardBackground ? "" : "is-disabled"}`}
-                disabled={!(settings.showCardBackground)}
-              >
-              <div className="two-col">
-                <label>
-                  Card bg left
-                  <input
-                    type="color"
-                    value={settings.cardBgLeft ?? "#130716"}
-                    onChange={(e) => update("cardBgLeft", e.target.value)}
-                  />
-                </label>
-
-                <label>
-                  Card bg right
-                  <input
-                    type="color"
-                    value={settings.cardBgRight ?? "#005e70"}
-                    onChange={(e) => update("cardBgRight", e.target.value)}
-                  />
-                </label>
-              </div>
-
-              <OptionSlider
-                label="Card bg balance"
-                optionLabel="Card bg gradient"
-                checked={settings.cardBgGradientEnabled}
-                onCheckedChange={(checked) =>
-                  update("cardBgGradientEnabled", checked)
-                }
-                value={settings.cardBgGradientBalance ?? 50}
-                min={0}
-                max={100}
-                disabled={!settings.cardBgGradientEnabled}
-                onChange={(v) => update("cardBgGradientBalance", v)}
-              />
-
-              <Slider
-                label="Card bg opacity"
-                value={settings.cardBgOpacity ?? 86}
-                min={0}
-                max={100}
-                onChange={(v) => update("cardBgOpacity", v)}
-              />
-
-              </fieldset>
-
-              <fieldset
-                className={`setting-scope ${settings.showBackgroundImage ? "" : "is-disabled"}`}
-                disabled={!(settings.showBackgroundImage)}
-              >
               <label>
-                Background image / GIF URL
-                <input
-                  value={settings.bgUrl}
-                  onChange={(e) => update("bgUrl", e.target.value)}
-                  placeholder="https://..."
-                />
-              </label>
-
-              <Slider
-                label="Background X"
-                value={settings.bgX}
-                min={0}
-                max={100}
-                onChange={(v) => update("bgX", v)}
-              />
-
-              <Slider
-                label="Background Y"
-                value={verticalSliderValue(settings.bgY)}
-                min={0}
-                max={100}
-                onChange={(v) => update("bgY", storedTopValue(v))}
-              />
-
-              <MappedSlider
-                label="Background zoom"
-                value={settings.bgZoom}
-                minValue={25}
-                maxValue={350}
-                onChange={(v) => update("bgZoom", v)}
-              />
-              </fieldset>
-
-            </div>
-          </details>
-
-          <details className="design-group">
-            <summary>
-              <span className="summary-copy">
-                <span className="summary-title">Main Text</span>
-                <small>名前・レート・ランクの文字と位置を設定します。</small>
-              </span>
-            </summary>
-
-            <div className="design-group-body">
-              <fieldset
-                className={`setting-scope ${settings.showName || settings.showRate || settings.showRankText || settings.showTrackTagText || settings.showRatingLabelText ? "" : "is-disabled"}`}
-                disabled={!(settings.showName || settings.showRate || settings.showRankText || settings.showTrackTagText || settings.showRatingLabelText)}
-              >
-                            <label>
-                Text font
-                <select
-                  value={settings.textFont ?? "DEFAULT"}
-                  onChange={(e) =>
-                    update("textFont", e.target.value as FontChoice)
-                  }
-                >
-                  <option value="DEFAULT">Default</option>
-                  <option value="OEDO_KANTEIRYU">大江戸勘亭流</option>
-                  <option value="YU_GOTHIC">Yu Gothic</option>
-                  <option value="MEIRYO">Meiryo</option>
-                  <option value="MINCHO">Yu Mincho</option>
-                  <option value="ARIAL">Arial</option>
-                  <option value="IMPACT">Impact</option>
-                  <option value="TREBUCHET">Trebuchet MS</option>
-                  <option value="VERDANA">Verdana</option>
-                  <option value="GEORGIA">Georgia</option>
-                  <option value="TIMES">Times New Roman</option>
-                  <option value="COURIER">Courier New</option>
-                  <option value="COMIC_SANS">Comic Sans MS</option>
+                {text("Text font", "文字フォント")}
+                <select value={settings.textFont ?? "DEFAULT"} onChange={(e) => update("textFont", e.target.value as FontChoice)}>
+                  <option value="DEFAULT">Default</option><option value="OEDO_KANTEIRYU">大江戸勘亭流</option><option value="YU_GOTHIC">Yu Gothic</option><option value="MEIRYO">Meiryo</option><option value="MINCHO">Yu Mincho</option><option value="ARIAL">Arial</option><option value="IMPACT">Impact</option><option value="TREBUCHET">Trebuchet MS</option><option value="VERDANA">Verdana</option><option value="GEORGIA">Georgia</option><option value="TIMES">Times New Roman</option><option value="COURIER">Courier New</option><option value="COMIC_SANS">Comic Sans MS</option>
                 </select>
               </label>
-
-<div className="two-col">
-                <label>
-                  Text top color
-                  <input
-                    type="color"
-                    value={settings.textTopColor ?? "#ffffff"}
-                    onChange={(e) => update("textTopColor", e.target.value)}
-                  />
-                </label>
-
-                <label>
-                  Text bottom color
-                  <input
-                    type="color"
-                    value={settings.textBottomColor ?? "#cfd6ff"}
-                    onChange={(e) => update("textBottomColor", e.target.value)}
-                  />
-                </label>
-              </div>
-
-              <OptionSlider
-                label="Text gradient balance"
-                optionLabel="Text gradient"
-                checked={settings.textGradientEnabled}
-                onCheckedChange={(checked) => update("textGradientEnabled", checked)}
-                value={settings.textGradientBalance ?? 40}
-                min={0}
-                max={100}
-                disabled={!settings.textGradientEnabled}
-                onChange={(v) => update("textGradientBalance", v)}
-              />
-
-              <div className="design-subtitle">Text shadow</div>
-
               <div className="two-col">
-                <label>
-                  Shadow color
-                  <input
-                    type="color"
-                    value={settings.textShadowColor}
-                    disabled={!settings.textShadowEnabled}
-                    onChange={(e) => update("textShadowColor", e.target.value)}
-                  />
-                </label>
-
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={settings.textShadowEnabled}
-                    onChange={(e) => update("textShadowEnabled", e.target.checked)}
-                  />
-                  Text shadow
-                </label>
+                <label>{text("Text top color", "文字 上色")}<input type="color" value={settings.textTopColor} onChange={(e) => update("textTopColor", e.target.value)} /></label>
+                <label>{text("Text bottom color", "文字 下色")}<input type="color" value={settings.textBottomColor} onChange={(e) => update("textBottomColor", e.target.value)} /></label>
               </div>
+              <OptionSlider label={text("Vertical gradient balance", "文字グラデーション比率")} optionLabel="Top / bottom gradient" checked={settings.textGradientEnabled} onCheckedChange={(checked) => update("textGradientEnabled", checked)} value={settings.textGradientBalance} min={0} max={100} disabled={!settings.textGradientEnabled} onChange={(v) => update("textGradientBalance", v)} />
 
-              <Slider label="Shadow X" value={settings.textShadowX} min={0} max={100} disabled={!settings.textShadowEnabled} onChange={(v) => update("textShadowX", v)} />
-              <Slider label="Shadow Y" value={settings.textShadowY} min={0} max={100} disabled={!settings.textShadowEnabled} onChange={(v) => update("textShadowY", v)} />
-              <Slider label="Shadow blur" value={settings.textShadowBlur} min={0} max={100} disabled={!settings.textShadowEnabled} onChange={(v) => update("textShadowBlur", v)} />
-              <Slider label="Shadow opacity" value={settings.textShadowOpacity} min={0} max={100} disabled={!settings.textShadowEnabled} onChange={(v) => update("textShadowOpacity", v)} />
-
-              </fieldset>
-
-              <fieldset
-                className={`setting-scope ${settings.showName ? "" : "is-disabled"}`}
-                disabled={!(settings.showName)}
-              >
-              <div className="design-subtitle">Name text position</div>
-
-              <Slider
-                label="Name X"
-                value={settings.nameX}
-                min={0}
-                max={100}
-                onChange={(v) => update("nameX", v)}
-              />
-
-              <Slider
-                label="Name Y"
-                value={verticalSliderValue(settings.nameY)}
-                min={0}
-                max={100}
-                onChange={(v) => update("nameY", storedTopValue(v))}
-              />
-
-              <MappedSlider
-                label="Name size"
-                value={settings.nameSize}
-                minValue={4}
-                maxValue={120}
-                onChange={(v) => update("nameSize", v)}
-              />
-
-              <MappedSlider
-                label="Name spacing"
-                value={settings.nameTextSpacing}
-                minValue={0}
-                maxValue={40}
-                onChange={(v) => update("nameTextSpacing", v)}
-              />
-
-
-              </fieldset>
-
-              <fieldset
-                className={`setting-scope ${settings.showRate ? "" : "is-disabled"}`}
-                disabled={!(settings.showRate)}
-              >
-              <div className="design-subtitle">Rate number layout</div>
-
-              <Slider
-                label="Rate X"
-                value={settings.scoreX}
-                min={0}
-                max={100}
-                onChange={(v) => update("scoreX", v)}
-              />
-
-              <Slider
-                label="Rate Y"
-                value={verticalSliderValue(settings.scoreY)}
-                min={0}
-                max={100}
-                onChange={(v) => update("scoreY", storedTopValue(v))}
-              />
-
-              <MappedSlider
-                label="Rate size"
-                value={settings.scoreSize}
-                minValue={6}
-                maxValue={160}
-                onChange={(v) => update("scoreSize", v)}
-              />
-
-              <MappedSlider
-                label="Rate spacing"
-                value={settings.scoreTextSpacing}
-                minValue={0}
-                maxValue={40}
-                onChange={(v) => update("scoreTextSpacing", v)}
-              />
-
-              </fieldset>
-
-              <fieldset
-                className={`setting-scope ${settings.showRankText ? "" : "is-disabled"}`}
-                disabled={!(settings.showRankText)}
-              >
-              <div className="design-subtitle">Rank text layout</div>
-
-              <Slider
-                label="Rank text X"
-                value={settings.rankTextX}
-                min={0}
-                max={100}
-                onChange={(v) => update("rankTextX", v)}
-              />
-
-              <Slider
-                label="Rank text Y"
-                value={verticalSliderValue(settings.rankTextY)}
-                min={0}
-                max={100}
-                onChange={(v) => update("rankTextY", storedTopValue(v))}
-              />
-
-              <MappedSlider
-                label="Rank text size"
-                value={settings.rankTextSize}
-                minValue={4}
-                maxValue={90}
-                onChange={(v) => update("rankTextSize", v)}
-              />
-              </fieldset>
-
-              <fieldset
-                className={`setting-scope ${settings.showRankIcon ? "" : "is-disabled"}`}
-                disabled={!settings.showRankIcon}
-              >
-                <div className="design-subtitle">Rank icon layout</div>
-                <Slider label="Rank icon X" value={settings.rankIconX} min={0} max={100} onChange={(v) => update("rankIconX", v)} />
-                <Slider label="Rank icon Y" value={verticalSliderValue(settings.rankIconY)} min={0} max={100} onChange={(v) => update("rankIconY", storedTopValue(v))} />
-                <MappedSlider label="Rank icon size" value={settings.rankIconSize} minValue={0} maxValue={150} onChange={(v) => update("rankIconSize", v)} />
-              </fieldset>
-
+              <div className="design-subtitle">{text("Text shadow", "文字影")}</div>
+              <div className="two-col">
+                <label>{text("Shadow color", "影色")}<input type="color" value={settings.textShadowColor} disabled={!settings.textShadowEnabled} onChange={(e) => update("textShadowColor", e.target.value)} /></label>
+                <label className="checkbox-label"><input type="checkbox" checked={settings.textShadowEnabled} onChange={(e) => update("textShadowEnabled", e.target.checked)} />{text("Text shadow", "文字影")}</label>
+              </div>
+              <Slider label={text("Shadow X", "影 X")} value={settings.textShadowX} min={0} max={100} disabled={!settings.textShadowEnabled} onChange={(v) => update("textShadowX", v)} />
+              <Slider label={text("Shadow Y", "影 Y")} value={settings.textShadowY} min={0} max={100} disabled={!settings.textShadowEnabled} onChange={(v) => update("textShadowY", v)} />
+              <Slider label={text("Shadow blur", "影ぼかし")} value={settings.textShadowBlur} min={0} max={100} disabled={!settings.textShadowEnabled} onChange={(v) => update("textShadowBlur", v)} />
+              <Slider label={text("Shadow opacity", "影透明度")} value={settings.textShadowOpacity} min={0} max={100} disabled={!settings.textShadowEnabled} onChange={(v) => update("textShadowOpacity", v)} />
             </div>
           </details>
 
-<details className="design-group">
-            <summary>
-              <span className="summary-copy">
-                <span className="summary-title">Track / Rating Labels</span>
-                <small>RT/CTとMMR/LRの文字スタイルと位置を設定します。</small>
-              </span>
-            </summary>
+          <div className="design-section-label">{text("Player information", "プレイヤー情報")}</div>
 
+          <details className="design-group">
+            <summary><span className="summary-copy"><span className="summary-title">{text("Display Name", "表示名")}</span></span><SummaryToggle label={text("Name", "名前")} checked={settings.showName} onChange={(v) => update("showName", v)} /></summary>
             <div className="design-group-body">
-
-              <fieldset
-                className={`setting-scope ${settings.showTrackTagText ? "" : "is-disabled"}`}
-                disabled={!(settings.showTrackTagText)}
-              >
-              <div className="two-col">
-                <label>
-                  Track text top
-                  <input
-                    type="color"
-                    value={settings.tagTextTopColor ?? "#ffffff"}
-                    onChange={(e) => update("tagTextTopColor", e.target.value)}
-                  />
-                </label>
-
-                <label>
-                  Track text bottom
-                  <input
-                    type="color"
-                    value={settings.tagTextBottomColor ?? "#ff3030"}
-                    onChange={(e) =>
-                      update("tagTextBottomColor", e.target.value)
-                    }
-                  />
-                </label>
-              </div>
-
-              <OptionSlider
-                label="Track text balance"
-                optionLabel="Track text gradient"
-                checked={settings.tagTextGradientEnabled}
-                onCheckedChange={(checked) =>
-                  update("tagTextGradientEnabled", checked)
-                }
-                value={settings.tagTextGradientBalance ?? 40}
-                min={0}
-                max={100}
-                disabled={!settings.tagTextGradientEnabled}
-                onChange={(v) => update("tagTextGradientBalance", v)}
-              />
-
+              <TransparencyControl language={uiLanguage} label={text("Display name", "表示名")} value={settings.nameTransparency} onChange={(v) => update("nameTransparency", v)} disabled={!settings.showName} />
+              <fieldset className={`setting-scope ${settings.showName ? "" : "is-disabled"}`} disabled={!settings.showName}>
+                <Slider label={text("Name X", "名前 X")} value={settings.nameX} min={0} max={100} onChange={(v) => update("nameX", v)} />
+                <Slider label={text("Name Y", "名前 Y")} value={verticalSliderValue(settings.nameY)} min={0} max={100} onChange={(v) => update("nameY", storedTopValue(v))} />
+                <MappedSlider label={text("Name size", "名前サイズ")} value={settings.nameSize} minValue={4} maxValue={120} onChange={(v) => update("nameSize", v)} />
+                <MappedSlider label={text("Name spacing", "名前文字間隔")} value={settings.nameTextSpacing} minValue={0} maxValue={40} onChange={(v) => update("nameTextSpacing", v)} />
               </fieldset>
-
-              <fieldset
-                className={`setting-scope ${settings.showTrackTagText ? "" : "is-disabled"}`}
-                disabled={!(settings.showTrackTagText)}
-              >
-              <div className="design-subtitle">Track text layout</div>
-
-              <Slider
-                label="Track text X"
-                value={settings.tagX}
-                min={0}
-                max={100}
-                onChange={(v) => update("tagX", v)}
-              />
-
-              <Slider
-                label="Track text Y"
-                value={verticalSliderValue(settings.tagY)}
-                min={0}
-                max={100}
-                onChange={(v) => update("tagY", storedTopValue(v))}
-              />
-
-              <MappedSlider
-                label="Track tag text size"
-                value={settings.tagTextSize}
-                minValue={4}
-                maxValue={90}
-                onChange={(v) => update("tagTextSize", v)}
-              />
-
-              <MappedSlider
-                label="Track tag text spacing"
-                value={settings.tagTextSpacing}
-                minValue={0}
-                maxValue={50}
-                onChange={(v) => update("tagTextSpacing", v)}
-              />
-
-              </fieldset>
-
-              <div className="design-subtitle">Rating label</div>
-
-              <fieldset
-                className={`setting-scope ${settings.showRatingLabelText ? "" : "is-disabled"}`}
-                disabled={!(settings.showRatingLabelText)}
-              >
-              <div className="two-col">
-                <label>
-                  Rating text top
-                  <input
-                    type="color"
-                    value={settings.ratingTextTopColor ?? "#ffffff"}
-                    onChange={(e) =>
-                      update("ratingTextTopColor", e.target.value)
-                    }
-                  />
-                </label>
-
-                <label>
-                  Rating text bottom
-                  <input
-                    type="color"
-                    value={settings.ratingTextBottomColor ?? "#ff3030"}
-                    onChange={(e) =>
-                      update("ratingTextBottomColor", e.target.value)
-                    }
-                  />
-                </label>
-              </div>
-
-              <OptionSlider
-                label="Rating text balance"
-                optionLabel="Rating text gradient"
-                checked={settings.ratingTextGradientEnabled}
-                onCheckedChange={(checked) =>
-                  update("ratingTextGradientEnabled", checked)
-                }
-                value={settings.ratingTextGradientBalance ?? 40}
-                min={0}
-                max={100}
-                disabled={!settings.ratingTextGradientEnabled}
-                onChange={(v) => update("ratingTextGradientBalance", v)}
-              />
-
-              <MappedSlider
-                label="Rating text size"
-                value={settings.ratingTextSize}
-                minValue={4}
-                maxValue={90}
-                onChange={(v) => update("ratingTextSize", v)}
-              />
-
-              <MappedSlider
-                label="Rating text spacing"
-                value={settings.ratingTextSpacing}
-                minValue={0}
-                maxValue={50}
-                onChange={(v) => update("ratingTextSpacing", v)}
-              />
-
-              </fieldset>
-
-              <fieldset
-                className={`setting-scope ${settings.showRatingLabelText ? "" : "is-disabled"}`}
-                disabled={!(settings.showRatingLabelText)}
-              >
-              <div className="design-subtitle">Rating text layout</div>
-
-              <Slider
-                label="Rating text X"
-                value={settings.ratingBoxX}
-                min={0}
-                max={100}
-                onChange={(v) => update("ratingBoxX", v)}
-              />
-
-              <Slider
-                label="Rating text Y"
-                value={verticalSliderValue(settings.ratingBoxY)}
-                min={0}
-                max={100}
-                onChange={(v) => update("ratingBoxY", storedTopValue(v))}
-              />
-
-              </fieldset>
-
             </div>
           </details>
 
           <details className="design-group">
             <summary>
-              <span className="summary-copy">
-                <span className="summary-title">Effects</span>
-                <small>レート切り替えとランク変動の演出を選びます。</small>
+              <span className="summary-copy"><span className="summary-title">{text("Rate / RT/CT / MMR/LR", "レート / ラベル")}</span></span>
+              <span className="summary-toggle-cluster">
+                <SummaryToggle label={text("Rate", "レート")} checked={settings.showRate} onChange={(v) => update("showRate", v)} />
+                <SummaryToggle label={text("Track", "Track")} checked={settings.showTrackTagText} onChange={(v) => update("showTrackTagText", v)} />
+                <SummaryToggle label={text("Label", "ラベル")} checked={settings.showRatingLabelText} onChange={(v) => update("showRatingLabelText", v)} />
               </span>
             </summary>
-
             <div className="design-group-body">
-              <div className="design-subtitle">Rank change effect</div>
+              <div className="design-subtitle">{text("Rate number", "レート数値")}</div>
+              <TransparencyControl language={uiLanguage} label={text("Rate number", "レート数値")} value={settings.rateTransparency} onChange={(v) => update("rateTransparency", v)} disabled={!settings.showRate} />
+              <fieldset className={`setting-scope ${settings.showRate ? "" : "is-disabled"}`} disabled={!settings.showRate}>
+                <Slider label={text("Rate X", "レート X")} value={settings.scoreX} min={0} max={100} onChange={(v) => update("scoreX", v)} />
+                <Slider label={text("Rate Y", "レート Y")} value={verticalSliderValue(settings.scoreY)} min={0} max={100} onChange={(v) => update("scoreY", storedTopValue(v))} />
+                <MappedSlider label={text("Rate size", "レートサイズ")} value={settings.scoreSize} minValue={6} maxValue={160} onChange={(v) => update("scoreSize", v)} />
+                <MappedSlider label={text("Rate spacing", "レート文字間隔")} value={settings.scoreTextSpacing} minValue={0} maxValue={40} onChange={(v) => update("scoreTextSpacing", v)} />
+              </fieldset>
+
+              <div className="design-subtitle">{text("RT/CT", "RT/CT")}</div>
+              <TransparencyControl language={uiLanguage} label={text("RT/CT", "RT/CT")} value={settings.trackTransparency} onChange={(v) => update("trackTransparency", v)} disabled={!settings.showTrackTagText} />
+              <fieldset className={`setting-scope ${settings.showTrackTagText ? "" : "is-disabled"}`} disabled={!settings.showTrackTagText}>
+                <Slider label={text("RT/CT X", "RT/CT X")} value={settings.tagX} min={0} max={100} onChange={(v) => update("tagX", v)} />
+                <Slider label={text("RT/CT Y", "RT/CT Y")} value={verticalSliderValue(settings.tagY)} min={0} max={100} onChange={(v) => update("tagY", storedTopValue(v))} />
+                <MappedSlider label={text("RT/CT size", "RT/CT サイズ")} value={settings.tagTextSize} minValue={4} maxValue={90} onChange={(v) => update("tagTextSize", v)} />
+                <MappedSlider label={text("RT/CT spacing", "RT/CT 文字間隔")} value={settings.tagTextSpacing} minValue={0} maxValue={50} onChange={(v) => update("tagTextSpacing", v)} />
+              </fieldset>
+
+              <div className="design-subtitle">{text("MMR/LR", "MMR/LR")}</div>
+              <TransparencyControl language={uiLanguage} label={text("MMR/LR", "MMR/LR")} value={settings.ratingTransparency} onChange={(v) => update("ratingTransparency", v)} disabled={!settings.showRatingLabelText} />
+              <fieldset className={`setting-scope ${settings.showRatingLabelText ? "" : "is-disabled"}`} disabled={!settings.showRatingLabelText}>
+                <Slider label={text("MMR/LR X", "MMR/LR X")} value={settings.ratingBoxX} min={0} max={100} onChange={(v) => update("ratingBoxX", v)} />
+                <Slider label={text("MMR/LR Y", "MMR/LR Y")} value={verticalSliderValue(settings.ratingBoxY)} min={0} max={100} onChange={(v) => update("ratingBoxY", storedTopValue(v))} />
+                <MappedSlider label={text("MMR/LR size", "MMR/LR サイズ")} value={settings.ratingTextSize} minValue={4} maxValue={90} onChange={(v) => update("ratingTextSize", v)} />
+                <MappedSlider label={text("MMR/LR spacing", "MMR/LR 文字間隔")} value={settings.ratingTextSpacing} minValue={0} maxValue={50} onChange={(v) => update("ratingTextSpacing", v)} />
+              </fieldset>
+            </div>
+          </details>
+
+          <details className="design-group">
+            <summary>
+              <span className="summary-copy"><span className="summary-title">{text("Rank", "ランク")}</span></span>
+              <span className="summary-toggle-cluster">
+                <SummaryToggle label={text("Text", "文字")} checked={settings.showRankText} onChange={(v) => update("showRankText", v)} />
+                <SummaryToggle label={text("Icon", "画像")} checked={settings.showRankIcon} onChange={(v) => update("showRankIcon", v)} />
+              </span>
+            </summary>
+            <div className="design-group-body">
+              <div className="design-subtitle">{text("Rank text", "ランク")}</div>
+              <TransparencyControl language={uiLanguage} label={text("Rank text", "ランク")} value={settings.rankTextTransparency} onChange={(v) => update("rankTextTransparency", v)} disabled={!settings.showRankText} />
+              <fieldset className={`setting-scope ${settings.showRankText ? "" : "is-disabled"}`} disabled={!settings.showRankText}>
+                <Slider label="Rank text X" value={settings.rankTextX} min={0} max={100} onChange={(v) => update("rankTextX", v)} />
+                <Slider label="Rank text Y" value={verticalSliderValue(settings.rankTextY)} min={0} max={100} onChange={(v) => update("rankTextY", storedTopValue(v))} />
+                <MappedSlider label="Rank text size" value={settings.rankTextSize} minValue={4} maxValue={90} onChange={(v) => update("rankTextSize", v)} />
+              </fieldset>
+
+              <div className="design-subtitle">{text("Rank icon", "ランク画像")}</div>
+              <TransparencyControl language={uiLanguage} label={text("Rank icon", "ランク画像")} value={settings.rankIconTransparency} onChange={(v) => update("rankIconTransparency", v)} disabled={!settings.showRankIcon} />
+              <fieldset className={`setting-scope ${settings.showRankIcon ? "" : "is-disabled"}`} disabled={!settings.showRankIcon}>
+                <Slider label={text("Rank icon X", "ランク画像 X")} value={settings.rankIconX} min={0} max={100} onChange={(v) => update("rankIconX", v)} />
+                <Slider label={text("Rank icon Y", "ランク画像 Y")} value={verticalSliderValue(settings.rankIconY)} min={0} max={100} onChange={(v) => update("rankIconY", storedTopValue(v))} />
+                <MappedSlider label={text("Rank icon size", "ランク画像サイズ")} value={settings.rankIconSize} minValue={0} maxValue={150} onChange={(v) => update("rankIconSize", v)} />
+              </fieldset>
+            </div>
+          </details>
+
+          <details className="design-group">
+            <summary><span className="summary-copy"><span className="summary-title">Events</span></span><SummaryToggle label="Events" checked={settings.showEvents} onChange={(v) => update("showEvents", v)} /></summary>
+            <div className="design-group-body">
+              <TransparencyControl language={uiLanguage} label="Events" value={settings.eventsTransparency} onChange={(v) => update("eventsTransparency", v)} disabled={!settings.showEvents} />
+              <fieldset className={`setting-scope ${settings.showEvents ? "" : "is-disabled"}`} disabled={!settings.showEvents}>
+                <label>{text("Events format", "模擬数形式")}<select value={settings.eventsFormat} onChange={(e) => update("eventsFormat", e.target.value as EventFormat)}><option value="EVENTS">100 Events</option><option value="PREFIX">Events 100</option><option value="HASH">#100</option><option value="NUMBER">100</option></select></label>
+                <div className="two-col"><label>{text("Events color", "模擬数色")}<input type="color" value={settings.eventsColor} disabled={settings.eventsUseMainColor} onChange={(e) => update("eventsColor", e.target.value)} /></label><label className="checkbox-label"><input type="checkbox" checked={settings.eventsUseMainColor} onChange={(e) => update("eventsUseMainColor", e.target.checked)} />{text("Use Main Text colors", "Main Textの色を使用")}</label></div>
+                <Slider label={text("Events X", "模擬数 X")} value={settings.eventsX} min={0} max={100} onChange={(v) => update("eventsX", v)} /><Slider label={text("Events Y", "模擬数 Y")} value={verticalSliderValue(settings.eventsY)} min={0} max={100} onChange={(v) => update("eventsY", storedTopValue(v))} /><MappedSlider label={text("Events size", "模擬数サイズ")} value={settings.eventsSize} minValue={4} maxValue={100} onChange={(v) => update("eventsSize", v)} /><MappedSlider label={text("Events spacing", "模擬数文字間隔")} value={settings.eventsSpacing} minValue={0} maxValue={50} onChange={(v) => update("eventsSpacing", v)} />
+              </fieldset>
+            </div>
+          </details>
+
+          <details className="design-group">
+            <summary><span className="summary-copy"><span className="summary-title">{text("Flag", "国旗")}</span></span><SummaryToggle label={text("Flag", "国旗")} checked={settings.showFlag} onChange={(v) => update("showFlag", v)} /></summary>
+            <div className="design-group-body">
+              <TransparencyControl language={uiLanguage} label={text("Flag", "国旗")} value={settings.flagTransparency} onChange={(v) => update("flagTransparency", v)} disabled={!settings.showFlag} />
+              <fieldset className={`setting-scope ${settings.showFlag ? "" : "is-disabled"}`} disabled={!settings.showFlag}>
+                <Slider label={text("Flag X", "国旗 X")} value={settings.flagX} min={0} max={100} onChange={(v) => update("flagX", v)} /><Slider label={text("Flag Y", "国旗 Y")} value={verticalSliderValue(settings.flagY)} min={0} max={100} onChange={(v) => update("flagY", storedTopValue(v))} /><MappedSlider label={text("Flag size", "国旗サイズ")} value={settings.flagSize} minValue={4} maxValue={100} onChange={(v) => update("flagSize", v)} />
+              </fieldset>
+            </div>
+          </details>
+
+          <div className="design-section-label">{text("Images / extras", "画像 / その他")}</div>
+
+          <details className="design-group">
+            <summary><span className="summary-copy"><span className="summary-title">{text("Background Image", "背景画像")}</span></span><SummaryToggle label={text("BG Image", "背景画像")} checked={settings.showBackgroundImage} onChange={(v) => update("showBackgroundImage", v)} /></summary>
+            <div className="design-group-body">
+              <TransparencyControl language={uiLanguage} label={text("Background image", "背景画像")} value={settings.backgroundImageTransparency} onChange={(v) => update("backgroundImageTransparency", v)} disabled={!settings.showBackgroundImage} />
+              <fieldset className={`setting-scope ${settings.showBackgroundImage ? "" : "is-disabled"}`} disabled={!settings.showBackgroundImage}>
+                <label>{text("Background image / GIF URL", "背景画像 / GIF URL")}<input value={settings.bgUrl} onChange={(e) => update("bgUrl", e.target.value)} placeholder="https://..." /></label><Slider label={text("Background X", "背景 X")} value={settings.bgX} min={0} max={100} onChange={(v) => update("bgX", v)} /><Slider label={text("Background Y", "背景 Y")} value={verticalSliderValue(settings.bgY)} min={0} max={100} onChange={(v) => update("bgY", storedTopValue(v))} /><MappedSlider label={text("Background zoom", "背景ズーム")} value={settings.bgZoom} minValue={25} maxValue={350} onChange={(v) => update("bgZoom", v)} />
+              </fieldset>
+            </div>
+          </details>
+
+          <details className="design-group">
+            <summary><span className="summary-copy"><span className="summary-title">{text("Custom Image", "追加画像")}</span></span><SummaryToggle label={text("Image", "画像")} checked={settings.showCustomImage} onChange={(v) => update("showCustomImage", v)} /></summary>
+            <div className="design-group-body">
+              <TransparencyControl language={uiLanguage} label={text("Custom image", "追加画像")} value={settings.customImageGradient} onChange={(v) => update("customImageGradient", v)} disabled={!settings.showCustomImage} />
+              <fieldset className={`setting-scope ${settings.showCustomImage ? "" : "is-disabled"}`} disabled={!settings.showCustomImage}>
+                <label>{text("Image URL", "画像URL")}<input value={settings.customImageUrl} onChange={(e) => update("customImageUrl", e.target.value)} placeholder="https://example.com/image.png" /></label><Slider label={text("Image X", "画像 X")} value={settings.customImageX} min={0} max={100} onChange={(v) => update("customImageX", v)} /><Slider label={text("Image Y", "画像 Y")} value={verticalSliderValue(settings.customImageY)} min={0} max={100} onChange={(v) => update("customImageY", storedTopValue(v))} /><MappedSlider label="Image Z" value={settings.customImageZ} minValue={0} maxValue={10} onChange={(v) => update("customImageZ", v)} /><MappedSlider label={text("Image size", "画像サイズ")} value={settings.customImageSize} minValue={0} maxValue={650} onChange={(v) => update("customImageSize", v)} />
+              </fieldset>
+            </div>
+          </details>
+
+          <details className="design-group">
+            <summary><span className="summary-copy"><span className="summary-title">{text("Extra Text", "追加テキスト")}</span></span><SummaryToggle label={text("Text", "文字")} checked={settings.showOtherText} onChange={(v) => update("showOtherText", v)} /></summary>
+            <div className="design-group-body">
+              <TransparencyControl language={uiLanguage} label={text("Extra text", "追加テキスト")} value={settings.otherTextTransparency} onChange={(v) => update("otherTextTransparency", v)} disabled={!settings.showOtherText} />
+              <fieldset className={`setting-scope ${settings.showOtherText ? "" : "is-disabled"}`} disabled={!settings.showOtherText}>
+                <label>{text("Text", "テキスト")}<input value={settings.otherText} onChange={(e) => update("otherText", e.target.value)} placeholder="Any text..." /></label><div className="two-col"><label>{text("Text color", "追加テキスト色")}<input type="color" value={settings.otherTextColor} disabled={settings.otherTextUseMainColor} onChange={(e) => update("otherTextColor", e.target.value)} /></label><label className="checkbox-label"><input type="checkbox" checked={settings.otherTextUseMainColor} onChange={(e) => update("otherTextUseMainColor", e.target.checked)} />{text("Use Main Text colors", "Main Textの色を使用")}</label></div><Slider label={text("Text X", "文字 X")} value={settings.otherTextX} min={0} max={100} onChange={(v) => update("otherTextX", v)} /><Slider label={text("Text Y", "文字 Y")} value={verticalSliderValue(settings.otherTextY)} min={0} max={100} onChange={(v) => update("otherTextY", storedTopValue(v))} /><MappedSlider label={text("Text size", "文字サイズ")} value={settings.otherTextSize} minValue={4} maxValue={100} onChange={(v) => update("otherTextSize", v)} /><MappedSlider label={text("Text spacing", "文字間隔")} value={settings.otherTextSpacing} minValue={0} maxValue={50} onChange={(v) => update("otherTextSpacing", v)} />
+              </fieldset>
+            </div>
+          </details>
+
+          <div className="design-section-label">{text("Effects", "エフェクト")}</div>
+          <details className="design-group">
+            <summary><span className="summary-copy"><span className="summary-title">{text("Effects", "エフェクト")}</span></span><SummaryToggle label={text("Flow", "枠線")} checked={settings.flowEnabled} onChange={(v) => update("flowEnabled", v)} /></summary>
+            <div className="design-group-body">
+              <div className="design-subtitle">{text("Win / Loss opening effect", "勝利 / 敗北 前半演出")}</div>
               <label>
-                Rank Up / Down style
+                {text("Opening style", "前半演出")}
                 <select
-                  value={settings.rankEffectStyle}
-                  onChange={(e) =>
-                    update("rankEffectStyle", e.target.value as RankEffectStyle)
-                  }
+                  value={settings.resultEffectStyle}
+                  onChange={(e) => update("resultEffectStyle", e.target.value as ResultEffectStyle)}
                 >
-                  <option value="CLASSIC">Classic reveal</option>
-                  <option value="FLASH">Light flash</option>
-                  <option value="SLIDE">Side slide</option>
-                  <option value="BURST">Energy burst</option>
-                  <option value="STARLIGHT">Starlight</option>
-                  <option value="METEOR">Meteor shower</option>
+                  <option value="DEFAULT">{text("Default", "デフォルト")}</option>
+                  <option value="THROTTLE">{text("Full Throttle!", "アクセル全開！")}</option>
+                  <option value="STARSTRUCK">{text("Star Struck", "スターストラック")}</option>
+                  <option value="NEONRUSH">{text("Neon Rush", "ネオンラッシュ")}</option>
+                  <option value="SHOCKWAVE">{text("Shockwave", "ショックウェーブ")}</option>
                 </select>
               </label>
-
-              <div className="design-subtitle">MMR / LR switch effect</div>
-              <label>
-                Switch style
-                <select
-                  value={settings.ratingSwitchEffectStyle}
-                  onChange={(e) =>
-                    update(
-                      "ratingSwitchEffectStyle",
-                      e.target.value as RatingSwitchEffectStyle
-                    )
-                  }
-                >
-                  <option value="WAVE">Wave</option>
-                  <option value="FADE">Soft fade</option>
-                  <option value="FLIP">3D flip</option>
-                  <option value="GLITCH">Digital glitch</option>
-                </select>
-              </label>
-
-              <div className="design-subtitle">Effect color</div>
-              <div className="two-col">
-                <label>
-                  Effect color
-                  <input
-                    type="color"
-                    value={settings.ratingEffectColor ?? "#ff3030"}
-                    disabled={settings.ratingEffectUseMainColor}
-                    onChange={(e) => update("ratingEffectColor", e.target.value)}
-                  />
-                </label>
-
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={settings.ratingEffectUseMainColor}
-                    onChange={(e) =>
-                      update("ratingEffectUseMainColor", e.target.checked)
-                    }
-                  />
-                  Use border color
-                </label>
-              </div>
+              <div className="design-subtitle">{text("Rank change effect", "ランク変動演出")}</div><label>{text("Rank Up / Down style", "Rank Up / Down演出")}<select value={settings.rankEffectStyle} onChange={(e) => update("rankEffectStyle", e.target.value as RankEffectStyle)}><option value="CLASSIC">{text("Classic reveal", "クラシック")}</option><option value="FLASH">{text("Light flash", "ライトフラッシュ")}</option><option value="SLIDE">{text("Side slide", "サイドスライド")}</option><option value="BURST">{text("Energy burst", "エナジーバースト")}</option><option value="STARLIGHT">{text("Starlight", "スターライト")}</option><option value="METEOR">{text("Meteor shower", "流星群")}</option></select></label>
+              <div className="design-subtitle">{text("MMR / LR switch effect", "MMR / LR切替演出")}</div><label>{text("Switch style", "切替演出")}<select value={settings.ratingSwitchEffectStyle} onChange={(e) => update("ratingSwitchEffectStyle", e.target.value as RatingSwitchEffectStyle)}><option value="WAVE">{text("Wave", "ウェーブ")}</option><option value="FADE">{text("Soft fade", "ソフトフェード")}</option><option value="FLIP">{text("3D flip", "3Dフリップ")}</option><option value="GLITCH">{text("Digital glitch", "デジタルグリッチ")}</option></select></label>
+              <div className="design-subtitle">{text("Effect color", "エフェクト色")}</div><div className="two-col"><label>{text("Effect color", "エフェクト色")}<input type="color" value={settings.ratingEffectColor} disabled={settings.ratingEffectUseMainColor} onChange={(e) => update("ratingEffectColor", e.target.value)} /></label><label className="checkbox-label"><input type="checkbox" checked={settings.ratingEffectUseMainColor} onChange={(e) => update("ratingEffectUseMainColor", e.target.checked)} />{text("Use border color", "枠線色を使用")}</label></div>
+              <div className="design-subtitle">{text("Border", "枠線")}</div><div className="two-col"><label>{text("Border color", "枠線色")}<input type="color" value={settings.borderColor} onChange={(e) => update("borderColor", e.target.value)} /></label><label>{text("Animated border color", "枠線カラー")}<input type="color" value={settings.flowColor} onChange={(e) => update("flowColor", e.target.value)} /></label></div><OptionSlider label={text("Border speed", "枠線速度")} optionLabel={text("Border animation", "枠線")} checked={settings.flowEnabled} onCheckedChange={(checked) => update("flowEnabled", checked)} value={settings.flowSpeed} min={0} max={100} disabled={!settings.flowEnabled} onChange={(v) => update("flowSpeed", v)} /><MappedSlider label={text("Border length", "枠線長さ")} value={settings.flowLength} minValue={1} maxValue={96} disabled={!settings.flowEnabled} onChange={(v) => update("flowLength", v)} />
             </div>
           </details>
-
-          <details className="design-group">
-            <summary>
-              <span className="summary-copy">
-                <span className="summary-title">Border / Flow</span>
-                <small>カード外枠と流れる光を設定します。</small>
-              </span>
-            </summary>
-
-            <div className="design-group-body">
-              <div className="design-subtitle">Border colors</div>
-              <div className="two-col">
-                <label>
-                  Border color
-                  <input
-                    type="color"
-                    value={settings.borderColor ?? "#ff0000"}
-                    onChange={(e) => update("borderColor", e.target.value)}
-                  />
-                </label>
-
-                <label>
-                  Flowing border color
-                  <input
-                    type="color"
-                    value={settings.flowColor ?? "#ff3030"}
-                    onChange={(e) => update("flowColor", e.target.value)}
-                  />
-                </label>
-              </div>
-
-              <div className="design-subtitle">Flow animation</div>
-
-              <OptionSlider
-                label="Flow speed"
-                optionLabel="Flowing border"
-                checked={settings.flowEnabled}
-                onCheckedChange={(checked) => update("flowEnabled", checked)}
-                value={settings.flowSpeed ?? 65}
-                min={0}
-                max={100}
-                disabled={!settings.flowEnabled}
-                onChange={(v) => update("flowSpeed", v)}
-              />
-
-              <MappedSlider
-                label="Flow length"
-                value={settings.flowLength ?? 16}
-                minValue={1}
-                maxValue={96}
-                disabled={!settings.flowEnabled}
-                onChange={(v) => update("flowLength", v)}
-              />
-
-
-            </div>
-          </details>
-
-          
-
-          <details className="design-group">
-            <summary>
-              <span className="summary-copy">
-                <span className="summary-title">Other</span>
-                <small>旗と好きな画像の配置を設定します。</small>
-              </span>
-            </summary>
-
-            <div className="design-group-body">
-              <fieldset
-                className={`setting-scope ${settings.showCustomImage ? "" : "is-disabled"}`}
-                disabled={!(settings.showCustomImage)}
-              >
-              <label>
-                Image URL
-                <input
-                  value={settings.customImageUrl}
-                  onChange={(e) => update("customImageUrl", e.target.value)}
-                  placeholder="https://example.com/image.png"
-                />
-              </label>
-
-              <Slider label="Image X" value={settings.customImageX} min={0} max={100} onChange={(v) => update("customImageX", v)} />
-              <Slider label="Image Y" value={verticalSliderValue(settings.customImageY)} min={0} max={100} onChange={(v) => update("customImageY", storedTopValue(v))} />
-              <MappedSlider label="Image Z" value={settings.customImageZ} minValue={0} maxValue={100} onChange={(v) => update("customImageZ", v)} />
-              <MappedSlider label="Image size" value={settings.customImageSize} minValue={0} maxValue={650} onChange={(v) => update("customImageSize", v)} />
-              <Slider label="Image transparency" value={settings.customImageGradient} min={0} max={100} onChange={(v) => update("customImageGradient", v)} />
-              <p className="control-note">0 = fully visible / 100 = fully transparent</p>
-              </fieldset>
-
-              <div className="design-subtitle">Flag layout</div>
-              <fieldset
-                className={`setting-scope ${settings.showFlag ? "" : "is-disabled"}`}
-                disabled={!(settings.showFlag)}
-              >
-              <Slider
-                label="Flag X"
-                value={settings.flagX}
-                min={0}
-                max={100}
-                onChange={(v) => update("flagX", v)}
-              />
-
-              <Slider
-                label="Flag Y"
-                value={verticalSliderValue(settings.flagY)}
-                min={0}
-                max={100}
-                onChange={(v) => update("flagY", storedTopValue(v))}
-              />
-
-              <MappedSlider
-                label="Flag size"
-                value={settings.flagSize}
-                minValue={4}
-                maxValue={100}
-                onChange={(v) => update("flagSize", v)}
-              />
-
-              </fieldset>
-
-            </div>
-          </details>
-
         </section>
 
         <section className="panel preview-panel">
-          <h2>Live preview</h2>
+          <h2>{text("Live preview", "ライブプレビュー")}</h2>
 
           <div className="preview-stage">
             <Card
@@ -2579,57 +2878,73 @@ export default function Home() {
             />
           </div>
 
-          <div className="animation-buttons">
-            <button type="button" onClick={() => triggerPreviewEffect("win")}>
-              Win
-            </button>
+          <div className="preview-action-row">
+            <div className="animation-buttons">
+              <button type="button" onClick={() => triggerPreviewEffect("rank-up")}>
+                {text("Win", "勝利")}
+              </button>
 
-            <button type="button" onClick={() => triggerPreviewEffect("loss")}>
-              Loss
-            </button>
+              <button type="button" onClick={() => triggerPreviewEffect("rank-down")}>
+                {text("Loss", "敗北")}
+              </button>
+            </div>
 
-            <button
-              type="button"
-              onClick={() => triggerPreviewEffect("rank-up")}
+            <div className="preview-history-controls">
+              <button
+                type="button"
+                onClick={undoSettings}
+                disabled={undoStack.length === 0}
+                title={text("Undo (Ctrl+Z)", "1つ戻す (Ctrl+Z)")}
+              >
+                ↶ {text("Undo", "戻す")}
+              </button>
+
+              <button
+                type="button"
+                onClick={redoSettings}
+                disabled={redoStack.length === 0}
+                title={text("Redo (Ctrl+Y)", "1つ進む (Ctrl+Y)")}
+              >
+                ↷ {text("Redo", "進む")}
+              </button>
+            </div>
+
+            <div
+              className={`preview-history-log ${historyLog ? "" : "is-empty"}`}
+              aria-live="polite"
+              title={historyLog}
             >
-              Rank Up
-            </button>
-
-            <button
-              type="button"
-              onClick={() => triggerPreviewEffect("rank-down")}
-            >
-              Rank Down
-            </button>
+              {historyLog || text("No edit history yet", "操作履歴なし")}
+            </div>
           </div>
 
-          <h2>OBS Browser Source URL</h2>
+          <h2>{text("OBS Browser Source URL", "OBSブラウザソースURL")}</h2>
 
           <div className="url-row">
             <input readOnly value={cardUrl} />
-            <button onClick={copyUrl}>{copied ? "Copied" : "Copy"}</button>
+            <button onClick={copyUrl}>{copied ? text("Copied", "コピー済み") : text("Copy", "コピー")}</button>
           </div>
 
           <a className="open-link" href={cardUrl} target="_blank">
-            Open card in new tab ↗
+            {text("Open card in new tab ↗", "カードを新しいタブで開く ↗")}
           </a>
 
-          <h2>Share design JSON</h2>
+          <h2>{text("Share design JSON", "デザインJSON共有")}</h2>
 
           <div className="share-buttons">
             <button type="button" onClick={copySettingsText}>
-              {settingsCopied ? "Copied" : "Copy design"}
+              {settingsCopied ? text("Copied", "コピー済み") : text("Copy design", "デザインをコピー")}
             </button>
 
-            <button type="button" onClick={toggleImportSettings}>
-              {showImportSettings ? "Close paste box" : "Paste design"}
+            <button type="button" onClick={pasteDesignFromClipboard}>
+              {text("Paste design", "デザインを貼り付け")}
             </button>
           </div>
 
           {showImportSettings && (
             <div className="share-import-area">
               <label>
-                Paste design text
+                {text("Paste design text", "デザイン文字列を貼り付け")}
                 <textarea
                   className="settings-textarea"
                   value={importSettingsText}
@@ -2643,7 +2958,7 @@ export default function Home() {
                 className="load-settings-button"
                 onClick={importSettings}
               >
-                Load pasted design
+                {text("Load pasted design", "貼り付けたデザインを読込")}
               </button>
             </div>
           )}
@@ -2654,138 +2969,19 @@ export default function Home() {
 
           <button
             className="reset-button"
-            onClick={() => setSettings(defaultSettings)}
+            onClick={() => applySettingsWithHistory(defaultSettings)}
           >
-            Reset settings
+            {text("Reset settings", "設定をリセット")}
           </button>
-
-          <details className="version-history">
-            <summary>Version history</summary>
-            <div className="version-history-body">
-              <div>
-                <b>v1.9.4</b>
-                <span>Increased the opacity and contrast of the Rank Up / Rank Down announcement and New Rank reveal so the text, emblem, stars, and meteor effects remain clearly visible.</span>
-              </div>
-              <div>
-                <b>v1.9.3</b>
-                <span>Reduced all MMR / LR Switch effects to quieter, smaller transitions with softer movement, glow, flip, and glitch intensity.</span>
-              </div>
-              <div>
-                <b>v1.9.2</b>
-                <span>Fixed the MMR / LR Switch effect styles and changed the default Card bg right color to RGB 0, 94, 112.</span>
-              </div>
-              <div>
-                <b>v1.9.1</b>
-                <span>Reduced the full-card rate arrows from 24 to 12 while keeping their larger, thicker appearance and full-width coverage.</span>
-              </div>
-              <div>
-                <b>v1.9.0</b>
-                <span>Made the full-card rate arrows substantially larger and thicker by switching to filled arrow glyphs and stronger outlines.</span>
-              </div>
-              <div>
-                <b>v1.8.9</b>
-                <span>Expanded the rate-change arrows across the full card, increased their size and count, and fixed the colors to green for gains and red for losses.</span>
-              </div>
-              <div>
-                <b>v1.8.8</b>
-                <span>Fixed the invisible rate arrows and corrected Meteor Shower so each meteor travels from the upper right toward the lower left with the glowing head leading.</span>
-              </div>
-              <div>
-                <b>v1.8.7</b>
-                <span>Added a directional arrow stream during rate changes while preserving the rate change → rank announcement → new rank reveal sequence.</span>
-              </div>
-              <div>
-                <b>v1.8.6</b>
-                <span>Restored the RANK UP / RANK DOWN announcement and delayed the selected rank reveal until after the announcement finishes.</span>
-              </div>
-              <div>
-                <b>v1.8.5</b>
-                <span>Separated the rank reveal from the RANK UP / DOWN text to prevent overlap, added Starlight and Meteor Shower reveal styles, and expanded star-based rank visuals.</span>
-              </div>
-              <div>
-                <b>v1.8.3</b>
-                <span>Removed the score settle artifact, moved Track / Rating Labels directly after Main Text, and added direction-specific Rank Up / Rank Down reveal effects.</span>
-              </div>
-              <div>
-                <b>v1.8.2</b>
-                <span>Updated the default design preset, preserved decimal mapped values, and removed the stray Win/Loss floating text while keeping the score and card animations.</span>
-              </div>
-              <div>
-                <b>v1.8.1</b>
-                <span>Hardened saved/design/API JSON parsing and switched local development to Webpack to prevent stale Turbopack JSON runtime failures.</span>
-              </div>
-              <div>
-                <b>v1.8.0</b>
-                <span>Fixed negative-MMR rank transitions, added selectable rank and rating-switch effects, added name/rate spacing controls, and introduced a black multi-accent builder theme.</span>
-              </div>
-              <div>
-                <b>v1.7.0</b>
-                <span>Normalized all sliders to 0–100, expanded placement and sizing ranges, fixed text gradients, merged label controls, added configurable text shadows, reorganized design groups, and refreshed the builder theme.</span>
-              </div>
-              <div>
-                <b>v1.6.8</b>
-                <span>Registered the remade font file as 大江戸勘亭流 using public/fonts/remake.otf.</span>
-              </div>
-              <div>
-                <b>v1.6.7</b>
-                <span>Corrected FOT-大江戸勘亭流 Std E using its exact internal names and original filename.</span>
-              </div>
-              <div>
-                <b>v1.6.6</b>
-                <span>Changed the default MMR, LR, and Rank Text values to blank.</span>
-              </div>
-              <div>
-                <b>v1.6.5</b>
-                <span>Changed the default background image URL to blank.</span>
-              </div>
-              <div>
-                <b>v1.6.4</b>
-                <span>Updated the default card preset, background, flag, rank icon, rating, and layout values.</span>
-              </div>
-              <div>
-                <b>v1.6.3</b>
-                <span>Removed the remaining Track Tag and Rating Label visual boxes and box-size controls.</span>
-              </div>
-              <div>
-                <b>v1.6.2</b>
-                <span>Removed Track Tag and Rating Label box color/gradient controls.</span>
-              </div>
-              <div>
-                <b>v1.6.1</b>
-                <span>Removed label box/shape controls and added overall overlay transparency.</span>
-              </div>
-              <div>
-                <b>v1.6.0</b>
-                <span>Rating Label behavior aligned with Track Tag, visibility-linked controls, persistent category descriptions, and corrected FOT-大江戸勘亭流 Std E support.</span>
-              </div>
-              <div>
-                <b>v1.5.0</b>
-                <span>Text / Box visibility split, image transparency fix, and font selector including 大江戸勘亭流 Std.</span>
-              </div>
-              <div>
-                <b>v1.4.0</b>
-                <span>Visibility toggles, custom image overlay, sizing fixes, and display-name fix.</span>
-              </div>
-              <div>
-                <b>v1.3.0</b>
-                <span>Soft Star / Heart labels and independent text spacing controls.</span>
-              </div>
-              <div>
-                <b>v1.2.0</b>
-                <span>JSON design sharing and independent Track / Rating styling.</span>
-              </div>
-              <p>Older OBS URLs and design JSON remain supported. New settings use safe defaults when missing.</p>
-            </div>
-          </details>
 
           <div className="bottom-fetch-block">
             <div className="fetch-button-row">
               <button type="button" onClick={fetchPlayer}>
-                Fetch player
+                {text("Fetch player", "プレイヤー取得")}
               </button>
 
               <button type="button" onClick={fetchRanks}>
-                Rank list
+                {text("Rank list", "ランク一覧")}
               </button>
             </div>
 
@@ -2793,13 +2989,128 @@ export default function Home() {
               <span>{apiStatus}</span>
               <span>{rankStatus}</span>
             </div>
+
+            <details className="fetched-assets-panel">
+              <summary>{text("Fetched image URLs", "取得画像を確認")}</summary>
+              <div className="fetched-asset-grid">
+                <label>
+                  {text("Flag image URL", "国旗画像URL")}
+                  <input value={settings.flagUrl} onChange={(e) => update("flagUrl", e.target.value)} placeholder={text("Auto fetched", "自動取得")} />
+                  {settings.flagUrl && <img className="fetched-asset-preview flag-preview" src={settings.flagUrl} alt="Flag preview" />}
+                </label>
+                <label>
+                  {text("Rank icon URL", "ランク画像URL")}
+                  <input value={settings.rankIconUrl} onChange={(e) => update("rankIconUrl", e.target.value)} placeholder={text("Auto fetched", "自動取得")} />
+                  {settings.rankIconUrl && <img className="fetched-asset-preview" src={settings.rankIconUrl} alt="Rank icon preview" />}
+                </label>
+              </div>
+            </details>
           </div>
         </section>
       </div>
+
+      {showVersionHistory && (
+        <div
+          className="version-history-backdrop"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.currentTarget === event.target) setShowVersionHistory(false);
+          }}
+        >
+          <section
+            className="version-history-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label={text("Version history", "バージョン履歴")}
+          >
+            <div className="version-history-modal-head">
+              <h2>{text("Version history", "バージョン履歴")}</h2>
+              <button
+                type="button"
+                onClick={() => setShowVersionHistory(false)}
+                aria-label={text("Close", "閉じる")}
+              >
+                ×
+              </button>
+            </div>
+            <div className="version-history-body">
+              {VERSION_HISTORY.map((entry) => (
+                <div key={entry.version}>
+                  <b>{entry.version}</b>
+                  <span>{uiLanguage === "JP" ? entry.jp : entry.en}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+      )}
     </main>
   );
 }
 
+
+function SummaryToggle(props: {
+  label: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}) {
+  return (
+    <label
+      className="summary-toggle"
+      onClick={(event) => event.stopPropagation()}
+      onKeyDown={(event) => event.stopPropagation()}
+      title={`${props.label}: ${props.checked ? "ON" : "OFF"}`}
+    >
+      <input
+        type="checkbox"
+        checked={props.checked}
+        onChange={(event) => props.onChange(event.target.checked)}
+        onClick={(event) => event.stopPropagation()}
+      />
+      <span>{props.label}</span>
+    </label>
+  );
+}
+
+function TransparencyControl(props: {
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+  disabled?: boolean;
+  language: UiLanguage;
+}) {
+  return (
+    <Slider
+      label={`${props.label} ${props.language === "JP" ? "透明度" : "transparency"}`}
+      value={props.value}
+      min={0}
+      max={100}
+      disabled={props.disabled}
+      onChange={props.onChange}
+    />
+  );
+}
+
+function VisibilityControl(props: {
+  label: string;
+  checked: boolean;
+  onCheckedChange: (value: boolean) => void;
+  transparency: number;
+  onTransparencyChange: (value: number) => void;
+}) {
+  return (
+    <div className={`visibility-control ${props.checked ? "" : "is-disabled"}`}>
+      <label className="checkbox-label">
+        <input type="checkbox" checked={props.checked} onChange={(e) => props.onCheckedChange(e.target.checked)} />
+        {props.label}
+      </label>
+      <div className="visibility-opacity-control">
+        <span>Transparency <b>{Math.round(props.transparency)}</b></span>
+        <input type="range" min={0} max={100} value={props.transparency} disabled={!props.checked} onChange={(e) => props.onTransparencyChange(Number(e.target.value))} />
+      </div>
+    </div>
+  );
+}
 
 function NumberStepper(props: {
   value: number;
@@ -2961,17 +3272,12 @@ function Card({
   );
 
   const cardBgStops = gradientStops(settings.cardBgGradientBalance, 50);
-  const cardBgAlpha = alphaHexFromPercent(settings.cardBgOpacity, 86);
-
-  const visibleBackgroundUrl = settings.showBackgroundImage ? settings.bgUrl : "";
+  const effectiveCardBgOpacity = (settings.cardBgOpacity ?? 86) * opacityFromTransparency(settings.cardBackgroundTransparency);
+  const cardBgAlpha = alphaHexFromPercent(effectiveCardBgOpacity, 86);
 
   const cardBackground = settings.cardBgGradientEnabled
-    ? visibleBackgroundUrl
-      ? `linear-gradient(90deg, ${hexWithAlpha(settings.cardBgLeft, cardBgAlpha)} 0%, ${hexWithAlpha(settings.cardBgLeft, cardBgAlpha)} ${cardBgStops.topStop}%, ${hexWithAlpha(settings.cardBgRight, cardBgAlpha)} ${cardBgStops.bottomStart}%, ${hexWithAlpha(settings.cardBgRight, cardBgAlpha)} 100%), url(${visibleBackgroundUrl})`
-      : `linear-gradient(90deg, ${settings.cardBgLeft ?? "#130716"} 0%, ${settings.cardBgLeft ?? "#130716"} ${cardBgStops.topStop}%, ${settings.cardBgRight ?? "#005e70"} ${cardBgStops.bottomStart}%, ${settings.cardBgRight ?? "#005e70"} 100%)`
-    : visibleBackgroundUrl
-      ? `linear-gradient(90deg, ${hexWithAlpha(settings.cardBgLeft, cardBgAlpha)} 0%, ${hexWithAlpha(settings.cardBgLeft, cardBgAlpha)} 100%), url(${visibleBackgroundUrl})`
-      : `linear-gradient(90deg, ${settings.cardBgLeft ?? "#130716"} 0%, ${settings.cardBgLeft ?? "#130716"} 100%)`;
+    ? `linear-gradient(90deg, ${hexWithAlpha(settings.cardBgLeft, cardBgAlpha)} 0%, ${hexWithAlpha(settings.cardBgLeft, cardBgAlpha)} ${cardBgStops.topStop}%, ${hexWithAlpha(settings.cardBgRight, cardBgAlpha)} ${cardBgStops.bottomStart}%, ${hexWithAlpha(settings.cardBgRight, cardBgAlpha)} 100%)`
+    : `linear-gradient(90deg, ${hexWithAlpha(settings.cardBgLeft, cardBgAlpha)} 0%, ${hexWithAlpha(settings.cardBgLeft, cardBgAlpha)} 100%)`;
 
   const customImageTransparency = percent(settings.customImageGradient, 0);
   const customImageOpacity = Math.max(
@@ -2983,10 +3289,18 @@ function Card({
   const previewRankIcon = previewRank.emblem || settings.rankIconUrl;
 
   const tagBoxStops = gradientStops(settings.tagBoxGradientBalance, 50);
-  const tagTextStops = gradientStops(settings.tagTextGradientBalance, 40);
   const ratingBoxStops = gradientStops(settings.ratingBoxGradientBalance, 50);
-  const ratingTextStops = gradientStops(settings.ratingTextGradientBalance, 40);
-  const textStops = gradientStops(settings.textGradientBalance, 40);
+  const effectiveTagTop = settings.textTopColor;
+  const effectiveTagBottom = settings.textBottomColor;
+  const effectiveTagGradient = settings.textGradientEnabled;
+  const effectiveTagBalance = settings.textGradientBalance;
+  const effectiveRatingTop = settings.textTopColor;
+  const effectiveRatingBottom = settings.textBottomColor;
+  const effectiveRatingGradient = settings.textGradientEnabled;
+  const effectiveRatingBalance = settings.textGradientBalance;
+  const textStops = gradientStops(settings.textGradientBalance, 50);
+  const effectiveTagTextStops = gradientStops(effectiveTagBalance, 50);
+  const effectiveRatingTextStops = gradientStops(effectiveRatingBalance, 50);
   const ratingEffectColor = settings.ratingEffectUseMainColor
     ? settings.borderColor
     : settings.ratingEffectColor;
@@ -3004,9 +3318,9 @@ function Card({
         settings.textFont === "OEDO_KANTEIRYU" ? "font-oedo-kanteiryu" : ""
       } ${!settings.flowEnabled ? "no-flow" : ""} ${
         !settings.tagBoxGradientEnabled ? "no-tag-box-gradient" : ""
-      } ${!settings.tagTextGradientEnabled ? "no-tag-text-gradient" : ""} ${
+      } ${!effectiveTagGradient ? "no-tag-text-gradient" : ""} ${
         !settings.ratingBoxGradientEnabled ? "no-rating-box-gradient" : ""
-      } ${!settings.ratingTextGradientEnabled ? "no-rating-text-gradient" : ""} ${
+      } ${!effectiveRatingGradient ? "no-rating-text-gradient" : ""} ${
         !settings.textGradientEnabled ? "no-text-gradient" : ""
       } ${!settings.cardBgGradientEnabled ? "no-card-bg-gradient" : ""} label-shape-rounded ${
         `rank-effect-style-${settings.rankEffectStyle.toLowerCase()} rating-switch-style-${settings.ratingSwitchEffectStyle.toLowerCase()}`
@@ -3019,10 +3333,8 @@ function Card({
             0,
             Math.min(1, 1 - (settings.overallTransparency ?? 0) / 100)
           ),
-          transform: `scale(${settings.cardScale / 100})`,
+          transform: "scale(0.98)",
           backgroundImage: settings.showCardBackground ? cardBackground : "none",
-          backgroundPosition: `${settings.bgX}% ${settings.bgY}%`,
-          backgroundSize: `${settings.bgZoom}%`,
           borderColor: "transparent",
           boxShadow: `0 0 28px ${(settings.borderColor ?? "#ff0000")}44, inset 0 0 24px #ffffff10`,
           "--border-color": settings.borderColor ?? "#ff0000",
@@ -3033,24 +3345,27 @@ function Card({
           "--flow-gap": String(100 - percent(settings.flowLength, 16)),
           "--tag-top-color": settings.tagTopColor ?? "#b90000",
           "--tag-bottom-color": settings.tagBottomColor ?? "#000000",
-          "--tag-text-top-color": settings.tagTextTopColor ?? "#ffffff",
-          "--tag-text-bottom-color": settings.tagTextBottomColor ?? "#ff3030",
+          "--tag-text-top-color": effectiveTagTop ?? "#ffffff",
+          "--tag-text-bottom-color": effectiveTagBottom ?? "#ff3030",
           "--tag-box-top-stop": `${tagBoxStops.topStop}%`,
           "--tag-box-bottom-start": `${tagBoxStops.bottomStart}%`,
-          "--tag-text-top-stop": `${tagTextStops.topStop}%`,
-          "--tag-text-bottom-start": `${tagTextStops.bottomStart}%`,
+          "--tag-text-gradient-balance": `${effectiveTagBalance}%`,
+          "--tag-text-top-stop": `${effectiveTagTextStops.topStop}%`,
+          "--tag-text-bottom-start": `${effectiveTagTextStops.bottomStart}%`,
           "--rating-top-color": settings.ratingBoxTopColor ?? "#b90000",
           "--rating-bottom-color": settings.ratingBoxBottomColor ?? "#000000",
-          "--rating-text-top-color": settings.ratingTextTopColor ?? "#ffffff",
-          "--rating-text-bottom-color": settings.ratingTextBottomColor ?? "#ff3030",
+          "--rating-text-top-color": effectiveRatingTop ?? "#ffffff",
+          "--rating-text-bottom-color": effectiveRatingBottom ?? "#ff3030",
           "--rating-box-top-stop": `${ratingBoxStops.topStop}%`,
           "--rating-box-bottom-start": `${ratingBoxStops.bottomStart}%`,
-          "--rating-text-top-stop": `${ratingTextStops.topStop}%`,
-          "--rating-text-bottom-start": `${ratingTextStops.bottomStart}%`,
+          "--rating-text-gradient-balance": `${effectiveRatingBalance}%`,
+          "--rating-text-top-stop": `${effectiveRatingTextStops.topStop}%`,
+          "--rating-text-bottom-start": `${effectiveRatingTextStops.bottomStart}%`,
           "--label-radius": `${settings.labelRadius ?? 10}px`,
           "--card-font": fontFamily(settings.textFont),
           "--text-top-color": settings.textTopColor ?? "#ffffff",
           "--text-bottom-color": settings.textBottomColor ?? "#ff3030",
+          "--text-gradient-balance": `${settings.textGradientBalance}%`,
           "--text-top-stop": `${textStops.topStop}%`,
           "--text-bottom-start": `${textStops.bottomStart}%`,
           "--text-shadow-x": `${shadowOffsetX(settings.textShadowX)}px`,
@@ -3060,6 +3375,19 @@ function Card({
         } as CSSProperties
       }
     >
+      {settings.showBackgroundImage && settings.bgUrl && (
+        <div
+          className="card-background-image-layer"
+          style={{
+            backgroundImage: `url(${settings.bgUrl})`,
+            backgroundPosition: `${settings.bgX}% ${settings.bgY}%`,
+            backgroundSize: `${settings.bgZoom}%`,
+            opacity: opacityFromTransparency(settings.backgroundImageTransparency),
+          }}
+          aria-hidden="true"
+        />
+      )}
+
       <svg
         className="flow-border-svg"
         viewBox="0 0 650 150"
@@ -3102,6 +3430,7 @@ function Card({
             top: `${settings.rankIconY}%`,
             width: settings.rankIconSize,
             height: settings.rankIconSize,
+            opacity: opacityFromTransparency(settings.rankIconTransparency),
           }}
         />
       )}
@@ -3114,6 +3443,7 @@ function Card({
             top: `${settings.tagY}%`,
             fontSize: settings.tagTextSize,
             letterSpacing: `${(settings.tagTextSpacing ?? 0) / 100}em`,
+            opacity: opacityFromTransparency(settings.trackTransparency),
           }}
         >
           {settings.showTrackTagText && (
@@ -3131,6 +3461,7 @@ function Card({
             width: Math.round(settings.flagSize * 1.92),
             height: Math.round(settings.flagSize * 1.42),
             fontSize: settings.flagSize,
+            opacity: opacityFromTransparency(settings.flagTransparency),
             background: settings.flagUrl
               ? "rgba(255, 255, 255, .92)"
               : (settings.borderColor ?? "#000000"),
@@ -3152,6 +3483,7 @@ function Card({
             top: `${settings.nameY}%`,
             fontSize: settings.nameSize,
             letterSpacing: `${(settings.nameTextSpacing ?? 0) / 100}em`,
+            opacity: opacityFromTransparency(settings.nameTransparency),
           }}
         >
           {name}
@@ -3170,40 +3502,7 @@ function Card({
       )}
 
       {(effect === "win" || effect === "loss") && (
-        <div
-          className={`rating-arrow-stream ${
-            effect === "win" ? "is-up" : "is-down"
-          }`}
-          style={{
-            left: `${settings.scoreX}%`,
-            top: `${settings.scoreY}%`,
-          }}
-          aria-hidden="true"
-        >
-          {Array.from({ length: 12 }, (_, index) => {
-            const x = 5 + index * 8.18;
-            const delay = index * 0.075;
-            const duration = 1.25 + (index % 4) * 0.14;
-            const size = [42, 50, 60, 46, 56, 44][index % 6];
-
-            return (
-              <span
-                className="rating-arrow-particle"
-                key={`preview-rating-arrow-${index}`}
-                style={
-                  {
-                    "--arrow-x": `${x}%`,
-                    "--arrow-delay": `${delay}s`,
-                    "--arrow-duration": `${duration}s`,
-                    "--arrow-size": `${size}px`,
-                  } as CSSProperties
-                }
-              >
-                {effect === "win" ? "⬆" : "⬇"}
-              </span>
-            );
-          })}
-        </div>
+        <ResultOpeningEffect kind={effect} style={settings.resultEffectStyle} />
       )}
 
       {settings.showRate && (
@@ -3222,6 +3521,7 @@ function Card({
             fontSize: settings.scoreSize,
             letterSpacing: `${(settings.scoreTextSpacing ?? 0) / 100}em`,
             columnGap: `${(settings.scoreTextSpacing ?? 0) / 100}em`,
+            opacity: opacityFromTransparency(settings.rateTransparency),
           }}
         />
       )}
@@ -3239,6 +3539,7 @@ function Card({
           top: `${settings.ratingBoxY}%`,
           fontSize: settings.ratingTextSize,
           letterSpacing: `${(settings.ratingTextSpacing ?? 0) / 100}em`,
+          opacity: opacityFromTransparency(settings.ratingTransparency),
         }}
       >
         {settings.showRatingLabelText && (
@@ -3254,10 +3555,43 @@ function Card({
           left: `${settings.rankTextX}%`,
           top: `${settings.rankTextY}%`,
           fontSize: settings.rankTextSize,
+          opacity: opacityFromTransparency(settings.rankTextTransparency),
         }}
       >
         {cleanRankText(settings.rankText || "MKW Lounge")}
       </div>
+      )}
+
+      {settings.showEvents && formatEvents(settings.events, settings.eventsFormat) && (
+        <div
+          className={`event-line ${settings.eventsUseMainColor ? "main-gradient-text" : "solid-custom-text"}`}
+          style={{
+            left: `${settings.eventsX}%`,
+            top: `${settings.eventsY}%`,
+            fontSize: settings.eventsSize,
+            letterSpacing: `${(settings.eventsSpacing ?? 0) / 100}em`,
+            color: settings.eventsUseMainColor ? undefined : settings.eventsColor,
+            opacity: opacityFromTransparency(settings.eventsTransparency),
+          }}
+        >
+          {formatEvents(settings.events, settings.eventsFormat)}
+        </div>
+      )}
+
+      {settings.showOtherText && settings.otherText && (
+        <div
+          className={`other-text-line ${settings.otherTextUseMainColor ? "main-gradient-text" : "solid-custom-text"}`}
+          style={{
+            left: `${settings.otherTextX}%`,
+            top: `${settings.otherTextY}%`,
+            fontSize: settings.otherTextSize,
+            letterSpacing: `${(settings.otherTextSpacing ?? 0) / 100}em`,
+            color: settings.otherTextUseMainColor ? undefined : settings.otherTextColor,
+            opacity: opacityFromTransparency(settings.otherTextTransparency),
+          }}
+        >
+          {settings.otherText}
+        </div>
       )}
 
       {(effect === "rank-up" || effect === "rank-down") &&

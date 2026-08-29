@@ -100,12 +100,45 @@ function rankEffectStyle(
   return "CLASSIC";
 }
 
+type EventFormat = "EVENTS" | "PREFIX" | "HASH" | "NUMBER";
+
+function eventFormat(value: string): EventFormat {
+  const normalized = value.toUpperCase();
+  const migrated =
+    normalized === "SHORT"
+      ? "PREFIX"
+      : normalized === "COMPACT"
+        ? "NUMBER"
+        : normalized;
+
+  return (["EVENTS", "PREFIX", "HASH", "NUMBER"].includes(migrated)
+    ? migrated
+    : "EVENTS") as EventFormat;
+}
+
 function ratingSwitchEffectStyle(
   value: string
 ): "WAVE" | "FADE" | "FLIP" | "GLITCH" {
   const style = value.toUpperCase();
   if (style === "FADE" || style === "FLIP" || style === "GLITCH") return style;
   return "WAVE";
+}
+
+function resultEffectStyle(
+  value: string
+): "DEFAULT" | "THROTTLE" | "SKY" | "REINCARNATION" | "STARSTRUCK" {
+  const style = value.toUpperCase();
+
+  if (
+    style === "THROTTLE" ||
+    style === "SKY" ||
+    style === "REINCARNATION" ||
+    style === "STARSTRUCK"
+  ) {
+    return style;
+  }
+
+  return "DEFAULT";
 }
 
 export default async function CardPage({
@@ -133,6 +166,9 @@ export default async function CardPage({
     lr: getValue(params, "lr", ""),
     rank: getValue(params, "rank", ""),
     icon: getValue(params, "icon", "https://i.imgur.com/OwhIiNz.png"),
+    events: getValue(params, "events", ""),
+    eventFormat: eventFormat(getValue(params, "eventFormat", "EVENTS")),
+    otherText: getValue(params, "otherText", ""),
     border: color(
       getValue(params, "border", getValue(params, "main", "000000")),
       "#000000"
@@ -147,6 +183,14 @@ export default async function CardPage({
     ratingSwitchEffectStyle: ratingSwitchEffectStyle(
       getValue(params, "switchEffect", "WAVE")
     ),
+    resultEffectStyle: resultEffectStyle(
+      getValue(params, "resultEffect", "DEFAULT")
+    ),
+    labelIndependentColors: getValue(params, "labelIndependent", "0") !== "0",
+    eventsUseMainColor: getValue(params, "eventMain", "1") !== "0",
+    eventsColor: color(getValue(params, "eventColor", "ffffff"), "#ffffff"),
+    otherTextUseMainColor: getValue(params, "otherMain", "1") !== "0",
+    otherTextColor: color(getValue(params, "otherColor", "ffffff"), "#ffffff"),
     tagTop: color(getValue(params, "tagTop", "000000"), "#000000"),
     tagBottom: color(getValue(params, "tagBottom", "ffffff"), "#ffffff"),
     tagTextTop: color(getValue(params, "tagTextTop", "ffffff"), "#ffffff"),
@@ -185,7 +229,7 @@ export default async function CardPage({
     bgX: getNumber(params, "bgx", 50),
     bgY: getNumber(params, "bgy", 50),
     bgZoom: getNumber(params, "bgz", 106.25),
-    scale: getNumber(params, "scale", 100),
+    scale: 98,
     nameX: getNumber(params, "nx", 36),
     nameY: getNumber(params, "ny", 58),
     nameSize: getNumber(params, "ns", 37),
@@ -209,6 +253,14 @@ export default async function CardPage({
     rankTextX: getNumber(params, "rx", 67),
     rankTextY: getNumber(params, "ry", 83),
     rankTextSize: getNumber(params, "rs", 20),
+    eventsX: getNumber(params, "ex", 84),
+    eventsY: getNumber(params, "ey", 22),
+    eventsSize: getNumber(params, "esz", 18),
+    eventsSpacing: getNumber(params, "espace", 0),
+    otherTextX: getNumber(params, "otx", 50),
+    otherTextY: getNumber(params, "oty", 50),
+    otherTextSize: getNumber(params, "ots", 18),
+    otherTextSpacing: getNumber(params, "otspace", 0),
     flagX: getNumber(params, "fx", 22),
     flagY: getNumber(params, "fy", 25),
     flagSize: getNumber(params, "fs", 24),
@@ -233,6 +285,19 @@ export default async function CardPage({
     showBackgroundImage: getValue(params, "vbg", "1") !== "0",
     showCardBackground: getValue(params, "vcard", "1") !== "0",
     showCustomImage: getValue(params, "vimage", "1") !== "0",
+    showEvents: getValue(params, "vevents", "0") !== "0",
+    showOtherText: getValue(params, "vothertext", "0") !== "0",
+    nameTransparency: getNumber(params, "nameOpacity", 0),
+    rateTransparency: getNumber(params, "rateOpacity", 0),
+    trackTransparency: getNumber(params, "trackOpacity", 0),
+    ratingTransparency: getNumber(params, "ratingOpacity", 0),
+    rankTextTransparency: getNumber(params, "rankOpacity", 0),
+    rankIconTransparency: getNumber(params, "iconOpacity", 0),
+    flagTransparency: getNumber(params, "flagOpacity", 0),
+    backgroundImageTransparency: getNumber(params, "bgImageOpacity", 0),
+    cardBackgroundTransparency: getNumber(params, "cardLayerOpacity", 0),
+    eventsTransparency: getNumber(params, "eventsOpacity", 0),
+    otherTextTransparency: getNumber(params, "otherTextOpacity", 0),
     customImageUrl: getValue(params, "overlay", ""),
     customImageX: getNumber(params, "ox", 50),
     customImageY: getNumber(params, "oy", 50),
