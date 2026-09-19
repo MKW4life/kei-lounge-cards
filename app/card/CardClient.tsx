@@ -1286,7 +1286,7 @@ export default function CardClient({
               fontSize: layoutScoreSize,
               "--score-digit-spacing": `${(initial.scoreTextSpacing ?? 0) / 100}em`,
               opacity: opacityFromTransparency(initial.rateTransparency),
-            }}
+            } as CSSProperties}
           />
         )}
 

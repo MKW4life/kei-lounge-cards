@@ -3836,7 +3836,7 @@ function Card({
             fontSize: layoutScoreSize,
             "--score-digit-spacing": `${(settings.scoreTextSpacing ?? 0) / 100}em`,
             opacity: opacityFromTransparency(settings.rateTransparency),
-          }}
+          } as CSSProperties}
         />
       )}
 
