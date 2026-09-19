@@ -1,4 +1,4 @@
-﻿import CardClient from "./CardClient";
+import CardClient from "./CardClient";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -35,6 +35,10 @@ function ratingMode(value: string): "MMR" | "LR" | "SWITCH" {
 
 function modeSetting(value: string): "RT" | "CT" {
   return value === "CT" ? "CT" : "RT";
+}
+
+function layoutMode(value: string): "STANDARD" | "COMPACT" {
+  return value.toLowerCase() === "compact" ? "COMPACT" : "STANDARD";
 }
 
 type FontChoice =
@@ -101,6 +105,7 @@ function rankEffectStyle(
 }
 
 type EventFormat = "EVENTS" | "PREFIX" | "HASH" | "NUMBER";
+type RankTextFormat = "DIVISION" | "FULL_SLASH" | "CLASS" | "FULL_BREAK";
 
 function eventFormat(value: string): EventFormat {
   const normalized = value.toUpperCase();
@@ -116,11 +121,25 @@ function eventFormat(value: string): EventFormat {
     : "EVENTS") as EventFormat;
 }
 
+function rankTextFormat(value: string): RankTextFormat {
+  const normalized = value.toUpperCase();
+  return (["DIVISION", "FULL_SLASH", "CLASS", "FULL_BREAK"].includes(normalized)
+    ? normalized
+    : "FULL_SLASH") as RankTextFormat;
+}
+
 function ratingSwitchEffectStyle(
   value: string
-): "WAVE" | "FADE" | "FLIP" | "GLITCH" {
+): "WAVE" | "FADE" | "SLIDE" | "PULSE" | "SWEEP" | "GLITCH" {
   const style = value.toUpperCase();
-  if (style === "FADE" || style === "FLIP" || style === "GLITCH") return style;
+  if (style === "FLIP") return "SLIDE";
+  if (
+    style === "FADE" ||
+    style === "SLIDE" ||
+    style === "PULSE" ||
+    style === "SWEEP" ||
+    style === "GLITCH"
+  ) return style;
   return "WAVE";
 }
 
@@ -156,6 +175,7 @@ export default async function CardPage({
     name: getValue(params, "name", "Your Name"),
     lounge: getValue(params, "lounge", ""),
     mode: modeSetting(getValue(params, "mode", "RT")),
+    layoutMode: layoutMode(getValue(params, "layout", "standard")),
     ratingMode: ratingMode(getValue(params, "ratingMode", "MMR")),
     ratingSwitchSeconds: getNumber(
       params,
@@ -167,6 +187,7 @@ export default async function CardPage({
     mmr: getValue(params, "mmr", ""),
     lr: getValue(params, "lr", ""),
     rank: getValue(params, "rank", ""),
+    rankTextFormat: rankTextFormat(getValue(params, "rankFormat", "FULL_SLASH")),
     icon: getValue(params, "icon", "https://i.imgur.com/OwhIiNz.png"),
     events: getValue(params, "events", ""),
     eventFormat: eventFormat(getValue(params, "eventFormat", "EVENTS")),
@@ -255,6 +276,7 @@ export default async function CardPage({
     rankTextX: getNumber(params, "rx", 67),
     rankTextY: getNumber(params, "ry", 83),
     rankTextSize: getNumber(params, "rs", 20),
+    rankTextSpacing: getNumber(params, "rankspace", 0),
     eventsX: getNumber(params, "ex", 84),
     eventsY: getNumber(params, "ey", 22),
     eventsSize: getNumber(params, "esz", 18),
@@ -269,6 +291,34 @@ export default async function CardPage({
     iconX: getNumber(params, "ix", 12),
     iconY: getNumber(params, "iy", 26),
     iconSize: getNumber(params, "isz", 60),
+
+    compactNameX: getNumber(params, "cnx", 31),
+    compactNameY: getNumber(params, "cny", 23),
+    compactNameSize: getNumber(params, "cns", 25),
+    compactScoreX: getNumber(params, "csx", 31),
+    compactScoreY: getNumber(params, "csy", 53),
+    compactScoreSize: getNumber(params, "cssz", 36),
+    compactRatingX: getNumber(params, "crlx", 61),
+    compactRatingY: getNumber(params, "crly", 54),
+    compactRatingSize: getNumber(params, "crls", 14),
+    compactTagX: getNumber(params, "ctx", 73),
+    compactTagY: getNumber(params, "cty", 54),
+    compactTagSize: getNumber(params, "cts", 14),
+    compactRankTextX: getNumber(params, "crx", 31),
+    compactRankTextY: getNumber(params, "cry", 82),
+    compactRankTextSize: getNumber(params, "crs", 14),
+    compactEventsX: getNumber(params, "cex", 88),
+    compactEventsY: getNumber(params, "cey", 80),
+    compactEventsSize: getNumber(params, "ces", 12),
+    compactOtherTextX: getNumber(params, "cox", 83),
+    compactOtherTextY: getNumber(params, "coy", 27),
+    compactOtherTextSize: getNumber(params, "cos", 11),
+    compactFlagX: getNumber(params, "cfx", 90),
+    compactFlagY: getNumber(params, "cfy", 20),
+    compactFlagSize: getNumber(params, "cfs", 16),
+    compactIconX: getNumber(params, "cix", 13.5),
+    compactIconY: getNumber(params, "ciy", 50),
+    compactIconSize: getNumber(params, "cis", 86),
     showName: getValue(params, "vname", "1") !== "0",
     showRate: getValue(params, "vrate", "1") !== "0",
     showTrackTag: legacyTrackVisible,

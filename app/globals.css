@@ -6755,3 +6755,410 @@ label.summary-toggle span {
   16% { opacity: .95; }
   100% { opacity: 0; transform: rotate(var(--shock-rot, 0deg)) translateX(220px) scaleX(1); }
 }
+
+
+/* v2.1.6 — narrow compact layout
+   Compact mode changes aspect ratio instead of simply shrinking the card.
+   Standard: 650x150 (4.33:1)
+   Compact:  380x150 (2.53:1)
+   Keep the same on-screen height in OBS and the compact card uses about 42% less width. */
+.layout-mode-control {
+  margin-bottom: 16px;
+  padding: 12px;
+  border: 1px solid rgba(124, 140, 255, .22);
+  border-radius: 12px;
+  background: rgba(124, 140, 255, .055);
+}
+
+.layout-mode-control > label {
+  display: block;
+  margin: 0;
+}
+
+.layout-mode-note {
+  margin-top: 9px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.layout-mode-note.is-active {
+  color: #dce3ff;
+}
+
+.obs-size-hint {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 9px;
+  background: rgba(255,255,255,.045);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.obs-size-hint.is-compact {
+  color: #dce3ff;
+  background: rgba(124, 140, 255, .09);
+}
+
+.preview-stage.compact-preview-stage {
+  height: 300px;
+}
+
+.card-shell.compact-mode {
+  width: 380px !important;
+  height: 150px !important;
+  border-radius: 62px !important;
+}
+
+.card-shell.compact-mode .result-opening-fx {
+  border-radius: 62px;
+}
+
+/* Compact positioning and sizes are controlled by the same Design sliders while Compact mode is active. */
+.card-shell.compact-mode .card-name {
+  max-width: 64%;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
+  text-align: center;
+  line-height: 1;
+}
+
+/* Long compact names always stay fully visible. When they reach the available
+   horizontal width, only the X axis is compressed. The user's Name size still
+   controls the actual font height, so the size slider never becomes visually
+   stuck while merely shifting the text sideways. */
+.card-shell.compact-mode .compact-auto-fit-name {
+  width: 64%;
+  max-width: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.compact-auto-fit-name-text {
+  display: inline-block;
+  flex: 0 0 auto;
+  max-width: none;
+  white-space: nowrap;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+.card-shell:not(.no-text-gradient) .compact-auto-fit-name-text {
+  background: linear-gradient(
+    180deg,
+    var(--text-top-color) 0%,
+    var(--text-top-color) var(--text-top-stop),
+    var(--text-bottom-color) var(--text-bottom-start),
+    var(--text-bottom-color) 100%
+  );
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.card-shell.no-text-gradient .compact-auto-fit-name-text {
+  background: none;
+  color: var(--text-top-color);
+  -webkit-text-fill-color: currentColor;
+}
+
+.card-shell.compact-mode .card-score {
+  line-height: 1;
+}
+
+.card-shell.compact-mode .rating-label,
+.card-shell.compact-mode .mode-tag {
+  padding: 3px 7px !important;
+  min-width: 0 !important;
+}
+
+.card-shell.compact-mode .rank-line {
+  max-width: 66%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  line-height: 1;
+}
+
+.card-shell.compact-mode .flag-badge {
+  padding: 2px !important;
+}
+
+.card-shell.compact-mode .event-line {
+  max-width: 30%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-shell.compact-mode .other-text-line {
+  max-width: 34%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Compact OBS page has no transparent 650px-wide dead area. */
+.obs-page.compact-obs-page {
+  width: 380px !important;
+  height: 150px !important;
+}
+
+.obs-page .card-shell.compact-mode {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: auto;
+  bottom: auto;
+  margin: 0;
+  transform: scale(.98) !important;
+  transform-origin: center !important;
+}
+
+@media (max-width: 680px) {
+  .preview-stage.compact-preview-stage {
+    height: 240px;
+  }
+
+  .preview-stage .card-shell.compact-mode {
+    transform: scale(.88) !important;
+  }
+}
+
+
+/* v2.1.7 compact editing hint */
+.compact-edit-note {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(124, 140, 255, .28);
+  border-radius: 10px;
+  background: rgba(124, 140, 255, .08);
+  color: #dce3ff;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+
+/* v2.2.5 — compact elements keep their natural size, but anything outside
+   the rounded card border is clipped to transparent. */
+.card-shell.compact-mode {
+  overflow: hidden !important;
+}
+
+.card-shell.compact-mode .card-name {
+  width: max-content !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: nowrap !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+
+/* v2.2.2 — true rate digit spacing, including negative values */
+.card-score.rolling-number {
+  column-gap: 0 !important;
+  letter-spacing: 0 !important;
+}
+
+.card-score > .rolling-digit-window,
+.card-score > .rolling-static-char {
+  margin-right: var(--score-digit-spacing, 0em);
+}
+
+.card-score > .rolling-digit-window:last-child,
+.card-score > .rolling-static-char:last-child {
+  margin-right: 0;
+}
+
+
+/* v2.2.3 rank text format */
+.rank-line {
+  white-space: nowrap;
+}
+
+
+/* v2.2.7 MMR / LR switch polish
+   - Soft Fade no longer animates `filter` on the text itself, so the user's
+     configured drop-shadow stays active throughout the switch.
+   - 3D Flip is retired. Slide In, Pulse and Light Sweep are the new options. */
+
+/* Soft Fade: opacity/scale only on text. Never override the shared text-shadow filter. */
+.card-shell .card-score.rating-score-switch-fade {
+  animation: switch-score-fade-v227 .54s ease-in-out both !important;
+}
+
+.card-shell .rating-label.rating-label-switch-fade {
+  animation: switch-label-fade-v227 .54s ease-in-out both !important;
+}
+
+@keyframes switch-score-fade-v227 {
+  0% {
+    opacity: .28;
+    transform: translate(-50%, -50%) scale(.97);
+  }
+  58% {
+    opacity: .9;
+    transform: translate(-50%, -50%) scale(1.015);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes switch-label-fade-v227 {
+  0% {
+    opacity: .22;
+    transform: translate(-50%, -50%) scale(.97);
+  }
+  58% {
+    opacity: .9;
+    transform: translate(-50%, -50%) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* Slide In */
+.rating-switch-effect-slide {
+  width: 238px !important;
+  height: 72px !important;
+  border: 0 !important;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--rating-effect-color) 10%, transparent) 25%,
+    color-mix(in srgb, var(--rating-effect-color) 42%, transparent) 50%,
+    color-mix(in srgb, var(--rating-effect-color) 10%, transparent) 75%,
+    transparent 100%
+  ) !important;
+  box-shadow: none !important;
+  animation: switch-layer-slide-v227 .52s cubic-bezier(.2,.8,.2,1) forwards !important;
+}
+
+.card-shell .card-score.rating-score-switch-slide {
+  animation: switch-score-slide-v227 .5s cubic-bezier(.16,1,.3,1) both !important;
+}
+
+.card-shell .rating-label.rating-label-switch-slide {
+  animation: switch-label-slide-v227 .5s cubic-bezier(.16,1,.3,1) both !important;
+}
+
+@keyframes switch-layer-slide-v227 {
+  0% { opacity: 0; transform: translate(-68%, -50%) scaleX(.62); }
+  38% { opacity: .52; }
+  100% { opacity: 0; transform: translate(-32%, -50%) scaleX(1.08); }
+}
+
+@keyframes switch-score-slide-v227 {
+  0% { opacity: .25; transform: translate(calc(-50% - 22px), -50%); }
+  62% { opacity: 1; transform: translate(calc(-50% + 3px), -50%); }
+  100% { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+@keyframes switch-label-slide-v227 {
+  0% { opacity: .25; transform: translate(calc(-50% + 16px), -50%); }
+  62% { opacity: 1; transform: translate(calc(-50% - 2px), -50%); }
+  100% { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+/* Pulse */
+.rating-switch-effect-pulse {
+  width: 150px !important;
+  height: 64px !important;
+  border: 1.5px solid color-mix(in srgb, var(--rating-effect-color) 55%, transparent) !important;
+  border-radius: 999px !important;
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--rating-effect-color) 22%, transparent),
+    transparent 68%
+  ) !important;
+  box-shadow: 0 0 10px color-mix(in srgb, var(--rating-effect-color) 28%, transparent) !important;
+  animation: switch-layer-pulse-v227 .56s ease-out forwards !important;
+}
+
+.card-shell .card-score.rating-score-switch-pulse {
+  animation: switch-score-pulse-v227 .54s cubic-bezier(.16,1,.3,1) both !important;
+}
+
+.card-shell .rating-label.rating-label-switch-pulse {
+  animation: switch-label-pulse-v227 .54s cubic-bezier(.16,1,.3,1) both !important;
+}
+
+@keyframes switch-layer-pulse-v227 {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.62); }
+  38% { opacity: .58; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.42); }
+}
+
+@keyframes switch-score-pulse-v227 {
+  0% { opacity: .38; transform: translate(-50%, -50%) scale(.82); }
+  58% { opacity: 1; transform: translate(-50%, -50%) scale(1.075); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes switch-label-pulse-v227 {
+  0% { opacity: .42; transform: translate(-50%, -50%) scale(.88); }
+  58% { opacity: 1; transform: translate(-50%, -50%) scale(1.045); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+/* Light Sweep */
+.rating-switch-effect-sweep {
+  width: 250px !important;
+  height: 76px !important;
+  border: 0 !important;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    transparent 41%,
+    color-mix(in srgb, var(--rating-effect-color) 16%, transparent) 46%,
+    color-mix(in srgb, white 62%, var(--rating-effect-color)) 50%,
+    color-mix(in srgb, var(--rating-effect-color) 16%, transparent) 54%,
+    transparent 59%,
+    transparent 100%
+  ) !important;
+  background-size: 260% 100% !important;
+  box-shadow: none !important;
+  animation: switch-layer-sweep-v227 .62s ease-in-out forwards !important;
+}
+
+.card-shell .card-score.rating-score-switch-sweep {
+  animation: switch-score-sweep-v227 .58s ease-out both !important;
+}
+
+.card-shell .rating-label.rating-label-switch-sweep {
+  animation: switch-label-sweep-v227 .58s ease-out both !important;
+}
+
+@keyframes switch-layer-sweep-v227 {
+  0% { opacity: 0; background-position: 120% 0; transform: translate(-50%, -50%); }
+  20% { opacity: .58; }
+  78% { opacity: .46; }
+  100% { opacity: 0; background-position: -120% 0; transform: translate(-50%, -50%); }
+}
+
+@keyframes switch-score-sweep-v227 {
+  0% { opacity: .46; transform: translate(-50%, -50%) scale(.985); }
+  45% { opacity: 1; transform: translate(-50%, -50%) scale(1.025); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes switch-label-sweep-v227 {
+  0% { opacity: .38; transform: translate(-50%, -50%); }
+  50% { opacity: 1; transform: translate(-50%, -50%); }
+  100% { opacity: 1; transform: translate(-50%, -50%); }
+}

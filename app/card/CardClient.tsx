@@ -1,10 +1,16 @@
 "use client";
 
 import RollingNumber from "@/components/RollingNumber";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 
 type RatingMode = "MMR" | "LR" | "SWITCH";
 type ModeSetting = "RT" | "CT";
+type LayoutMode = "STANDARD" | "COMPACT";
 type LabelShape = "ROUNDED" | "STAR" | "HEART";
 type FontChoice =
   | "DEFAULT"
@@ -29,9 +35,10 @@ type RankEffectStyle =
   | "BURST"
   | "STARLIGHT"
   | "METEOR";
-type RatingSwitchEffectStyle = "WAVE" | "FADE" | "FLIP" | "GLITCH";
+type RatingSwitchEffectStyle = "WAVE" | "FADE" | "SLIDE" | "PULSE" | "SWEEP" | "GLITCH";
 type ResultEffectStyle = "DEFAULT" | "THROTTLE" | "SKY" | "REINCARNATION" | "STARSTRUCK" | "NEONRUSH" | "SHOCKWAVE";
 type EventFormat = "EVENTS" | "PREFIX" | "HASH" | "NUMBER";
+type RankTextFormat = "DIVISION" | "FULL_SLASH" | "CLASS" | "FULL_BREAK";
 type EffectKind = "win" | "loss" | "rank-up" | "rank-down";
 type EffectPhase = "change" | "rank-reveal";
 
@@ -47,6 +54,7 @@ type InitialCardSettings = {
   name: string;
   lounge: string;
   mode: ModeSetting;
+  layoutMode: LayoutMode;
 
   ratingMode: RatingMode;
   ratingSwitchSeconds: number;
@@ -58,6 +66,7 @@ type InitialCardSettings = {
   lr: string;
 
   rank: string;
+  rankTextFormat: RankTextFormat;
   icon: string;
   events: string;
   eventFormat: EventFormat;
@@ -144,6 +153,7 @@ type InitialCardSettings = {
   rankTextX: number;
   rankTextY: number;
   rankTextSize: number;
+  rankTextSpacing: number;
   eventsX: number;
   eventsY: number;
   eventsSize: number;
@@ -160,6 +170,34 @@ type InitialCardSettings = {
   iconX: number;
   iconY: number;
   iconSize: number;
+
+  compactNameX: number;
+  compactNameY: number;
+  compactNameSize: number;
+  compactScoreX: number;
+  compactScoreY: number;
+  compactScoreSize: number;
+  compactRatingX: number;
+  compactRatingY: number;
+  compactRatingSize: number;
+  compactTagX: number;
+  compactTagY: number;
+  compactTagSize: number;
+  compactRankTextX: number;
+  compactRankTextY: number;
+  compactRankTextSize: number;
+  compactEventsX: number;
+  compactEventsY: number;
+  compactEventsSize: number;
+  compactOtherTextX: number;
+  compactOtherTextY: number;
+  compactOtherTextSize: number;
+  compactFlagX: number;
+  compactFlagY: number;
+  compactFlagSize: number;
+  compactIconX: number;
+  compactIconY: number;
+  compactIconSize: number;
 
   showName: boolean;
   showRate: boolean;
@@ -353,6 +391,38 @@ function ResultOpeningEffect({
 
 function cleanRankText(text: string) {
   return text.replace(/\s*,\s*/g, " / ");
+}
+
+function splitRankText(text: string) {
+  const cleaned = cleanRankText(text || "").trim();
+  const parts = cleaned.split("/").map((part) => part.trim());
+
+  return {
+    division: parts[0] || "",
+    className: parts.slice(1).join(" / "),
+  };
+}
+
+function formatRankText(text: string, format: RankTextFormat) {
+  const cleaned = cleanRankText(text || "").trim();
+  if (!cleaned) return "";
+
+  const { division, className } = splitRankText(cleaned);
+
+  if (!className) {
+    return division || cleaned;
+  }
+
+  switch (format) {
+    case "DIVISION":
+      return division;
+    case "CLASS":
+      return className;
+    case "FULL_BREAK":
+      return `${division}\n${className}`;
+    default:
+      return `${division}/${className}`;
+  }
 }
 
 function opacityFromTransparency(value: number | undefined) {
@@ -564,6 +634,10 @@ export default function CardClient({
     const prevHtmlBackgroundColor = html.style.backgroundColor;
     const prevHtmlWidth = html.style.width;
     const prevHtmlHeight = html.style.height;
+    const prevHtmlMinWidth = html.style.minWidth;
+    const prevHtmlMaxWidth = html.style.maxWidth;
+    const prevHtmlMinHeight = html.style.minHeight;
+    const prevHtmlMaxHeight = html.style.maxHeight;
     const prevHtmlOverflow = html.style.overflow;
 
     const prevBodyBackground = body.style.background;
@@ -571,22 +645,37 @@ export default function CardClient({
     const prevBodyMargin = body.style.margin;
     const prevBodyWidth = body.style.width;
     const prevBodyHeight = body.style.height;
+    const prevBodyMinWidth = body.style.minWidth;
+    const prevBodyMaxWidth = body.style.maxWidth;
+    const prevBodyMinHeight = body.style.minHeight;
+    const prevBodyMaxHeight = body.style.maxHeight;
     const prevBodyOverflow = body.style.overflow;
+
+    const obsWidth = initial.layoutMode === "COMPACT" ? "380px" : "650px";
+    const obsHeight = "150px";
 
     html.classList.add("obs-transparent");
     body.classList.add("obs-transparent");
 
     html.style.setProperty("background", "transparent", "important");
     html.style.setProperty("background-color", "transparent", "important");
-    html.style.setProperty("width", "650px", "important");
-    html.style.setProperty("height", "150px", "important");
+    html.style.setProperty("width", obsWidth, "important");
+    html.style.setProperty("height", obsHeight, "important");
+    html.style.setProperty("min-width", obsWidth, "important");
+    html.style.setProperty("max-width", obsWidth, "important");
+    html.style.setProperty("min-height", obsHeight, "important");
+    html.style.setProperty("max-height", obsHeight, "important");
     html.style.setProperty("overflow", "hidden", "important");
 
     body.style.setProperty("background", "transparent", "important");
     body.style.setProperty("background-color", "transparent", "important");
     body.style.setProperty("margin", "0", "important");
-    body.style.setProperty("width", "650px", "important");
-    body.style.setProperty("height", "150px", "important");
+    body.style.setProperty("width", obsWidth, "important");
+    body.style.setProperty("height", obsHeight, "important");
+    body.style.setProperty("min-width", obsWidth, "important");
+    body.style.setProperty("max-width", obsWidth, "important");
+    body.style.setProperty("min-height", obsHeight, "important");
+    body.style.setProperty("max-height", obsHeight, "important");
     body.style.setProperty("overflow", "hidden", "important");
 
     return () => {
@@ -597,6 +686,10 @@ export default function CardClient({
       html.style.backgroundColor = prevHtmlBackgroundColor;
       html.style.width = prevHtmlWidth;
       html.style.height = prevHtmlHeight;
+      html.style.minWidth = prevHtmlMinWidth;
+      html.style.maxWidth = prevHtmlMaxWidth;
+      html.style.minHeight = prevHtmlMinHeight;
+      html.style.maxHeight = prevHtmlMaxHeight;
       html.style.overflow = prevHtmlOverflow;
 
       body.style.background = prevBodyBackground;
@@ -604,9 +697,13 @@ export default function CardClient({
       body.style.margin = prevBodyMargin;
       body.style.width = prevBodyWidth;
       body.style.height = prevBodyHeight;
+      body.style.minWidth = prevBodyMinWidth;
+      body.style.maxWidth = prevBodyMaxWidth;
+      body.style.minHeight = prevBodyMinHeight;
+      body.style.maxHeight = prevBodyMaxHeight;
       body.style.overflow = prevBodyOverflow;
     };
-  }, []);
+  }, [initial.layoutMode]);
 
   useEffect(() => {
     activeRatingRef.current = activeRating;
@@ -941,10 +1038,39 @@ export default function CardClient({
     Math.min(1, 1 - customImageTransparency / 100)
   );
 
+  const compactLayout = initial.layoutMode === "COMPACT";
+  const layoutNameX = compactLayout ? initial.compactNameX : initial.nameX;
+  const layoutNameY = compactLayout ? initial.compactNameY : initial.nameY;
+  const layoutNameSize = compactLayout ? initial.compactNameSize : initial.nameSize;
+  const layoutScoreX = compactLayout ? initial.compactScoreX : initial.scoreX;
+  const layoutScoreY = compactLayout ? initial.compactScoreY : initial.scoreY;
+  const layoutScoreSize = compactLayout ? initial.compactScoreSize : initial.scoreSize;
+  const layoutRatingX = compactLayout ? initial.compactRatingX : initial.ratingBoxX;
+  const layoutRatingY = compactLayout ? initial.compactRatingY : initial.ratingBoxY;
+  const layoutRatingSize = compactLayout ? initial.compactRatingSize : initial.ratingTextSize;
+  const layoutTagX = compactLayout ? initial.compactTagX : initial.tagX;
+  const layoutTagY = compactLayout ? initial.compactTagY : initial.tagY;
+  const layoutTagSize = compactLayout ? initial.compactTagSize : initial.tagTextSize;
+  const layoutRankX = compactLayout ? initial.compactRankTextX : initial.rankTextX;
+  const layoutRankY = compactLayout ? initial.compactRankTextY : initial.rankTextY;
+  const layoutRankSize = compactLayout ? initial.compactRankTextSize : initial.rankTextSize;
+  const layoutEventsX = compactLayout ? initial.compactEventsX : initial.eventsX;
+  const layoutEventsY = compactLayout ? initial.compactEventsY : initial.eventsY;
+  const layoutEventsSize = compactLayout ? initial.compactEventsSize : initial.eventsSize;
+  const layoutOtherX = compactLayout ? initial.compactOtherTextX : initial.otherTextX;
+  const layoutOtherY = compactLayout ? initial.compactOtherTextY : initial.otherTextY;
+  const layoutOtherSize = compactLayout ? initial.compactOtherTextSize : initial.otherTextSize;
+  const layoutFlagX = compactLayout ? initial.compactFlagX : initial.flagX;
+  const layoutFlagY = compactLayout ? initial.compactFlagY : initial.flagY;
+  const layoutFlagSize = compactLayout ? initial.compactFlagSize : initial.flagSize;
+  const layoutIconX = compactLayout ? initial.compactIconX : initial.iconX;
+  const layoutIconY = compactLayout ? initial.compactIconY : initial.iconY;
+  const layoutIconSize = compactLayout ? initial.compactIconSize : initial.iconSize;
+
   return (
-    <main className="obs-page">
+    <main className={`obs-page ${initial.layoutMode === "COMPACT" ? "compact-obs-page" : ""}`}>
       <div
-        className={`card-shell ${
+        className={`card-shell ${initial.layoutMode === "COMPACT" ? "compact-mode" : ""} ${
           initial.textFont === "OEDO_KANTEIRYU"
             ? "font-oedo-kanteiryu"
             : ""
@@ -1026,17 +1152,18 @@ export default function CardClient({
 
         <svg
           className="flow-border-svg"
-          viewBox="0 0 650 150"
+          viewBox={initial.layoutMode === "COMPACT" ? "0 0 380 150" : "0 0 650 150"}
+          preserveAspectRatio="none"
           aria-hidden="true"
         >
           <rect
             className="flow-border-path"
             x="1"
             y="1"
-            width="648"
+            width={initial.layoutMode === "COMPACT" ? "378" : "648"}
             height="148"
-            rx="69"
-            ry="69"
+            rx={initial.layoutMode === "COMPACT" ? "61" : "69"}
+            ry={initial.layoutMode === "COMPACT" ? "61" : "69"}
             pathLength={100}
           />
         </svg>
@@ -1062,10 +1189,10 @@ export default function CardClient({
             src={display.icon}
             alt=""
             style={{
-              left: `${initial.iconX}%`,
-              top: `${initial.iconY}%`,
-              width: initial.iconSize,
-              height: initial.iconSize,
+              left: `${layoutIconX}%`,
+              top: `${layoutIconY}%`,
+              width: layoutIconSize,
+              height: layoutIconSize,
               opacity: opacityFromTransparency(initial.rankIconTransparency),
             }}
           />
@@ -1075,9 +1202,9 @@ export default function CardClient({
           <div
             className="mode-tag"
             style={{
-              left: `${initial.tagX}%`,
-              top: `${initial.tagY}%`,
-              fontSize: initial.tagTextSize,
+              left: `${layoutTagX}%`,
+              top: `${layoutTagY}%`,
+              fontSize: layoutTagSize,
               letterSpacing: `${(initial.tagTextSpacing ?? 0) / 100}em`,
               opacity: opacityFromTransparency(initial.trackTransparency),
             }}
@@ -1092,11 +1219,11 @@ export default function CardClient({
           <div
             className={`flag-badge ${display.flagUrl ? "has-image" : ""}`}
             style={{
-              left: `${initial.flagX}%`,
-              top: `${initial.flagY}%`,
-              width: Math.round(initial.flagSize * 1.92),
-              height: Math.round(initial.flagSize * 1.42),
-              fontSize: initial.flagSize,
+              left: `${layoutFlagX}%`,
+              top: `${layoutFlagY}%`,
+              width: Math.round(layoutFlagSize * 1.92),
+              height: Math.round(layoutFlagSize * 1.42),
+              fontSize: layoutFlagSize,
               opacity: opacityFromTransparency(initial.flagTransparency),
               background: display.flagUrl
                 ? "rgba(255, 255, 255, .92)"
@@ -1115,9 +1242,9 @@ export default function CardClient({
           <div
             className="card-name"
             style={{
-              left: `${initial.nameX}%`,
-              top: `${initial.nameY}%`,
-              fontSize: initial.nameSize,
+              left: `${layoutNameX}%`,
+              top: `${layoutNameY}%`,
+              fontSize: layoutNameSize,
               letterSpacing: `${(initial.nameTextSpacing ?? 0) / 100}em`,
               opacity: opacityFromTransparency(initial.nameTransparency),
             }}
@@ -1131,8 +1258,8 @@ export default function CardClient({
             key={`switch-wave-${switchAnimationToken}`}
             className={`rating-switch-effect rating-switch-effect-${initial.ratingSwitchEffectStyle.toLowerCase()}`}
             style={{
-              left: `${initial.scoreX}%`,
-              top: `${initial.scoreY}%`,
+              left: `${layoutScoreX}%`,
+              top: `${layoutScoreY}%`,
             }}
           />
         )}
@@ -1154,11 +1281,10 @@ export default function CardClient({
                 : ""
             }`}
             style={{
-              left: `${initial.scoreX}%`,
-              top: `${initial.scoreY}%`,
-              fontSize: initial.scoreSize,
-              letterSpacing: `${(initial.scoreTextSpacing ?? 0) / 100}em`,
-              columnGap: `${(initial.scoreTextSpacing ?? 0) / 100}em`,
+              left: `${layoutScoreX}%`,
+              top: `${layoutScoreY}%`,
+              fontSize: layoutScoreSize,
+              "--score-digit-spacing": `${(initial.scoreTextSpacing ?? 0) / 100}em`,
               opacity: opacityFromTransparency(initial.rateTransparency),
             }}
           />
@@ -1173,9 +1299,9 @@ export default function CardClient({
               : ""
           }`}
           style={{
-            left: `${initial.ratingBoxX}%`,
-            top: `${initial.ratingBoxY}%`,
-            fontSize: initial.ratingTextSize,
+            left: `${layoutRatingX}%`,
+            top: `${layoutRatingY}%`,
+            fontSize: layoutRatingSize,
             letterSpacing: `${(initial.ratingTextSpacing ?? 0) / 100}em`,
             opacity: opacityFromTransparency(initial.ratingTransparency),
           }}
@@ -1190,20 +1316,24 @@ export default function CardClient({
         <div
           className="rank-line"
           style={{
-            left: `${initial.rankTextX}%`,
-            top: `${initial.rankTextY}%`,
-            fontSize: initial.rankTextSize,
+            left: `${layoutRankX}%`,
+            top: `${layoutRankY}%`,
+            fontSize: layoutRankSize,
+            letterSpacing: `${(initial.rankTextSpacing ?? 0) / 100}em`,
             opacity: opacityFromTransparency(initial.rankTextTransparency),
+            whiteSpace: initial.rankTextFormat === "FULL_BREAK" ? "pre-line" : "nowrap",
+            lineHeight: initial.rankTextFormat === "FULL_BREAK" ? 0.9 : 1,
+            textAlign: "center",
           }}
         >
-          {display.rank || "MKW Lounge"}
+          {formatRankText(display.rank || "MKW Lounge", initial.rankTextFormat)}
         </div>
         )}
 
         {effect &&
           effect.phase === "change" &&
           (effect.kind === "rank-up" || effect.kind === "rank-down") && (
-            <div className={`effect-burst rank-announcement ${effect.kind}`}>
+            <div className={`effect-burst rank-announcement ${effect.kind}`} style={{ letterSpacing: `${(initial.rankTextSpacing ?? 0) / 100}em` }}>
               {effect.text}
             </div>
           )}
@@ -1212,7 +1342,7 @@ export default function CardClient({
           <div
             className={`event-line ${initial.eventsUseMainColor ? "main-gradient-text" : "solid-custom-text"}`}
             style={{
-              left: `${initial.eventsX}%`, top: `${initial.eventsY}%`, fontSize: initial.eventsSize,
+              left: `${layoutEventsX}%`, top: `${layoutEventsY}%`, fontSize: layoutEventsSize,
               letterSpacing: `${(initial.eventsSpacing ?? 0) / 100}em`,
               color: initial.eventsUseMainColor ? undefined : initial.eventsColor,
               opacity: opacityFromTransparency(initial.eventsTransparency),
@@ -1224,7 +1354,7 @@ export default function CardClient({
           <div
             className={`other-text-line ${initial.otherTextUseMainColor ? "main-gradient-text" : "solid-custom-text"}`}
             style={{
-              left: `${initial.otherTextX}%`, top: `${initial.otherTextY}%`, fontSize: initial.otherTextSize,
+              left: `${layoutOtherX}%`, top: `${layoutOtherY}%`, fontSize: layoutOtherSize,
               letterSpacing: `${(initial.otherTextSpacing ?? 0) / 100}em`,
               color: initial.otherTextUseMainColor ? undefined : initial.otherTextColor,
               opacity: opacityFromTransparency(initial.otherTextTransparency),
@@ -1254,12 +1384,19 @@ export default function CardClient({
               <img className="rank-reveal-bg" src={effect.rankIcon} alt="" />
             )}
 
-            <div className="rank-reveal-label">
+            <div className="rank-reveal-label" style={{ letterSpacing: `${(initial.rankTextSpacing ?? 0) / 100}em` }}>
               {effect.kind === "rank-up" ? "NEW RANK" : "RANK CHANGED"}
             </div>
 
-            <div className="rank-reveal-text">
-              {cleanRankText(effect.rankText || "NEW RANK")}
+            <div
+              className="rank-reveal-text"
+              style={{
+                letterSpacing: `${(initial.rankTextSpacing ?? 0) / 100}em`,
+                whiteSpace: initial.rankTextFormat === "FULL_BREAK" ? "pre-line" : "nowrap",
+                lineHeight: initial.rankTextFormat === "FULL_BREAK" ? 0.9 : undefined,
+              }}
+            >
+              {formatRankText(effect.rankText || "NEW RANK", initial.rankTextFormat)}
             </div>
           </div>
         )}

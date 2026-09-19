@@ -13,6 +13,7 @@ import {
 type PreviewEffect = "win" | "loss" | "rank-up" | "rank-down" | null;
 type RatingMode = "MMR" | "LR" | "SWITCH";
 type ModeSetting = "RT" | "CT";
+type LayoutMode = "STANDARD" | "COMPACT";
 type LabelShape = "ROUNDED" | "STAR" | "HEART";
 type FontChoice =
   | "DEFAULT"
@@ -37,9 +38,10 @@ type RankEffectStyle =
   | "BURST"
   | "STARLIGHT"
   | "METEOR";
-type RatingSwitchEffectStyle = "WAVE" | "FADE" | "FLIP" | "GLITCH";
+type RatingSwitchEffectStyle = "WAVE" | "FADE" | "SLIDE" | "PULSE" | "SWEEP" | "GLITCH";
 type ResultEffectStyle = "DEFAULT" | "THROTTLE" | "SKY" | "REINCARNATION" | "STARSTRUCK" | "NEONRUSH" | "SHOCKWAVE";
 type EventFormat = "EVENTS" | "PREFIX" | "HASH" | "NUMBER";
+type RankTextFormat = "DIVISION" | "FULL_SLASH" | "CLASS" | "FULL_BREAK";
 
 type PreviewScoreBump = {
   rating: ActiveRating;
@@ -68,6 +70,7 @@ type Settings = {
   loungeName: string;
   displayName: string;
   mode: ModeSetting;
+  layoutMode: LayoutMode;
 
   ratingMode: RatingMode;
   ratingSwitchSeconds: number;
@@ -80,6 +83,7 @@ type Settings = {
   lr: string;
 
   rankText: string;
+  rankTextFormat: RankTextFormat;
   rankIconUrl: string;
   events: string;
   otherText: string;
@@ -168,6 +172,7 @@ type Settings = {
   rankTextX: number;
   rankTextY: number;
   rankTextSize: number;
+  rankTextSpacing: number;
 
   eventsX: number;
   eventsY: number;
@@ -186,6 +191,34 @@ type Settings = {
   rankIconX: number;
   rankIconY: number;
   rankIconSize: number;
+
+  compactNameX: number;
+  compactNameY: number;
+  compactNameSize: number;
+  compactScoreX: number;
+  compactScoreY: number;
+  compactScoreSize: number;
+  compactRatingX: number;
+  compactRatingY: number;
+  compactRatingSize: number;
+  compactTagX: number;
+  compactTagY: number;
+  compactTagSize: number;
+  compactRankTextX: number;
+  compactRankTextY: number;
+  compactRankTextSize: number;
+  compactEventsX: number;
+  compactEventsY: number;
+  compactEventsSize: number;
+  compactOtherTextX: number;
+  compactOtherTextY: number;
+  compactOtherTextSize: number;
+  compactFlagX: number;
+  compactFlagY: number;
+  compactFlagSize: number;
+  compactRankIconX: number;
+  compactRankIconY: number;
+  compactRankIconSize: number;
 
   showName: boolean;
   showRate: boolean;
@@ -253,6 +286,7 @@ const defaultSettings: Settings = {
   loungeName: "",
   displayName: "Your Name",
   mode: "RT",
+  layoutMode: "STANDARD",
 
   ratingMode: "MMR",
   ratingSwitchSeconds: 5,
@@ -265,6 +299,7 @@ const defaultSettings: Settings = {
   lr: "",
 
   rankText: "",
+  rankTextFormat: "FULL_SLASH",
   rankIconUrl: "https://i.imgur.com/OwhIiNz.png",
   events: "",
   otherText: "",
@@ -353,6 +388,7 @@ const defaultSettings: Settings = {
   rankTextX: 67,
   rankTextY: 83,
   rankTextSize: 20,
+  rankTextSpacing: 0,
 
   eventsX: 84,
   eventsY: 22,
@@ -371,6 +407,34 @@ const defaultSettings: Settings = {
   rankIconX: 12,
   rankIconY: 26,
   rankIconSize: 60,
+
+  compactNameX: 31,
+  compactNameY: 23,
+  compactNameSize: 25,
+  compactScoreX: 31,
+  compactScoreY: 53,
+  compactScoreSize: 36,
+  compactRatingX: 61,
+  compactRatingY: 54,
+  compactRatingSize: 14,
+  compactTagX: 73,
+  compactTagY: 54,
+  compactTagSize: 14,
+  compactRankTextX: 31,
+  compactRankTextY: 82,
+  compactRankTextSize: 14,
+  compactEventsX: 88,
+  compactEventsY: 80,
+  compactEventsSize: 12,
+  compactOtherTextX: 83,
+  compactOtherTextY: 27,
+  compactOtherTextSize: 11,
+  compactFlagX: 90,
+  compactFlagY: 20,
+  compactFlagSize: 16,
+  compactRankIconX: 13.5,
+  compactRankIconY: 50,
+  compactRankIconSize: 86,
 
   showName: true,
   showRate: true,
@@ -411,6 +475,7 @@ const defaultSettings: Settings = {
 };
 
 const designSettingKeys: Array<keyof Settings> = [
+  "layoutMode",
   "borderColor",
   "flowColor",
   "flowEnabled",
@@ -468,12 +533,40 @@ const designSettingKeys: Array<keyof Settings> = [
   "rankTextX",
   "rankTextY",
   "rankTextSize",
+  "rankTextSpacing",
   "flagX",
   "flagY",
   "flagSize",
   "rankIconX",
   "rankIconY",
   "rankIconSize",
+  "compactNameX",
+  "compactNameY",
+  "compactNameSize",
+  "compactScoreX",
+  "compactScoreY",
+  "compactScoreSize",
+  "compactRatingX",
+  "compactRatingY",
+  "compactRatingSize",
+  "compactTagX",
+  "compactTagY",
+  "compactTagSize",
+  "compactRankTextX",
+  "compactRankTextY",
+  "compactRankTextSize",
+  "compactEventsX",
+  "compactEventsY",
+  "compactEventsSize",
+  "compactOtherTextX",
+  "compactOtherTextY",
+  "compactOtherTextSize",
+  "compactFlagX",
+  "compactFlagY",
+  "compactFlagSize",
+  "compactRankIconX",
+  "compactRankIconY",
+  "compactRankIconSize",
   "showName",
   "showRate",
   "showTrackTag",
@@ -522,6 +615,7 @@ const designSettingKeys: Array<keyof Settings> = [
   "flagTransparency",
   "backgroundImageTransparency",
   "cardBackgroundTransparency",
+  "rankTextFormat",
 ];
 
 
@@ -605,33 +699,34 @@ function clampDesignNumber(key: keyof Settings, value: number) {
     nameX: [0, 100],
     nameY: [0, 100],
     nameSize: [16, 60],
-    nameTextSpacing: [0, 100],
+    nameTextSpacing: [-50, 50],
     scoreX: [0, 100],
     scoreY: [0, 100],
     scoreSize: [20, 80],
-    scoreTextSpacing: [0, 100],
+    scoreTextSpacing: [-50, 50],
     ratingBoxX: [0, 100],
     ratingBoxY: [0, 100],
     ratingBoxSize: [8, 30],
     ratingTextSize: [8, 30],
-    ratingTextSpacing: [0, 30],
+    ratingTextSpacing: [-50, 50],
     labelRadius: [0, 15],
     tagX: [0, 100],
     tagY: [0, 100],
     tagSize: [8, 30],
     tagTextSize: [8, 30],
-    tagTextSpacing: [0, 30],
+    tagTextSpacing: [-50, 50],
     rankTextX: [0, 100],
     rankTextY: [0, 100],
     rankTextSize: [6, 90],
+    rankTextSpacing: [-50, 50],
     eventsX: [0, 100],
     eventsY: [0, 100],
     eventsSize: [4, 100],
-    eventsSpacing: [0, 50],
+    eventsSpacing: [-50, 50],
     otherTextX: [0, 100],
     otherTextY: [0, 100],
     otherTextSize: [4, 100],
-    otherTextSpacing: [0, 50],
+    otherTextSpacing: [-50, 50],
     nameTransparency: [0, 100],
     rateTransparency: [0, 100],
     trackTransparency: [0, 100],
@@ -701,6 +796,11 @@ function decodeDesignValue(key: keyof Settings, token: string) {
       decoded = value;
     }
 
+    if (key === "layoutMode") {
+      const mode = decoded.toUpperCase();
+      return (mode === "COMPACT" || mode === "STANDARD" ? mode : defaultValue) as never;
+    }
+
     if (key === "labelShape") {
       const shape = decoded.toUpperCase();
 
@@ -727,10 +827,12 @@ function decodeDesignValue(key: keyof Settings, token: string) {
     }
 
     if (key === "ratingSwitchEffectStyle") {
-      return (["WAVE", "FADE", "FLIP", "GLITCH"].includes(
-        decoded.toUpperCase()
+      const normalized = decoded.toUpperCase();
+      const migrated = normalized === "FLIP" ? "SLIDE" : normalized;
+      return (["WAVE", "FADE", "SLIDE", "PULSE", "SWEEP", "GLITCH"].includes(
+        migrated
       )
-        ? decoded.toUpperCase()
+        ? migrated
         : defaultValue) as never;
     }
 
@@ -753,6 +855,13 @@ function decodeDesignValue(key: keyof Settings, token: string) {
 
       return (["EVENTS", "PREFIX", "HASH", "NUMBER"].includes(migrated)
         ? migrated
+        : defaultValue) as never;
+    }
+
+    if (key === "rankTextFormat") {
+      const normalized = decoded.toUpperCase();
+      return (["DIVISION", "FULL_SLASH", "CLASS", "FULL_BREAK"].includes(normalized)
+        ? normalized
         : defaultValue) as never;
     }
 
@@ -1115,6 +1224,28 @@ function splitRankText(text: string) {
   };
 }
 
+function formatRankText(text: string, format: RankTextFormat) {
+  const cleaned = cleanRankText(text || "").trim();
+  if (!cleaned) return "";
+
+  const { division, className } = splitRankText(cleaned);
+
+  if (!className) {
+    return division || cleaned;
+  }
+
+  switch (format) {
+    case "DIVISION":
+      return division;
+    case "CLASS":
+      return className;
+    case "FULL_BREAK":
+      return `${division}\n${className}`;
+    default:
+      return `${division}/${className}`;
+  }
+}
+
 function getDivisionOrder(rankOrder: RankEntry[]) {
   const divisions: {
     division: string;
@@ -1237,9 +1368,9 @@ function getPreviewRank(
 
 const VERSION_HISTORY = [
   {
-    version: "v2.0.5–v2.1.4",
-    en: "Improved Undo / Redo, Lounge-name autocomplete, JP / EN wording, Preview / OBS parity, and selectable Win / Loss effects. Autocomplete now uses fresh prefix-only matches and changing the Lounge name automatically refreshes the player card.",
-    jp: "Undo / Redo、Lounge名予測変換、JP / EN表記、Preview / OBSの一致、勝利 / 敗北演出を改善しました。Lounge名候補は最新の先頭一致のみとし、Lounge名変更時に表示名・MMR/LR・ランク等を自動更新するよう改善しました。",
+    version: "v2.0.5–v2.2.7",
+    en: "Improved Undo / Redo, Lounge-name autocomplete, JP / EN wording, Preview / OBS parity, selectable Win / Loss effects, automatic player refresh, and Compact mode customization. All player text elements now support adjustable character spacing, including Rank text, and Rank text can be shown as division only, division/tier, tier only, or on two lines. MMR / LR switch effects now preserve text shadows; 3D Flip was replaced with Slide In, Pulse, and Light Sweep.",
+    jp: "Undo / Redo、Lounge名予測変換、JP / EN表記、Preview / OBSの一致、勝利 / 敗北演出、Lounge名変更時の自動更新、コンパクトモードの調整機能を改善しました。名前・レート・RT/CT・MMR/LR・ランク・模擬数・追加テキストのすべてで文字間隔を狭く／広く調整できるようにし、ランク文字はDivisionのみ・Division/Tier・Tierのみ・2行表示から選択できるようにしました。MMR / LR切替のソフトフェードでも文字の影を維持するよう修正し、3Dフリップを削除してスライドイン・パルス・ライトスイープを追加しました。",
   },
   {
     version: "v2.0.0–v2.0.4",
@@ -1406,6 +1537,7 @@ const SETTING_LABELS: Partial<Record<keyof Settings, { en: string; jp: string }>
   loungeName: { en: "Lounge name", jp: "Lounge名" },
   displayName: { en: "Display name", jp: "表示名" },
   mode: { en: "Track", jp: "トラック" },
+  layoutMode: { en: "Card layout", jp: "カードレイアウト" },
   ratingMode: { en: "Rating display", jp: "レート表示" },
   ratingSwitchSeconds: { en: "MMR / LR interval", jp: "MMR / LR切替間隔" },
   flag: { en: "Flag text", jp: "国旗テキスト" },
@@ -1414,6 +1546,7 @@ const SETTING_LABELS: Partial<Record<keyof Settings, { en: string; jp: string }>
   lr: { en: "LR", jp: "LR" },
   events: { en: "Events", jp: "Events" },
   rankText: { en: "Rank text", jp: "ランク文字" },
+  rankTextFormat: { en: "Rank format", jp: "ランク表示形式" },
   rankIconUrl: { en: "Rank icon", jp: "ランク画像" },
   borderColor: { en: "Border color", jp: "枠線色" },
   flowColor: { en: "Flow color", jp: "枠線カラー" },
@@ -1469,12 +1602,40 @@ const SETTING_LABELS: Partial<Record<keyof Settings, { en: string; jp: string }>
   rankTextX: { en: "Rank text X", jp: "ランク X" },
   rankTextY: { en: "Rank text Y", jp: "ランク Y" },
   rankTextSize: { en: "Rank text size", jp: "ランクサイズ" },
+  rankTextSpacing: { en: "Rank spacing", jp: "ランク文字間隔" },
   flagX: { en: "Flag X", jp: "国旗 X" },
   flagY: { en: "Flag Y", jp: "国旗 Y" },
   flagSize: { en: "Flag size", jp: "国旗サイズ" },
   rankIconX: { en: "Rank icon X", jp: "ランク画像 X" },
   rankIconY: { en: "Rank icon Y", jp: "ランク画像 Y" },
   rankIconSize: { en: "Rank icon size", jp: "ランク画像サイズ" },
+  compactNameX: { en: "Compact name X", jp: "コンパクト 名前 X" },
+  compactNameY: { en: "Compact name Y", jp: "コンパクト 名前 Y" },
+  compactNameSize: { en: "Compact name size", jp: "コンパクト 名前サイズ" },
+  compactScoreX: { en: "Compact rate X", jp: "コンパクト レート X" },
+  compactScoreY: { en: "Compact rate Y", jp: "コンパクト レート Y" },
+  compactScoreSize: { en: "Compact rate size", jp: "コンパクト レートサイズ" },
+  compactRatingX: { en: "Compact MMR/LR X", jp: "コンパクト MMR/LR X" },
+  compactRatingY: { en: "Compact MMR/LR Y", jp: "コンパクト MMR/LR Y" },
+  compactRatingSize: { en: "Compact MMR/LR size", jp: "コンパクト MMR/LRサイズ" },
+  compactTagX: { en: "Compact RT/CT X", jp: "コンパクト RT/CT X" },
+  compactTagY: { en: "Compact RT/CT Y", jp: "コンパクト RT/CT Y" },
+  compactTagSize: { en: "Compact RT/CT size", jp: "コンパクト RT/CTサイズ" },
+  compactRankTextX: { en: "Compact rank X", jp: "コンパクト ランク X" },
+  compactRankTextY: { en: "Compact rank Y", jp: "コンパクト ランク Y" },
+  compactRankTextSize: { en: "Compact rank size", jp: "コンパクト ランクサイズ" },
+  compactEventsX: { en: "Compact Events X", jp: "コンパクト 模擬数 X" },
+  compactEventsY: { en: "Compact Events Y", jp: "コンパクト 模擬数 Y" },
+  compactEventsSize: { en: "Compact Events size", jp: "コンパクト 模擬数サイズ" },
+  compactOtherTextX: { en: "Compact extra text X", jp: "コンパクト 追加テキスト X" },
+  compactOtherTextY: { en: "Compact extra text Y", jp: "コンパクト 追加テキスト Y" },
+  compactOtherTextSize: { en: "Compact extra text size", jp: "コンパクト 追加テキストサイズ" },
+  compactFlagX: { en: "Compact flag X", jp: "コンパクト 国旗 X" },
+  compactFlagY: { en: "Compact flag Y", jp: "コンパクト 国旗 Y" },
+  compactFlagSize: { en: "Compact flag size", jp: "コンパクト 国旗サイズ" },
+  compactRankIconX: { en: "Compact rank icon X", jp: "コンパクト ランク画像 X" },
+  compactRankIconY: { en: "Compact rank icon Y", jp: "コンパクト ランク画像 Y" },
+  compactRankIconSize: { en: "Compact rank icon size", jp: "コンパクト ランク画像サイズ" },
   eventsFormat: { en: "Events format", jp: "Events形式" },
   eventsUseMainColor: { en: "Events color source", jp: "Events色" },
   eventsColor: { en: "Events color", jp: "Events色" },
@@ -1600,6 +1761,7 @@ export default function Home() {
     (en: string, jp: string) => (uiLanguage === "JP" ? jp : en),
     [uiLanguage]
   );
+  const isCompactLayout = settings.layoutMode === "COMPACT";
 
 
   useEffect(() => {
@@ -2265,6 +2427,7 @@ export default function Home() {
 
     params.set("lounge", settings.loungeName);
     params.set("mode", settings.mode === "CT" ? "CT" : "RT");
+    params.set("layout", settings.layoutMode === "COMPACT" ? "compact" : "standard");
 
     params.set("ratingMode", settings.ratingMode);
     params.set("ratingSwitch", numberParam(settings.ratingSwitchSeconds ?? 5));
@@ -2278,6 +2441,7 @@ export default function Home() {
     params.set("lr", settings.lr);
 
     params.set("rank", cleanRankText(settings.rankText));
+    params.set("rankFormat", settings.rankTextFormat);
     params.set("events", settings.events);
     params.set("eventFormat", settings.eventsFormat);
     params.set("otherText", settings.otherText);
@@ -2367,6 +2531,7 @@ export default function Home() {
     params.set("rx", numberParam(settings.rankTextX));
     params.set("ry", numberParam(settings.rankTextY));
     params.set("rs", numberParam(settings.rankTextSize));
+    params.set("rankspace", numberParam(settings.rankTextSpacing));
 
     params.set("ex", numberParam(settings.eventsX));
     params.set("ey", numberParam(settings.eventsY));
@@ -2385,6 +2550,34 @@ export default function Home() {
     params.set("ix", numberParam(settings.rankIconX));
     params.set("iy", numberParam(settings.rankIconY));
     params.set("isz", numberParam(settings.rankIconSize));
+
+    params.set("cnx", numberParam(settings.compactNameX));
+    params.set("cny", numberParam(settings.compactNameY));
+    params.set("cns", numberParam(settings.compactNameSize));
+    params.set("csx", numberParam(settings.compactScoreX));
+    params.set("csy", numberParam(settings.compactScoreY));
+    params.set("cssz", numberParam(settings.compactScoreSize));
+    params.set("crlx", numberParam(settings.compactRatingX));
+    params.set("crly", numberParam(settings.compactRatingY));
+    params.set("crls", numberParam(settings.compactRatingSize));
+    params.set("ctx", numberParam(settings.compactTagX));
+    params.set("cty", numberParam(settings.compactTagY));
+    params.set("cts", numberParam(settings.compactTagSize));
+    params.set("crx", numberParam(settings.compactRankTextX));
+    params.set("cry", numberParam(settings.compactRankTextY));
+    params.set("crs", numberParam(settings.compactRankTextSize));
+    params.set("cex", numberParam(settings.compactEventsX));
+    params.set("cey", numberParam(settings.compactEventsY));
+    params.set("ces", numberParam(settings.compactEventsSize));
+    params.set("cox", numberParam(settings.compactOtherTextX));
+    params.set("coy", numberParam(settings.compactOtherTextY));
+    params.set("cos", numberParam(settings.compactOtherTextSize));
+    params.set("cfx", numberParam(settings.compactFlagX));
+    params.set("cfy", numberParam(settings.compactFlagY));
+    params.set("cfs", numberParam(settings.compactFlagSize));
+    params.set("cix", numberParam(settings.compactRankIconX));
+    params.set("ciy", numberParam(settings.compactRankIconY));
+    params.set("cis", numberParam(settings.compactRankIconSize));
 
     params.set("vname", settings.showName ? "1" : "0");
     params.set("vrate", settings.showRate ? "1" : "0");
@@ -2563,6 +2756,21 @@ export default function Home() {
           <details className="basic-settings-group" open>
             <summary>{text("Basic", "基本設定")}</summary>
             <div className="basic-settings-body">
+              <div className="layout-mode-control">
+                <label>
+                  {text("Card layout", "カードレイアウト")}
+                  <select
+                    value={settings.layoutMode}
+                    onChange={(e) => update("layoutMode", e.target.value as LayoutMode)}
+                  >
+                    <option value="STANDARD">{text("Standard (650 × 150)", "標準 (650 × 150)")}</option>
+                    <option value="COMPACT">{text("Compact — narrow (380 × 150)", "コンパクト — 横幅短縮 (380 × 150)")}</option>
+                  </select>
+                </label>
+
+
+              </div>
+
               <div className="two-col">
                 <label>
                   {text("Lounge name", "Lounge名")}
@@ -2753,16 +2961,24 @@ export default function Home() {
           </details>
 
           <div className="design-section-label">{text("Player information", "プレイヤー情報")}</div>
+          {isCompactLayout && (
+            <div className="compact-edit-note">
+              {text(
+                "Compact layout is active. Position and size controls below now edit the compact layout only.",
+                "コンパクトモード中です。以下の位置・サイズ設定はコンパクト専用として保存されます。"
+              )}
+            </div>
+          )}
 
           <details className="design-group">
             <summary><span className="summary-copy"><span className="summary-title">{text("Display Name", "表示名")}</span></span><SummaryToggle label={text("Name", "名前")} checked={settings.showName} onChange={(v) => update("showName", v)} /></summary>
             <div className="design-group-body">
               <TransparencyControl language={uiLanguage} label={text("Display name", "表示名")} value={settings.nameTransparency} onChange={(v) => update("nameTransparency", v)} disabled={!settings.showName} />
               <fieldset className={`setting-scope ${settings.showName ? "" : "is-disabled"}`} disabled={!settings.showName}>
-                <Slider label={text("Name X", "名前 X")} value={settings.nameX} min={0} max={100} onChange={(v) => update("nameX", v)} />
-                <Slider label={text("Name Y", "名前 Y")} value={verticalSliderValue(settings.nameY)} min={0} max={100} onChange={(v) => update("nameY", storedTopValue(v))} />
-                <MappedSlider label={text("Name size", "名前サイズ")} value={settings.nameSize} minValue={4} maxValue={120} onChange={(v) => update("nameSize", v)} />
-                <MappedSlider label={text("Name spacing", "名前文字間隔")} value={settings.nameTextSpacing} minValue={0} maxValue={40} onChange={(v) => update("nameTextSpacing", v)} />
+                <Slider label={text("Name X", "名前 X")} value={isCompactLayout ? settings.compactNameX : settings.nameX} min={0} max={100} onChange={(v) => update(isCompactLayout ? "compactNameX" : "nameX", v)} />
+                <Slider label={text("Name Y", "名前 Y")} value={verticalSliderValue(isCompactLayout ? settings.compactNameY : settings.nameY)} min={0} max={100} onChange={(v) => update(isCompactLayout ? "compactNameY" : "nameY", storedTopValue(v))} />
+                <MappedSlider label={text("Name size", "名前サイズ")} value={isCompactLayout ? settings.compactNameSize : settings.nameSize} minValue={4} maxValue={120} onChange={(v) => update(isCompactLayout ? "compactNameSize" : "nameSize", v)} />
+                <Slider label={text("Name spacing", "名前文字間隔")} value={settings.nameTextSpacing} min={-50} max={50} onChange={(v) => update("nameTextSpacing", v)} />
               </fieldset>
             </div>
           </details>
@@ -2780,28 +2996,28 @@ export default function Home() {
               <div className="design-subtitle">{text("Rate number", "レート数値")}</div>
               <TransparencyControl language={uiLanguage} label={text("Rate number", "レート数値")} value={settings.rateTransparency} onChange={(v) => update("rateTransparency", v)} disabled={!settings.showRate} />
               <fieldset className={`setting-scope ${settings.showRate ? "" : "is-disabled"}`} disabled={!settings.showRate}>
-                <Slider label={text("Rate X", "レート X")} value={settings.scoreX} min={0} max={100} onChange={(v) => update("scoreX", v)} />
-                <Slider label={text("Rate Y", "レート Y")} value={verticalSliderValue(settings.scoreY)} min={0} max={100} onChange={(v) => update("scoreY", storedTopValue(v))} />
-                <MappedSlider label={text("Rate size", "レートサイズ")} value={settings.scoreSize} minValue={6} maxValue={160} onChange={(v) => update("scoreSize", v)} />
-                <MappedSlider label={text("Rate spacing", "レート文字間隔")} value={settings.scoreTextSpacing} minValue={0} maxValue={40} onChange={(v) => update("scoreTextSpacing", v)} />
+                <Slider label={text("Rate X", "レート X")} value={isCompactLayout ? settings.compactScoreX : settings.scoreX} min={0} max={100} onChange={(v) => update(isCompactLayout ? "compactScoreX" : "scoreX", v)} />
+                <Slider label={text("Rate Y", "レート Y")} value={verticalSliderValue(isCompactLayout ? settings.compactScoreY : settings.scoreY)} min={0} max={100} onChange={(v) => update(isCompactLayout ? "compactScoreY" : "scoreY", storedTopValue(v))} />
+                <MappedSlider label={text("Rate size", "レートサイズ")} value={isCompactLayout ? settings.compactScoreSize : settings.scoreSize} minValue={6} maxValue={160} onChange={(v) => update(isCompactLayout ? "compactScoreSize" : "scoreSize", v)} />
+                <Slider label={text("Rate spacing", "レート文字間隔")} value={settings.scoreTextSpacing} min={-50} max={50} onChange={(v) => update("scoreTextSpacing", v)} />
               </fieldset>
 
               <div className="design-subtitle">{text("RT/CT", "RT/CT")}</div>
               <TransparencyControl language={uiLanguage} label={text("RT/CT", "RT/CT")} value={settings.trackTransparency} onChange={(v) => update("trackTransparency", v)} disabled={!settings.showTrackTagText} />
               <fieldset className={`setting-scope ${settings.showTrackTagText ? "" : "is-disabled"}`} disabled={!settings.showTrackTagText}>
-                <Slider label={text("RT/CT X", "RT/CT X")} value={settings.tagX} min={0} max={100} onChange={(v) => update("tagX", v)} />
-                <Slider label={text("RT/CT Y", "RT/CT Y")} value={verticalSliderValue(settings.tagY)} min={0} max={100} onChange={(v) => update("tagY", storedTopValue(v))} />
-                <MappedSlider label={text("RT/CT size", "RT/CT サイズ")} value={settings.tagTextSize} minValue={4} maxValue={90} onChange={(v) => update("tagTextSize", v)} />
-                <MappedSlider label={text("RT/CT spacing", "RT/CT 文字間隔")} value={settings.tagTextSpacing} minValue={0} maxValue={50} onChange={(v) => update("tagTextSpacing", v)} />
+                <Slider label={text("RT/CT X", "RT/CT X")} value={isCompactLayout ? settings.compactTagX : settings.tagX} min={0} max={100} onChange={(v) => update(isCompactLayout ? "compactTagX" : "tagX", v)} />
+                <Slider label={text("RT/CT Y", "RT/CT Y")} value={verticalSliderValue(isCompactLayout ? settings.compactTagY : settings.tagY)} min={0} max={100} onChange={(v) => update(isCompactLayout ? "compactTagY" : "tagY", storedTopValue(v))} />
+                <MappedSlider label={text("RT/CT size", "RT/CT サイズ")} value={isCompactLayout ? settings.compactTagSize : settings.tagTextSize} minValue={4} maxValue={90} onChange={(v) => update(isCompactLayout ? "compactTagSize" : "tagTextSize", v)} />
+                <Slider label={text("RT/CT spacing", "RT/CT 文字間隔")} value={settings.tagTextSpacing} min={-50} max={50} onChange={(v) => update("tagTextSpacing", v)} />
               </fieldset>
 
               <div className="design-subtitle">{text("MMR/LR", "MMR/LR")}</div>
               <TransparencyControl language={uiLanguage} label={text("MMR/LR", "MMR/LR")} value={settings.ratingTransparency} onChange={(v) => update("ratingTransparency", v)} disabled={!settings.showRatingLabelText} />
               <fieldset className={`setting-scope ${settings.showRatingLabelText ? "" : "is-disabled"}`} disabled={!settings.showRatingLabelText}>
-                <Slider label={text("MMR/LR X", "MMR/LR X")} value={settings.ratingBoxX} min={0} max={100} onChange={(v) => update("ratingBoxX", v)} />
-                <Slider label={text("MMR/LR Y", "MMR/LR Y")} value={verticalSliderValue(settings.ratingBoxY)} min={0} max={100} onChange={(v) => update("ratingBoxY", storedTopValue(v))} />
-                <MappedSlider label={text("MMR/LR size", "MMR/LR サイズ")} value={settings.ratingTextSize} minValue={4} maxValue={90} onChange={(v) => update("ratingTextSize", v)} />
-                <MappedSlider label={text("MMR/LR spacing", "MMR/LR 文字間隔")} value={settings.ratingTextSpacing} minValue={0} maxValue={50} onChange={(v) => update("ratingTextSpacing", v)} />
+                <Slider label={text("MMR/LR X", "MMR/LR X")} value={isCompactLayout ? settings.compactRatingX : settings.ratingBoxX} min={0} max={100} onChange={(v) => update(isCompactLayout ? "compactRatingX" : "ratingBoxX", v)} />
+                <Slider label={text("MMR/LR Y", "MMR/LR Y")} value={verticalSliderValue(isCompactLayout ? settings.compactRatingY : settings.ratingBoxY)} min={0} max={100} onChange={(v) => update(isCompactLayout ? "compactRatingY" : "ratingBoxY", storedTopValue(v))} />
+                <MappedSlider label={text("MMR/LR size", "MMR/LR サイズ")} value={isCompactLayout ? settings.compactRatingSize : settings.ratingTextSize} minValue={4} maxValue={90} onChange={(v) => update(isCompactLayout ? "compactRatingSize" : "ratingTextSize", v)} />
+                <Slider label={text("MMR/LR spacing", "MMR/LR 文字間隔")} value={settings.ratingTextSpacing} min={-50} max={50} onChange={(v) => update("ratingTextSpacing", v)} />
               </fieldset>
             </div>
           </details>
@@ -2816,19 +3032,31 @@ export default function Home() {
             </summary>
             <div className="design-group-body">
               <div className="design-subtitle">{text("Rank text", "ランク")}</div>
+              <label>
+                {text("Rank format", "ランク表示形式")}
+                <select
+                  value={settings.rankTextFormat}
+                  onChange={(e) => update("rankTextFormat", e.target.value as RankTextFormat)}
+                >
+                  <option value="DIVISION">Silver</option>
+                  <option value="FULL_SLASH">Silver/Mid Tier</option>
+                  <option value="CLASS">Mid Tier</option>
+                  <option value="FULL_BREAK">{text("Silver ↵ Mid Tier", "Silver ↵ Mid Tier（改行）")}</option>
+                </select>
+              </label>
               <TransparencyControl language={uiLanguage} label={text("Rank text", "ランク")} value={settings.rankTextTransparency} onChange={(v) => update("rankTextTransparency", v)} disabled={!settings.showRankText} />
               <fieldset className={`setting-scope ${settings.showRankText ? "" : "is-disabled"}`} disabled={!settings.showRankText}>
-                <Slider label="Rank text X" value={settings.rankTextX} min={0} max={100} onChange={(v) => update("rankTextX", v)} />
-                <Slider label="Rank text Y" value={verticalSliderValue(settings.rankTextY)} min={0} max={100} onChange={(v) => update("rankTextY", storedTopValue(v))} />
-                <MappedSlider label="Rank text size" value={settings.rankTextSize} minValue={4} maxValue={90} onChange={(v) => update("rankTextSize", v)} />
+                <Slider label={text("Rank X", "ランク X")} value={isCompactLayout ? settings.compactRankTextX : settings.rankTextX} min={0} max={100} onChange={(v) => update(isCompactLayout ? "compactRankTextX" : "rankTextX", v)} />
+                <Slider label={text("Rank Y", "ランク Y")} value={verticalSliderValue(isCompactLayout ? settings.compactRankTextY : settings.rankTextY)} min={0} max={100} onChange={(v) => update(isCompactLayout ? "compactRankTextY" : "rankTextY", storedTopValue(v))} />
+                <MappedSlider label={text("Rank size", "ランクサイズ")} value={isCompactLayout ? settings.compactRankTextSize : settings.rankTextSize} minValue={4} maxValue={90} onChange={(v) => update(isCompactLayout ? "compactRankTextSize" : "rankTextSize", v)} /><Slider label={text("Rank spacing", "ランク文字間隔")} value={settings.rankTextSpacing} min={-50} max={50} onChange={(v) => update("rankTextSpacing", v)} />
               </fieldset>
 
               <div className="design-subtitle">{text("Rank icon", "ランク画像")}</div>
               <TransparencyControl language={uiLanguage} label={text("Rank icon", "ランク画像")} value={settings.rankIconTransparency} onChange={(v) => update("rankIconTransparency", v)} disabled={!settings.showRankIcon} />
               <fieldset className={`setting-scope ${settings.showRankIcon ? "" : "is-disabled"}`} disabled={!settings.showRankIcon}>
-                <Slider label={text("Rank icon X", "ランク画像 X")} value={settings.rankIconX} min={0} max={100} onChange={(v) => update("rankIconX", v)} />
-                <Slider label={text("Rank icon Y", "ランク画像 Y")} value={verticalSliderValue(settings.rankIconY)} min={0} max={100} onChange={(v) => update("rankIconY", storedTopValue(v))} />
-                <MappedSlider label={text("Rank icon size", "ランク画像サイズ")} value={settings.rankIconSize} minValue={0} maxValue={150} onChange={(v) => update("rankIconSize", v)} />
+                <Slider label={text("Rank icon X", "ランク画像 X")} value={isCompactLayout ? settings.compactRankIconX : settings.rankIconX} min={0} max={100} onChange={(v) => update(isCompactLayout ? "compactRankIconX" : "rankIconX", v)} />
+                <Slider label={text("Rank icon Y", "ランク画像 Y")} value={verticalSliderValue(isCompactLayout ? settings.compactRankIconY : settings.rankIconY)} min={0} max={100} onChange={(v) => update(isCompactLayout ? "compactRankIconY" : "rankIconY", storedTopValue(v))} />
+                <MappedSlider label={text("Rank icon size", "ランク画像サイズ")} value={isCompactLayout ? settings.compactRankIconSize : settings.rankIconSize} minValue={0} maxValue={150} onChange={(v) => update(isCompactLayout ? "compactRankIconSize" : "rankIconSize", v)} />
               </fieldset>
             </div>
           </details>
@@ -2840,7 +3068,7 @@ export default function Home() {
               <fieldset className={`setting-scope ${settings.showEvents ? "" : "is-disabled"}`} disabled={!settings.showEvents}>
                 <label>{text("Events format", "模擬数形式")}<select value={settings.eventsFormat} onChange={(e) => update("eventsFormat", e.target.value as EventFormat)}><option value="EVENTS">100 Events</option><option value="PREFIX">Events 100</option><option value="HASH">#100</option><option value="NUMBER">100</option></select></label>
                 <div className="two-col"><label>{text("Events color", "模擬数色")}<input type="color" value={settings.eventsColor} disabled={settings.eventsUseMainColor} onChange={(e) => update("eventsColor", e.target.value)} /></label><label className="checkbox-label"><input type="checkbox" checked={settings.eventsUseMainColor} onChange={(e) => update("eventsUseMainColor", e.target.checked)} />{text("Use Main Text colors", "Main Textの色を使用")}</label></div>
-                <Slider label={text("Events X", "模擬数 X")} value={settings.eventsX} min={0} max={100} onChange={(v) => update("eventsX", v)} /><Slider label={text("Events Y", "模擬数 Y")} value={verticalSliderValue(settings.eventsY)} min={0} max={100} onChange={(v) => update("eventsY", storedTopValue(v))} /><MappedSlider label={text("Events size", "模擬数サイズ")} value={settings.eventsSize} minValue={4} maxValue={100} onChange={(v) => update("eventsSize", v)} /><MappedSlider label={text("Events spacing", "模擬数文字間隔")} value={settings.eventsSpacing} minValue={0} maxValue={50} onChange={(v) => update("eventsSpacing", v)} />
+                <Slider label={text("Events X", "模擬数 X")} value={isCompactLayout ? settings.compactEventsX : settings.eventsX} min={0} max={100} onChange={(v) => update(isCompactLayout ? "compactEventsX" : "eventsX", v)} /><Slider label={text("Events Y", "模擬数 Y")} value={verticalSliderValue(isCompactLayout ? settings.compactEventsY : settings.eventsY)} min={0} max={100} onChange={(v) => update(isCompactLayout ? "compactEventsY" : "eventsY", storedTopValue(v))} /><MappedSlider label={text("Events size", "模擬数サイズ")} value={isCompactLayout ? settings.compactEventsSize : settings.eventsSize} minValue={4} maxValue={100} onChange={(v) => update(isCompactLayout ? "compactEventsSize" : "eventsSize", v)} /><Slider label={text("Events spacing", "模擬数文字間隔")} value={settings.eventsSpacing} min={-50} max={50} onChange={(v) => update("eventsSpacing", v)} />
               </fieldset>
             </div>
           </details>
@@ -2850,7 +3078,7 @@ export default function Home() {
             <div className="design-group-body">
               <TransparencyControl language={uiLanguage} label={text("Flag", "国旗")} value={settings.flagTransparency} onChange={(v) => update("flagTransparency", v)} disabled={!settings.showFlag} />
               <fieldset className={`setting-scope ${settings.showFlag ? "" : "is-disabled"}`} disabled={!settings.showFlag}>
-                <Slider label={text("Flag X", "国旗 X")} value={settings.flagX} min={0} max={100} onChange={(v) => update("flagX", v)} /><Slider label={text("Flag Y", "国旗 Y")} value={verticalSliderValue(settings.flagY)} min={0} max={100} onChange={(v) => update("flagY", storedTopValue(v))} /><MappedSlider label={text("Flag size", "国旗サイズ")} value={settings.flagSize} minValue={4} maxValue={100} onChange={(v) => update("flagSize", v)} />
+                <Slider label={text("Flag X", "国旗 X")} value={isCompactLayout ? settings.compactFlagX : settings.flagX} min={0} max={100} onChange={(v) => update(isCompactLayout ? "compactFlagX" : "flagX", v)} /><Slider label={text("Flag Y", "国旗 Y")} value={verticalSliderValue(isCompactLayout ? settings.compactFlagY : settings.flagY)} min={0} max={100} onChange={(v) => update(isCompactLayout ? "compactFlagY" : "flagY", storedTopValue(v))} /><MappedSlider label={text("Flag size", "国旗サイズ")} value={isCompactLayout ? settings.compactFlagSize : settings.flagSize} minValue={4} maxValue={100} onChange={(v) => update(isCompactLayout ? "compactFlagSize" : "flagSize", v)} />
               </fieldset>
             </div>
           </details>
@@ -2882,7 +3110,7 @@ export default function Home() {
             <div className="design-group-body">
               <TransparencyControl language={uiLanguage} label={text("Extra text", "追加テキスト")} value={settings.otherTextTransparency} onChange={(v) => update("otherTextTransparency", v)} disabled={!settings.showOtherText} />
               <fieldset className={`setting-scope ${settings.showOtherText ? "" : "is-disabled"}`} disabled={!settings.showOtherText}>
-                <label>{text("Text", "テキスト")}<input value={settings.otherText} onChange={(e) => update("otherText", e.target.value)} placeholder="Any text..." /></label><div className="two-col"><label>{text("Text color", "追加テキスト色")}<input type="color" value={settings.otherTextColor} disabled={settings.otherTextUseMainColor} onChange={(e) => update("otherTextColor", e.target.value)} /></label><label className="checkbox-label"><input type="checkbox" checked={settings.otherTextUseMainColor} onChange={(e) => update("otherTextUseMainColor", e.target.checked)} />{text("Use Main Text colors", "Main Textの色を使用")}</label></div><Slider label={text("Text X", "文字 X")} value={settings.otherTextX} min={0} max={100} onChange={(v) => update("otherTextX", v)} /><Slider label={text("Text Y", "文字 Y")} value={verticalSliderValue(settings.otherTextY)} min={0} max={100} onChange={(v) => update("otherTextY", storedTopValue(v))} /><MappedSlider label={text("Text size", "文字サイズ")} value={settings.otherTextSize} minValue={4} maxValue={100} onChange={(v) => update("otherTextSize", v)} /><MappedSlider label={text("Text spacing", "文字間隔")} value={settings.otherTextSpacing} minValue={0} maxValue={50} onChange={(v) => update("otherTextSpacing", v)} />
+                <label>{text("Text", "テキスト")}<input value={settings.otherText} onChange={(e) => update("otherText", e.target.value)} placeholder="Any text..." /></label><div className="two-col"><label>{text("Text color", "追加テキスト色")}<input type="color" value={settings.otherTextColor} disabled={settings.otherTextUseMainColor} onChange={(e) => update("otherTextColor", e.target.value)} /></label><label className="checkbox-label"><input type="checkbox" checked={settings.otherTextUseMainColor} onChange={(e) => update("otherTextUseMainColor", e.target.checked)} />{text("Use Main Text colors", "Main Textの色を使用")}</label></div><Slider label={text("Text X", "文字 X")} value={isCompactLayout ? settings.compactOtherTextX : settings.otherTextX} min={0} max={100} onChange={(v) => update(isCompactLayout ? "compactOtherTextX" : "otherTextX", v)} /><Slider label={text("Text Y", "文字 Y")} value={verticalSliderValue(isCompactLayout ? settings.compactOtherTextY : settings.otherTextY)} min={0} max={100} onChange={(v) => update(isCompactLayout ? "compactOtherTextY" : "otherTextY", storedTopValue(v))} /><MappedSlider label={text("Text size", "文字サイズ")} value={isCompactLayout ? settings.compactOtherTextSize : settings.otherTextSize} minValue={4} maxValue={100} onChange={(v) => update(isCompactLayout ? "compactOtherTextSize" : "otherTextSize", v)} /><Slider label={text("Text spacing", "文字間隔")} value={settings.otherTextSpacing} min={-50} max={50} onChange={(v) => update("otherTextSpacing", v)} />
               </fieldset>
             </div>
           </details>
@@ -2906,7 +3134,7 @@ export default function Home() {
                 </select>
               </label>
               <div className="design-subtitle">{text("Rank change effect", "ランク変動演出")}</div><label>{text("Rank Up / Down style", "Rank Up / Down演出")}<select value={settings.rankEffectStyle} onChange={(e) => update("rankEffectStyle", e.target.value as RankEffectStyle)}><option value="CLASSIC">{text("Classic reveal", "クラシック")}</option><option value="FLASH">{text("Light flash", "ライトフラッシュ")}</option><option value="SLIDE">{text("Side slide", "サイドスライド")}</option><option value="BURST">{text("Energy burst", "エナジーバースト")}</option><option value="STARLIGHT">{text("Starlight", "スターライト")}</option><option value="METEOR">{text("Meteor shower", "流星群")}</option></select></label>
-              <div className="design-subtitle">{text("MMR / LR switch effect", "MMR / LR切替演出")}</div><label>{text("Switch style", "切替演出")}<select value={settings.ratingSwitchEffectStyle} onChange={(e) => update("ratingSwitchEffectStyle", e.target.value as RatingSwitchEffectStyle)}><option value="WAVE">{text("Wave", "ウェーブ")}</option><option value="FADE">{text("Soft fade", "ソフトフェード")}</option><option value="FLIP">{text("3D flip", "3Dフリップ")}</option><option value="GLITCH">{text("Digital glitch", "デジタルグリッチ")}</option></select></label>
+              <div className="design-subtitle">{text("MMR / LR switch effect", "MMR / LR切替演出")}</div><label>{text("Switch style", "切替演出")}<select value={settings.ratingSwitchEffectStyle} onChange={(e) => update("ratingSwitchEffectStyle", e.target.value as RatingSwitchEffectStyle)}><option value="WAVE">{text("Wave", "ウェーブ")}</option><option value="FADE">{text("Soft fade", "ソフトフェード")}</option><option value="SLIDE">{text("Slide in", "スライドイン")}</option><option value="PULSE">{text("Pulse", "パルス")}</option><option value="SWEEP">{text("Light sweep", "ライトスイープ")}</option><option value="GLITCH">{text("Digital glitch", "デジタルグリッチ")}</option></select></label>
               <div className="design-subtitle">{text("Effect color", "エフェクト色")}</div><div className="two-col"><label>{text("Effect color", "エフェクト色")}<input type="color" value={settings.ratingEffectColor} disabled={settings.ratingEffectUseMainColor} onChange={(e) => update("ratingEffectColor", e.target.value)} /></label><label className="checkbox-label"><input type="checkbox" checked={settings.ratingEffectUseMainColor} onChange={(e) => update("ratingEffectUseMainColor", e.target.checked)} />{text("Use border color", "枠線色を使用")}</label></div>
               <div className="design-subtitle">{text("Border", "枠線")}</div><div className="two-col"><label>{text("Border color", "枠線色")}<input type="color" value={settings.borderColor} onChange={(e) => update("borderColor", e.target.value)} /></label><label>{text("Animated border color", "枠線カラー")}<input type="color" value={settings.flowColor} onChange={(e) => update("flowColor", e.target.value)} /></label></div><OptionSlider label={text("Border speed", "枠線速度")} optionLabel={text("Border animation", "枠線")} checked={settings.flowEnabled} onCheckedChange={(checked) => update("flowEnabled", checked)} value={settings.flowSpeed} min={0} max={100} disabled={!settings.flowEnabled} onChange={(v) => update("flowSpeed", v)} /><MappedSlider label={text("Border length", "枠線長さ")} value={settings.flowLength} minValue={1} maxValue={96} disabled={!settings.flowEnabled} onChange={(v) => update("flowLength", v)} />
             </div>
@@ -2916,7 +3144,7 @@ export default function Home() {
         <section className="panel preview-panel">
           <h2>{text("Live preview", "ライブプレビュー")}</h2>
 
-          <div className="preview-stage">
+          <div className={`preview-stage ${settings.layoutMode === "COMPACT" ? "compact-preview-stage" : ""}`}>
             <Card
               settings={settings}
               effect={previewEffect}
@@ -2975,6 +3203,12 @@ export default function Home() {
           <div className="url-row">
             <input readOnly value={cardUrl} />
             <button onClick={copyUrl}>{copied ? text("Copied", "コピー済み") : text("Copy", "コピー")}</button>
+          </div>
+
+          <div className={`obs-size-hint ${settings.layoutMode === "COMPACT" ? "is-compact" : ""}`}>
+            {settings.layoutMode === "COMPACT"
+              ? text("OBS source size: 380 × 150 (then scale freely in OBS)", "OBSソースサイズ: 380 × 150（その後OBS側で自由に縮小）")
+              : text("OBS source size: 650 × 150", "OBSソースサイズ: 650 × 150")}
           </div>
 
           <a className="open-link" href={cardUrl} target="_blank">
@@ -3363,10 +3597,38 @@ function Card({
       )
     : "transparent";
 
+  const compactLayout = settings.layoutMode === "COMPACT";
+  const layoutNameX = compactLayout ? settings.compactNameX : settings.nameX;
+  const layoutNameY = compactLayout ? settings.compactNameY : settings.nameY;
+  const layoutNameSize = compactLayout ? settings.compactNameSize : settings.nameSize;
+  const layoutScoreX = compactLayout ? settings.compactScoreX : settings.scoreX;
+  const layoutScoreY = compactLayout ? settings.compactScoreY : settings.scoreY;
+  const layoutScoreSize = compactLayout ? settings.compactScoreSize : settings.scoreSize;
+  const layoutRatingX = compactLayout ? settings.compactRatingX : settings.ratingBoxX;
+  const layoutRatingY = compactLayout ? settings.compactRatingY : settings.ratingBoxY;
+  const layoutRatingSize = compactLayout ? settings.compactRatingSize : settings.ratingTextSize;
+  const layoutTagX = compactLayout ? settings.compactTagX : settings.tagX;
+  const layoutTagY = compactLayout ? settings.compactTagY : settings.tagY;
+  const layoutTagSize = compactLayout ? settings.compactTagSize : settings.tagTextSize;
+  const layoutRankX = compactLayout ? settings.compactRankTextX : settings.rankTextX;
+  const layoutRankY = compactLayout ? settings.compactRankTextY : settings.rankTextY;
+  const layoutRankSize = compactLayout ? settings.compactRankTextSize : settings.rankTextSize;
+  const layoutEventsX = compactLayout ? settings.compactEventsX : settings.eventsX;
+  const layoutEventsY = compactLayout ? settings.compactEventsY : settings.eventsY;
+  const layoutEventsSize = compactLayout ? settings.compactEventsSize : settings.eventsSize;
+  const layoutOtherX = compactLayout ? settings.compactOtherTextX : settings.otherTextX;
+  const layoutOtherY = compactLayout ? settings.compactOtherTextY : settings.otherTextY;
+  const layoutOtherSize = compactLayout ? settings.compactOtherTextSize : settings.otherTextSize;
+  const layoutFlagX = compactLayout ? settings.compactFlagX : settings.flagX;
+  const layoutFlagY = compactLayout ? settings.compactFlagY : settings.flagY;
+  const layoutFlagSize = compactLayout ? settings.compactFlagSize : settings.flagSize;
+  const layoutIconX = compactLayout ? settings.compactRankIconX : settings.rankIconX;
+  const layoutIconY = compactLayout ? settings.compactRankIconY : settings.rankIconY;
+  const layoutIconSize = compactLayout ? settings.compactRankIconSize : settings.rankIconSize;
 
   return (
     <div
-      className={`card-shell ${
+      className={`card-shell ${settings.layoutMode === "COMPACT" ? "compact-mode" : ""} ${
         settings.textFont === "OEDO_KANTEIRYU" ? "font-oedo-kanteiryu" : ""
       } ${!settings.flowEnabled ? "no-flow" : ""} ${
         !settings.tagBoxGradientEnabled ? "no-tag-box-gradient" : ""
@@ -3442,17 +3704,18 @@ function Card({
 
       <svg
         className="flow-border-svg"
-        viewBox="0 0 650 150"
+        viewBox={settings.layoutMode === "COMPACT" ? "0 0 380 150" : "0 0 650 150"}
+        preserveAspectRatio="none"
         aria-hidden="true"
       >
         <rect
           className="flow-border-path"
           x="1"
           y="1"
-          width="648"
+          width={settings.layoutMode === "COMPACT" ? "378" : "648"}
           height="148"
-          rx="69"
-          ry="69"
+          rx={settings.layoutMode === "COMPACT" ? "61" : "69"}
+          ry={settings.layoutMode === "COMPACT" ? "61" : "69"}
           pathLength={100}
         />
       </svg>
@@ -3478,10 +3741,10 @@ function Card({
           src={settings.rankIconUrl}
           alt=""
           style={{
-            left: `${settings.rankIconX}%`,
-            top: `${settings.rankIconY}%`,
-            width: settings.rankIconSize,
-            height: settings.rankIconSize,
+            left: `${layoutIconX}%`,
+            top: `${layoutIconY}%`,
+            width: layoutIconSize,
+            height: layoutIconSize,
             opacity: opacityFromTransparency(settings.rankIconTransparency),
           }}
         />
@@ -3491,9 +3754,9 @@ function Card({
         <div
           className="mode-tag"
           style={{
-            left: `${settings.tagX}%`,
-            top: `${settings.tagY}%`,
-            fontSize: settings.tagTextSize,
+            left: `${layoutTagX}%`,
+            top: `${layoutTagY}%`,
+            fontSize: layoutTagSize,
             letterSpacing: `${(settings.tagTextSpacing ?? 0) / 100}em`,
             opacity: opacityFromTransparency(settings.trackTransparency),
           }}
@@ -3508,11 +3771,11 @@ function Card({
         <div
           className={`flag-badge ${settings.flagUrl ? "has-image" : ""}`}
           style={{
-            left: `${settings.flagX}%`,
-            top: `${settings.flagY}%`,
-            width: Math.round(settings.flagSize * 1.92),
-            height: Math.round(settings.flagSize * 1.42),
-            fontSize: settings.flagSize,
+            left: `${layoutFlagX}%`,
+            top: `${layoutFlagY}%`,
+            width: Math.round(layoutFlagSize * 1.92),
+            height: Math.round(layoutFlagSize * 1.42),
+            fontSize: layoutFlagSize,
             opacity: opacityFromTransparency(settings.flagTransparency),
             background: settings.flagUrl
               ? "rgba(255, 255, 255, .92)"
@@ -3531,9 +3794,9 @@ function Card({
         <div
           className="card-name"
           style={{
-            left: `${settings.nameX}%`,
-            top: `${settings.nameY}%`,
-            fontSize: settings.nameSize,
+            left: `${layoutNameX}%`,
+            top: `${layoutNameY}%`,
+            fontSize: layoutNameSize,
             letterSpacing: `${(settings.nameTextSpacing ?? 0) / 100}em`,
             opacity: opacityFromTransparency(settings.nameTransparency),
           }}
@@ -3547,8 +3810,8 @@ function Card({
           key={`preview-switch-wave-${previewSwitchAnimationToken}`}
           className={`rating-switch-effect rating-switch-effect-${settings.ratingSwitchEffectStyle.toLowerCase()}`}
           style={{
-            left: `${settings.scoreX}%`,
-            top: `${settings.scoreY}%`,
+            left: `${layoutScoreX}%`,
+            top: `${layoutScoreY}%`,
           }}
         />
       )}
@@ -3568,11 +3831,10 @@ function Card({
               : ""
           }`}
           style={{
-            left: `${settings.scoreX}%`,
-            top: `${settings.scoreY}%`,
-            fontSize: settings.scoreSize,
-            letterSpacing: `${(settings.scoreTextSpacing ?? 0) / 100}em`,
-            columnGap: `${(settings.scoreTextSpacing ?? 0) / 100}em`,
+            left: `${layoutScoreX}%`,
+            top: `${layoutScoreY}%`,
+            fontSize: layoutScoreSize,
+            "--score-digit-spacing": `${(settings.scoreTextSpacing ?? 0) / 100}em`,
             opacity: opacityFromTransparency(settings.rateTransparency),
           }}
         />
@@ -3587,9 +3849,9 @@ function Card({
             : ""
         }`}
         style={{
-          left: `${settings.ratingBoxX}%`,
-          top: `${settings.ratingBoxY}%`,
-          fontSize: settings.ratingTextSize,
+          left: `${layoutRatingX}%`,
+          top: `${layoutRatingY}%`,
+          fontSize: layoutRatingSize,
           letterSpacing: `${(settings.ratingTextSpacing ?? 0) / 100}em`,
           opacity: opacityFromTransparency(settings.ratingTransparency),
         }}
@@ -3604,13 +3866,17 @@ function Card({
       <div
         className="rank-line"
         style={{
-          left: `${settings.rankTextX}%`,
-          top: `${settings.rankTextY}%`,
-          fontSize: settings.rankTextSize,
+          left: `${layoutRankX}%`,
+          top: `${layoutRankY}%`,
+          fontSize: layoutRankSize,
+          letterSpacing: `${(settings.rankTextSpacing ?? 0) / 100}em`,
           opacity: opacityFromTransparency(settings.rankTextTransparency),
+          whiteSpace: settings.rankTextFormat === "FULL_BREAK" ? "pre-line" : "nowrap",
+          lineHeight: settings.rankTextFormat === "FULL_BREAK" ? 0.9 : 1,
+          textAlign: "center",
         }}
       >
-        {cleanRankText(settings.rankText || "MKW Lounge")}
+        {formatRankText(settings.rankText || "MKW Lounge", settings.rankTextFormat)}
       </div>
       )}
 
@@ -3618,9 +3884,9 @@ function Card({
         <div
           className={`event-line ${settings.eventsUseMainColor ? "main-gradient-text" : "solid-custom-text"}`}
           style={{
-            left: `${settings.eventsX}%`,
-            top: `${settings.eventsY}%`,
-            fontSize: settings.eventsSize,
+            left: `${layoutEventsX}%`,
+            top: `${layoutEventsY}%`,
+            fontSize: layoutEventsSize,
             letterSpacing: `${(settings.eventsSpacing ?? 0) / 100}em`,
             color: settings.eventsUseMainColor ? undefined : settings.eventsColor,
             opacity: opacityFromTransparency(settings.eventsTransparency),
@@ -3634,9 +3900,9 @@ function Card({
         <div
           className={`other-text-line ${settings.otherTextUseMainColor ? "main-gradient-text" : "solid-custom-text"}`}
           style={{
-            left: `${settings.otherTextX}%`,
-            top: `${settings.otherTextY}%`,
-            fontSize: settings.otherTextSize,
+            left: `${layoutOtherX}%`,
+            top: `${layoutOtherY}%`,
+            fontSize: layoutOtherSize,
             letterSpacing: `${(settings.otherTextSpacing ?? 0) / 100}em`,
             color: settings.otherTextUseMainColor ? undefined : settings.otherTextColor,
             opacity: opacityFromTransparency(settings.otherTextTransparency),
@@ -3648,7 +3914,7 @@ function Card({
 
       {(effect === "rank-up" || effect === "rank-down") &&
         !rankRevealVisible && (
-          <div className={`effect-burst rank-announcement ${effect}`}>
+          <div className={`effect-burst rank-announcement ${effect}`} style={{ letterSpacing: `${(settings.rankTextSpacing ?? 0) / 100}em` }}>
             {effect === "rank-up" ? "RANK UP" : "RANK DOWN"}
           </div>
         )}
@@ -3674,11 +3940,20 @@ function Card({
             <img className="rank-reveal-bg" src={previewRankIcon} alt="" />
           )}
 
-          <div className="rank-reveal-label">
+          <div className="rank-reveal-label" style={{ letterSpacing: `${(settings.rankTextSpacing ?? 0) / 100}em` }}>
             {effect === "rank-up" ? "NEW RANK" : "RANK CHANGED"}
           </div>
 
-          <div className="rank-reveal-text">{previewRank.text}</div>
+          <div
+            className="rank-reveal-text"
+            style={{
+              letterSpacing: `${(settings.rankTextSpacing ?? 0) / 100}em`,
+              whiteSpace: settings.rankTextFormat === "FULL_BREAK" ? "pre-line" : "nowrap",
+              lineHeight: settings.rankTextFormat === "FULL_BREAK" ? 0.9 : undefined,
+            }}
+          >
+            {formatRankText(previewRank.text, settings.rankTextFormat)}
+          </div>
         </div>
       )}
     </div>
