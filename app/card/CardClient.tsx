@@ -1098,7 +1098,10 @@ export default function CardClient({
             transform: "scale(0.98)",
             backgroundImage: initial.showCardBackground ? cardBackground : "none",
             borderColor: "transparent",
-            boxShadow: `0 0 28px ${initial.border}44, inset 0 0 24px #ffffff10`,
+            boxShadow:
+              initial.layoutMode === "COMPACT"
+                ? "inset 0 0 24px #ffffff10"
+                : `0 0 28px ${initial.border}44, inset 0 0 24px #ffffff10`,
             "--border-color": initial.border,
             "--flow-color": initial.flow || "#ff3030",
             "--rating-effect-color": ratingEffectColor || "#ff3030",

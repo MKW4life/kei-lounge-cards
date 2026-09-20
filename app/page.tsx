@@ -1368,7 +1368,7 @@ function getPreviewRank(
 
 const VERSION_HISTORY = [
   {
-    version: "v2.0.5–v2.2.7",
+    version: "v2.0.5–v2.2.9",
     en: "Improved Undo / Redo, Lounge-name autocomplete, JP / EN wording, Preview / OBS parity, selectable Win / Loss effects, automatic player refresh, and Compact mode customization. All player text elements now support adjustable character spacing, including Rank text, and Rank text can be shown as division only, division/tier, tier only, or on two lines. MMR / LR switch effects now preserve text shadows; 3D Flip was replaced with Slide In, Pulse, and Light Sweep.",
     jp: "Undo / Redo、Lounge名予測変換、JP / EN表記、Preview / OBSの一致、勝利 / 敗北演出、Lounge名変更時の自動更新、コンパクトモードの調整機能を改善しました。名前・レート・RT/CT・MMR/LR・ランク・模擬数・追加テキストのすべてで文字間隔を狭く／広く調整できるようにし、ランク文字はDivisionのみ・Division/Tier・Tierのみ・2行表示から選択できるようにしました。MMR / LR切替のソフトフェードでも文字の影を維持するよう修正し、3Dフリップを削除してスライドイン・パルス・ライトスイープを追加しました。",
   },
@@ -3650,7 +3650,10 @@ function Card({
           transform: "scale(0.98)",
           backgroundImage: settings.showCardBackground ? cardBackground : "none",
           borderColor: "transparent",
-          boxShadow: `0 0 28px ${(settings.borderColor ?? "#ff0000")}44, inset 0 0 24px #ffffff10`,
+          boxShadow:
+            settings.layoutMode === "COMPACT"
+              ? "inset 0 0 24px #ffffff10"
+              : `0 0 28px ${(settings.borderColor ?? "#ff0000")}44, inset 0 0 24px #ffffff10`,
           "--border-color": settings.borderColor ?? "#ff0000",
           "--flow-color": settings.flowColor ?? "#ff3030",
           "--rating-effect-color": ratingEffectColor ?? "#ff3030",

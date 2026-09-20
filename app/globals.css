@@ -7162,3 +7162,25 @@ label.summary-toggle span {
   50% { opacity: 1; transform: translate(-50%, -50%); }
   100% { opacity: 1; transform: translate(-50%, -50%); }
 }
+
+
+/* v2.2.9 — compact mode must be perfectly transparent outside the rounded card.
+   The normal card uses an outer glow on the shell itself; overflow cannot clip a
+   parent's own box-shadow, so Compact removes that outer glow and uses a hard
+   rounded clip for every internal layer/effect. */
+.card-shell.compact-mode {
+  overflow: hidden !important;
+  clip-path: inset(0 round 62px);
+  -webkit-clip-path: inset(0 round 62px);
+  background-clip: padding-box;
+}
+
+.card-shell.compact-mode::before {
+  border-radius: 62px !important;
+}
+
+.card-shell.compact-mode .card-background-image-layer,
+.card-shell.compact-mode .custom-overlay-image,
+.card-shell.compact-mode .result-opening-fx {
+  border-radius: inherit;
+}
