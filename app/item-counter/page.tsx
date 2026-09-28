@@ -20,6 +20,7 @@ import { SPRITE_DATA_URI } from "./sprite";
 
 type Action =
   | { action: "delta"; id: ItemId; amount: number }
+  | { action: "hotkeyIncrement"; index: number }
   | { action: "setCount"; id: ItemId; count: number }
   | { action: "setVisible"; id: ItemId; visible: boolean }
   | { action: "setOrder"; order: ItemId[] }
@@ -311,6 +312,36 @@ export default function ItemCounterPage() {
               kei-lounge-cards プロジェクトへ接続するとクラウド同期が有効になります。
             </div>
           )}
+        </section>
+
+        <section className={`${styles.panel} ${styles.connectionPanel}`}>
+          <div>
+            <h2>ゲーム中のグローバルホットキー</h2>
+            <p className={styles.help}>
+              Mario Kart が最前面でも Shift + 1〜7 でカウントできます。
+              ローカルWebサーバーは使わず、Windowsの小さな補助ツールからこのクラウドAPIへ送信します。
+            </p>
+          </div>
+          <div className={styles.connectionRow}>
+            <a
+              className={styles.button}
+              href="/MKW_Item_Counter_Hotkeys.ps1"
+              download
+            >
+              ① Hotkey本体をダウンロード
+            </a>
+            <a
+              className={styles.button}
+              href="/start_mkw_hotkeys.bat"
+              download
+            >
+              ② 起動BATをダウンロード
+            </a>
+          </div>
+          <p className={styles.help}>
+            2ファイルを同じフォルダに置き、start_mkw_hotkeys.bat を起動してください。
+            初回だけ上の「接続キー」を入力します。通常の1〜7とキーボードリセットは登録しません。
+          </p>
         </section>
 
         <div className={styles.workspace}>
