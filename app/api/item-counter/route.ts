@@ -46,6 +46,60 @@ type StateRead = {
   exists: boolean;
 };
 
+type RedisConfig = {
+  url: string;
+  token: string;
+};
+
+function getRedisConfig(): RedisConfig | null {
+  const url =
+    process.env.UPSTASH_REDIS_REST_URL?.trim() ||
+    process.env.KV_REST_API_URL?.trim();
+  const token =
+    process.env.UPSTASH_REDIS_REST_TOKEN?.trim() ||
+    process.env.KV_REST_API_TOKEN?.trim();
+
+  if (!url || !token) return null;
+  return { url: url.replace(/\/$/, ""), token };
+}
+
+function redisKey(key: string): string {
+  return `mkw:item-counter:${createHash("sha256").update(key).digest("hex")}`;
+}
+
+async function redisCommand(
+  config: RedisConfig,
+  command: Array<string | number>
+): Promise<unknown> {
+  const response = await fetch(config.url, {
+    method: "POST",
+    headers: {
+      authorization: `Bearer ${config.token}`,
+      "content-type": "application/json",
+    },
+    body: JSON.stringify(command),
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    const detail = (await response.text()).replace(/\s+/g, " ").slice(0, 180);
+    throw new Error(
+      `redis_${response.status}${detail ? `_${detail}` : ""}`
+    );
+  }
+
+  const body = (await response.json()) as {
+    result?: unknown;
+    error?: string;
+  };
+
+  if (body.error) {
+    throw new Error(`redis_error_${body.error}`);
+  }
+
+  return body.result;
+}
+
 function getBlobAuth(): BlobAuth {
   const readWriteToken = process.env.BLOB_READ_WRITE_TOKEN?.trim();
   if (readWriteToken) {
@@ -86,6 +140,24 @@ function blobUrl(auth: BlobAuth, path: string): string {
 }
 
 async function readState(key: string): Promise<StateRead> {
+  const redis = getRedisConfig();
+  if (redis) {
+    const raw = await redisCommand(redis, ["GET", redisKey(key)]);
+    if (typeof raw !== "string" || !raw) {
+      return {
+        state: structuredClone(DEFAULT_STATE),
+        etag: null,
+        exists: false,
+      };
+    }
+
+    return {
+      state: normalizeState(JSON.parse(raw)),
+      etag: null,
+      exists: true,
+    };
+  }
+
   const auth = getBlobAuth();
   const path = blobPath(key);
   const url = new URL(blobUrl(auth, path));
@@ -128,6 +200,16 @@ async function writeState(
   etag: string | null,
   exists: boolean
 ): Promise<"ok" | "retry"> {
+  const redis = getRedisConfig();
+  if (redis) {
+    await redisCommand(redis, [
+      "SET",
+      redisKey(key),
+      JSON.stringify(state),
+    ]);
+    return "ok";
+  }
+
   const auth = getBlobAuth();
   const path = blobPath(key);
   const headers: Record<string, string> = {
