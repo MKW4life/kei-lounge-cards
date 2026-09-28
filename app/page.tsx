@@ -2722,7 +2722,7 @@ export default function Home() {
           <summary>Kei Projects</summary>
           <div className="project-nav-menu">
             <a href="/">Kei Lounge Cards</a>
-            <a href="http://localhost:3000/">MKW Item Counter</a>
+            <a href="/item-counter">MKW Item Counter</a>
             <a href="https://kei-brstm-hub.vercel.app/" target="_blank" rel="noreferrer">Kei Music Hub</a>
           </div>
         </details>
