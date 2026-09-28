@@ -51,6 +51,7 @@ export default function ItemCounterPage() {
   const [origin, setOrigin] = useState("");
   const [state, setState] = useState<CounterState>(DEFAULT_STATE);
   const [storageError, setStorageError] = useState(false);
+  const [storageBlocked, setStorageBlocked] = useState(false);
   const [statusText, setStatusText] = useState("接続中...");
   const queueRef = useRef<Promise<void>>(Promise.resolve());
 
@@ -96,10 +97,14 @@ export default function ItemCounterPage() {
         } catch {
           // Ignore malformed error responses.
         }
+        if (detail.includes("blob_read_403") && detail.includes("blocked")) {
+          setStorageBlocked(true);
+        }
         setStatusText(`同期エラー (${response.status})${detail}`);
         return;
       }
       setStorageError(false);
+      setStorageBlocked(false);
       setState(normalizeState(await response.json()));
       setStatusText("クラウド同期中");
     } catch {
@@ -108,11 +113,11 @@ export default function ItemCounterPage() {
   }, [apiUrl]);
 
   useEffect(() => {
-    if (!apiUrl) return;
+    if (!apiUrl || storageBlocked) return;
     void loadState();
-    const timer = window.setInterval(loadState, 450);
+    const timer = window.setInterval(loadState, 5000);
     return () => window.clearInterval(timer);
-  }, [apiUrl, loadState]);
+  }, [apiUrl, loadState, storageBlocked]);
 
   const sendAction = useCallback(
     (payload: Action) => {
@@ -139,6 +144,9 @@ export default function ItemCounterPage() {
               detail = body.error ? `: ${body.error}` : "";
             } catch {
               // Ignore malformed error responses.
+            }
+            if (detail.includes("blob_") && detail.includes("blocked")) {
+              setStorageBlocked(true);
             }
             setStatusText(`更新エラー (${response.status})${detail}`);
             return;
@@ -310,6 +318,12 @@ export default function ItemCounterPage() {
               Vercel Blob がまだ接続されていません。Vercel の
               「Storage」から Private Blob Store を作成し、
               kei-lounge-cards プロジェクトへ接続するとクラウド同期が有効になります。
+            </div>
+          )}
+          {storageBlocked && (
+            <div className={styles.storageError}>
+              Vercel Blob Store が現在ブロックされているため、自動同期を停止しました。
+              ページを開いたままでも追加リクエストは送り続けません。
             </div>
           )}
         </section>
