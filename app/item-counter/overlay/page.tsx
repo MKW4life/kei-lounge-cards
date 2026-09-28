@@ -182,7 +182,22 @@ export default function ItemCounterOverlayPage() {
           `/api/item-counter?key=${encodeURIComponent(secret)}`,
           { cache: "no-store" }
         );
-        if (!response.ok || stopped) return;
+        if (!response.ok || stopped) {
+          if (!stopped) {
+            try {
+              const body = (await response.json()) as { error?: string };
+              if (
+                body.error?.includes("blob_read_403") &&
+                body.error.includes("blocked")
+              ) {
+                stopped = true;
+              }
+            } catch {
+              // Ignore malformed error responses.
+            }
+          }
+          return;
+        }
         stateRef.current = normalizeState(await response.json());
         render();
       } catch {
@@ -191,7 +206,7 @@ export default function ItemCounterOverlayPage() {
     };
 
     void refresh();
-    const timer = window.setInterval(refresh, 300);
+    const timer = window.setInterval(refresh, 1000);
     return () => {
       stopped = true;
       window.clearInterval(timer);
