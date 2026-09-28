@@ -16,6 +16,30 @@ type BlobAuth = {
   storeId: string;
 };
 
+type VercelRequestContext = {
+  headers?: Record<string, string>;
+};
+
+const VERCEL_REQUEST_CONTEXT = Symbol.for("@vercel/request-context");
+
+function getRequestContextOidcToken(): string | undefined {
+  const scopedGlobal = globalThis as typeof globalThis & {
+    [VERCEL_REQUEST_CONTEXT]?: {
+      get?: () => VercelRequestContext;
+    };
+  };
+
+  const contextToken =
+    scopedGlobal[VERCEL_REQUEST_CONTEXT]?.get?.().headers?.[
+      "x-vercel-oidc-token"
+    ];
+
+  const envToken = process.env.VERCEL_OIDC_TOKEN;
+
+  const token = (contextToken ?? envToken)?.trim();
+  return token || undefined;
+}
+
 type StateRead = {
   state: CounterState;
   etag: string | null;
@@ -32,7 +56,7 @@ function getBlobAuth(): BlobAuth {
     return { token: readWriteToken, storeId };
   }
 
-  const oidcToken = process.env.VERCEL_OIDC_TOKEN?.trim();
+  const oidcToken = getRequestContextOidcToken();
   const storeId = process.env.BLOB_STORE_ID?.trim();
   if (oidcToken && storeId) {
     return { token: oidcToken, storeId };
