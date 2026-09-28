@@ -195,6 +195,19 @@ function applyAction(
       );
       break;
     }
+    case "hotkeyIncrement": {
+      const index = Math.floor(Number(payload.index));
+      if (!Number.isFinite(index) || index < 1 || index > 7) {
+        throw new Error("invalid_hotkey_index");
+      }
+      const hotkeyId = next.order[index - 1];
+      if (!hotkeyId) throw new Error("invalid_hotkey_index");
+      next.items[hotkeyId].count = Math.max(
+        0,
+        Math.floor(next.items[hotkeyId].count + 1)
+      );
+      break;
+    }
     case "setCount": {
       if (!isItemId(id)) throw new Error("invalid_item");
       const count = Number(payload.count);
@@ -248,6 +261,7 @@ function errorResponse(error: unknown) {
           message === "invalid_amount" ||
           message === "invalid_count" ||
           message === "invalid_order" ||
+          message === "invalid_hotkey_index" ||
           message === "invalid_action"
         ? 400
         : 500;
