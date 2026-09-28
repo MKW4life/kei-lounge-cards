@@ -88,7 +88,14 @@ export default function ItemCounterPage() {
         return;
       }
       if (!response.ok) {
-        setStatusText(`同期エラー (${response.status})`);
+        let detail = "";
+        try {
+          const body = (await response.json()) as { error?: string };
+          detail = body.error ? `: ${body.error}` : "";
+        } catch {
+          // Ignore malformed error responses.
+        }
+        setStatusText(`同期エラー (${response.status})${detail}`);
         return;
       }
       setStorageError(false);
@@ -125,7 +132,14 @@ export default function ItemCounterPage() {
           }
 
           if (!response.ok) {
-            setStatusText(`更新エラー (${response.status})`);
+            let detail = "";
+            try {
+              const body = (await response.json()) as { error?: string };
+              detail = body.error ? `: ${body.error}` : "";
+            } catch {
+              // Ignore malformed error responses.
+            }
+            setStatusText(`更新エラー (${response.status})${detail}`);
             return;
           }
 
