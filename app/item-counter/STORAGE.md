@@ -1,5 +1,11 @@
 # MKW Item Counter storage
 
-This feature uses the Private Vercel Blob store connected to the kei-lounge-cards project.
+The item counter prefers Upstash Redis when a Redis integration is connected to the Vercel project.
 
-After connecting or changing the store, create a new deployment so the deployment receives the current Blob credentials / OIDC store binding.
+Supported Redis environment variable pairs:
+- UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN
+- KV_REST_API_URL + KV_REST_API_TOKEN
+
+Vercel Blob remains only as a fallback. Because Blob is not suitable for high-frequency polling, the UI and OBS overlay stop retrying when Blob reports that the store is blocked.
+
+After connecting or changing storage, create a new deployment so the deployment receives the current integration environment variables.
