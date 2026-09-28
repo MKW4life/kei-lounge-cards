@@ -1,0 +1,268 @@
+import { createHash, randomUUID } from "node:crypto";
+import { NextResponse } from "next/server";
+import {
+  DEFAULT_STATE,
+  ITEM_IDS,
+  type CounterState,
+  type ItemId,
+  normalizeState,
+} from "../../item-counter/model";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+type BlobAuth = {
+  token: string;
+  storeId: string;
+};
+
+type StateRead = {
+  state: CounterState;
+  etag: string | null;
+  exists: boolean;
+};
+
+function getBlobAuth(): BlobAuth {
+  const readWriteToken = process.env.BLOB_READ_WRITE_TOKEN?.trim();
+  if (readWriteToken) {
+    const storeId = readWriteToken.split("_")[3]?.trim();
+    if (!storeId) {
+      throw new Error("storage_not_configured");
+    }
+    return { token: readWriteToken, storeId };
+  }
+
+  const oidcToken = process.env.VERCEL_OIDC_TOKEN?.trim();
+  const storeId = process.env.BLOB_STORE_ID?.trim();
+  if (oidcToken && storeId) {
+    return { token: oidcToken, storeId };
+  }
+
+  throw new Error("storage_not_configured");
+}
+
+function validateKey(value: string | null): string {
+  const key = value?.trim() ?? "";
+  if (!/^[A-Za-z0-9_-]{24,160}$/.test(key)) {
+    throw new Error("invalid_key");
+  }
+  return key;
+}
+
+function blobPath(key: string): string {
+  const digest = createHash("sha256").update(key).digest("hex");
+  return `mkw-item-counter/${digest}.json`;
+}
+
+function blobUrl(auth: BlobAuth, path: string): string {
+  return `https://${auth.storeId}.private.blob.vercel-storage.com/${path}`;
+}
+
+async function readState(key: string): Promise<StateRead> {
+  const auth = getBlobAuth();
+  const path = blobPath(key);
+  const url = new URL(blobUrl(auth, path));
+  url.searchParams.set("cache", "0");
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      authorization: `Bearer ${auth.token}`,
+    },
+    cache: "no-store",
+  });
+
+  if (response.status === 404) {
+    return {
+      state: structuredClone(DEFAULT_STATE),
+      etag: null,
+      exists: false,
+    };
+  }
+
+  if (!response.ok) {
+    throw new Error(`blob_read_${response.status}`);
+  }
+
+  const parsed = normalizeState(await response.json());
+  return {
+    state: parsed,
+    etag: response.headers.get("etag"),
+    exists: true,
+  };
+}
+
+async function writeState(
+  key: string,
+  state: CounterState,
+  etag: string | null,
+  exists: boolean
+): Promise<"ok" | "retry"> {
+  const auth = getBlobAuth();
+  const path = blobPath(key);
+  const headers: Record<string, string> = {
+    authorization: `Bearer ${auth.token}`,
+    "content-type": "application/json; charset=utf-8",
+    "x-content-type": "application/json; charset=utf-8",
+    "x-vercel-blob-store-id": auth.storeId,
+    "x-api-version": "12",
+    "x-api-blob-request-id": `${auth.storeId}:${Date.now()}:${randomUUID()}`,
+    "x-api-blob-request-attempt": "0",
+    "x-vercel-blob-access": "private",
+    "x-add-random-suffix": "0",
+    "x-allow-overwrite": exists ? "1" : "0",
+  };
+
+  if (etag) {
+    headers["x-if-match"] = etag;
+    headers["x-allow-overwrite"] = "1";
+  }
+
+  const endpoint = new URL("https://vercel.com/api/blob/");
+  endpoint.searchParams.set("pathname", path);
+
+  const response = await fetch(endpoint, {
+    method: "PUT",
+    headers,
+    body: JSON.stringify(state),
+    cache: "no-store",
+  });
+
+  if (response.ok) return "ok";
+  if (response.status === 409 || response.status === 412) return "retry";
+
+  throw new Error(`blob_write_${response.status}`);
+}
+
+function isItemId(value: unknown): value is ItemId {
+  return (
+    typeof value === "string" &&
+    (ITEM_IDS as readonly string[]).includes(value)
+  );
+}
+
+function applyAction(
+  state: CounterState,
+  payload: Record<string, unknown>
+): CounterState {
+  const next = normalizeState(state);
+  const action = String(payload.action ?? "");
+  const id = payload.id;
+
+  switch (action) {
+    case "delta": {
+      if (!isItemId(id)) throw new Error("invalid_item");
+      const amount = Number(payload.amount);
+      if (!Number.isFinite(amount) || Math.abs(amount) > 1000) {
+        throw new Error("invalid_amount");
+      }
+      next.items[id].count = Math.max(
+        0,
+        Math.floor(next.items[id].count + amount)
+      );
+      break;
+    }
+    case "setCount": {
+      if (!isItemId(id)) throw new Error("invalid_item");
+      const count = Number(payload.count);
+      if (!Number.isFinite(count) || count < 0 || count > 999999) {
+        throw new Error("invalid_count");
+      }
+      next.items[id].count = Math.floor(count);
+      break;
+    }
+    case "setVisible": {
+      if (!isItemId(id)) throw new Error("invalid_item");
+      next.items[id].visible = Boolean(payload.visible);
+      break;
+    }
+    case "setOrder": {
+      if (!Array.isArray(payload.order)) throw new Error("invalid_order");
+      const order: ItemId[] = [];
+      for (const value of payload.order) {
+        if (isItemId(value) && !order.includes(value)) order.push(value);
+      }
+      for (const itemId of ITEM_IDS) {
+        if (!order.includes(itemId)) order.push(itemId);
+      }
+      next.order = order;
+      break;
+    }
+    case "reset": {
+      if (!isItemId(id)) throw new Error("invalid_item");
+      next.items[id].count = 0;
+      break;
+    }
+    case "resetAll": {
+      for (const itemId of ITEM_IDS) next.items[itemId].count = 0;
+      break;
+    }
+    default:
+      throw new Error("invalid_action");
+  }
+
+  next.updatedAt = Date.now();
+  return next;
+}
+
+function errorResponse(error: unknown) {
+  const message = error instanceof Error ? error.message : "unknown_error";
+  const status =
+    message === "storage_not_configured"
+      ? 503
+      : message === "invalid_key" ||
+          message === "invalid_item" ||
+          message === "invalid_amount" ||
+          message === "invalid_count" ||
+          message === "invalid_order" ||
+          message === "invalid_action"
+        ? 400
+        : 500;
+
+  return NextResponse.json(
+    { error: message },
+    {
+      status,
+      headers: { "Cache-Control": "no-store" },
+    }
+  );
+}
+
+export async function GET(request: Request) {
+  try {
+    const key = validateKey(new URL(request.url).searchParams.get("key"));
+    const { state } = await readState(key);
+    return NextResponse.json(state, {
+      headers: { "Cache-Control": "no-store" },
+    });
+  } catch (error) {
+    return errorResponse(error);
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const key = validateKey(new URL(request.url).searchParams.get("key"));
+    const payload = (await request.json()) as Record<string, unknown>;
+
+    for (let attempt = 0; attempt < 6; attempt += 1) {
+      const current = await readState(key);
+      const next = applyAction(current.state, payload);
+      const result = await writeState(
+        key,
+        next,
+        current.etag,
+        current.exists
+      );
+      if (result === "ok") {
+        return NextResponse.json(next, {
+          headers: { "Cache-Control": "no-store" },
+        });
+      }
+    }
+
+    throw new Error("write_conflict");
+  } catch (error) {
+    return errorResponse(error);
+  }
+}
