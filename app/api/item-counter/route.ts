@@ -57,7 +57,10 @@ function getBlobAuth(): BlobAuth {
   }
 
   const oidcToken = getRequestContextOidcToken();
-  const storeId = process.env.BLOB_STORE_ID?.trim();
+  const rawStoreId = process.env.BLOB_STORE_ID?.trim();
+  const storeId = rawStoreId?.startsWith("store_")
+    ? rawStoreId.slice("store_".length)
+    : rawStoreId;
   if (oidcToken && storeId) {
     return { token: oidcToken, storeId };
   }
