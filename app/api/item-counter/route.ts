@@ -105,7 +105,10 @@ async function readState(key: string): Promise<StateRead> {
   }
 
   if (!response.ok) {
-    throw new Error(`blob_read_${response.status}`);
+    const detail = (await response.text()).replace(/\s+/g, " ").slice(0, 180);
+    throw new Error(
+      `blob_read_${response.status}${detail ? `_${detail}` : ""}`
+    );
   }
 
   const parsed = normalizeState(await response.json());
@@ -155,7 +158,10 @@ async function writeState(
   if (response.ok) return "ok";
   if (response.status === 409 || response.status === 412) return "retry";
 
-  throw new Error(`blob_write_${response.status}`);
+  const detail = (await response.text()).replace(/\s+/g, " ").slice(0, 180);
+  throw new Error(
+    `blob_write_${response.status}${detail ? `_${detail}` : ""}`
+  );
 }
 
 function isItemId(value: unknown): value is ItemId {
