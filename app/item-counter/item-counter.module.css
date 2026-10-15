@@ -1,10 +1,8 @@
 .page {
   min-height: 100vh;
   padding: 82px 24px 48px;
-  color: #eef4ff;
-  background:
-    radial-gradient(circle at 15% 0%, rgba(77, 105, 190, 0.22), transparent 34%),
-    #090c12;
+  color: #f4f4f5;
+  background: #09090b;
 }
 
 .shell {
@@ -22,7 +20,7 @@
 
 .eyebrow {
   margin: 0 0 5px;
-  color: #91a2be;
+  color: #a1a1aa;
   font-size: 12px;
   font-weight: 800;
   letter-spacing: .12em;
@@ -38,7 +36,7 @@
 .lead,
 .help,
 .statusText {
-  color: #9ba8bc;
+  color: #a1a1aa;
 }
 
 .lead {
@@ -58,10 +56,10 @@
 }
 
 .panel {
-  border: 1px solid #273041;
+  border: 1px solid #29292d;
   border-radius: 16px;
-  background: rgba(15, 19, 27, .94);
-  box-shadow: 0 18px 55px rgba(0, 0, 0, .23);
+  background: #101013;
+  box-shadow: none;
 }
 
 .connectionPanel {
@@ -79,9 +77,9 @@
 
 .urlInput,
 .countInput {
-  border: 1px solid #364257;
-  background: #080b10;
-  color: #f7f9fd;
+  border: 1px solid #39393f;
+  background: #09090b;
+  color: #f4f4f5;
   border-radius: 9px;
 }
 
@@ -93,9 +91,9 @@
 
 .button,
 .smallButton {
-  border: 1px solid #3d4960;
-  background: #1b2230;
-  color: #f4f7fb;
+  border: 1px solid #3f3f46;
+  background: #18181b;
+  color: #f4f4f5;
   border-radius: 9px;
   font-weight: 750;
   cursor: pointer;
@@ -108,7 +106,7 @@
 
 .button:hover,
 .smallButton:hover {
-  background: #252f40;
+  background: #27272a;
 }
 
 .danger {
@@ -142,7 +140,7 @@
 .sectionHead p,
 .previewHead p {
   margin: 0;
-  color: #96a4ba;
+  color: #a1a1aa;
   font-size: 13px;
 }
 
@@ -158,15 +156,15 @@
 }
 
 .card {
-  border: 1px solid #293241;
+  border: 1px solid #303036;
   border-radius: 14px;
   padding: 13px;
-  background: #10151d;
+  background: #101013;
 }
 
 .cardVisible {
-  border-color: #506078;
-  background: #141a24;
+  border-color: #52525b;
+  background: #18181b;
 }
 
 .cardTop {
@@ -200,9 +198,9 @@
   height: 22px;
   padding: 0 6px;
   margin-top: 4px;
-  border: 1px solid #3b4659;
+  border: 1px solid #3f3f46;
   border-radius: 6px;
-  color: #a9b5c8;
+  color: #a1a1aa;
   font-size: 11px;
   font-weight: 800;
 }
@@ -266,7 +264,7 @@
   height: min(76vh, 720px);
   min-height: 430px;
   overflow: hidden;
-  border: 1px solid #353d48;
+  border: 1px solid #39393f;
   border-radius: 11px;
   background-color: #d4d4d4;
   background-image:
@@ -297,7 +295,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #b9c9e5;
+  color: #d4d4d8;
   font-size: 12px;
 }
 

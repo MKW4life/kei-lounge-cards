@@ -244,11 +244,7 @@ export default function ItemCounterPage() {
       <div className={styles.shell}>
         <header className={styles.hero}>
           <div>
-            <p className={styles.eyebrow}>OBS Browser Source Overlay</p>
             <h1 className={styles.title}>MKW Item Counter</h1>
-            <p className={styles.lead}>
-              1〜7単独は無効。Shift + 1〜7 だけで対応するカウントを +1 します。
-            </p>
           </div>
           <button
             type="button"
@@ -279,7 +275,7 @@ export default function ItemCounterPage() {
               className={styles.button}
               onClick={() => overlayUrl && window.open(overlayUrl, "_blank")}
             >
-              開く
+              OBSを開く
             </button>
           </div>
 
@@ -295,33 +291,23 @@ export default function ItemCounterPage() {
             </button>
           </div>
 
-          <p className={styles.help}>
-            {statusText}。この接続キーは、後でゲーム中の Shift + 1〜7 を拾う
-            Windows用グローバルホットキー補助ツールにも使用します。
-          </p>
+          <p className={styles.help} role="status">{statusText}</p>
 
           {storageError && (
             <div className={styles.storageError}>
-              Vercel Blob がまだ接続されていません。Vercel の
-              「Storage」から Private Blob Store を作成し、
-              kei-lounge-cards プロジェクトへ接続するとクラウド同期が有効になります。
+              同期できません。カウンター用ストレージの設定を確認してください。
             </div>
           )}
           {storageBlocked && (
             <div className={styles.storageError}>
-              Vercel Blob Store が現在ブロックされているため、自動同期を停止しました。
-              ページを開いたままでも追加リクエストは送り続けません。
+              ストレージへのアクセスが拒否されました。接続設定を確認してください。
             </div>
           )}
         </section>
 
         <section className={`${styles.panel} ${styles.connectionPanel}`}>
           <div>
-            <h2>ゲーム中のグローバルホットキー</h2>
-            <p className={styles.help}>
-              Mario Kart が最前面でも Shift + 1〜7 でカウントできます。
-              ローカルWebサーバーは使わず、Windowsの小さな補助ツールからこのクラウドAPIへ送信します。
-            </p>
+            <h2>Windowsホットキー</h2>
           </div>
           <div className={styles.connectionRow}>
             <a
@@ -329,19 +315,18 @@ export default function ItemCounterPage() {
               href="/MKW_Item_Counter_Hotkeys.ps1"
               download
             >
-              ① Hotkey本体をダウンロード
+              Hotkeyスクリプトを保存
             </a>
             <a
               className={styles.button}
               href="/start_mkw_hotkeys.bat"
               download
             >
-              ② 起動BATをダウンロード
+              起動BATを保存
             </a>
           </div>
           <p className={styles.help}>
-            2ファイルを同じフォルダに置き、start_mkw_hotkeys.bat を起動してください。
-            初回だけ上の「接続キー」を入力します。通常の1〜7とキーボードリセットは登録しません。
+            2ファイルを同じフォルダに保存して起動BATを実行。初回は接続キーを入力してください。
           </p>
         </section>
 
@@ -350,12 +335,9 @@ export default function ItemCounterPage() {
             <div className={styles.sectionHead}>
               <div>
                 <h2>アイテムカウンター</h2>
-                <p>
-                  ▲▼で順番を変更できます。番号は現在の並び順に合わせて変わります。
-                </p>
               </div>
               <p className={styles.hotkey}>
-                Shift + 1〜7 = +1 ／ 1〜7単独・Rリセット = 無効
+                Shift + 1〜7 で +1
               </p>
             </div>
 
@@ -484,7 +466,6 @@ export default function ItemCounterPage() {
             <section className={`${styles.panel} ${styles.previewPanel}`}>
               <div className={styles.previewHead}>
                 <h2>プレビュー</h2>
-                <p>この縦並びがそのままOBSへ反映されます。</p>
               </div>
               <div className={styles.previewStage}>
                 {secret && (

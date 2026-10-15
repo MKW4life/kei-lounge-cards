@@ -3188,28 +3188,24 @@ export default function Home() {
               aria-live="polite"
               title={historyLog}
             >
-              {historyLog || text("No edit history yet", "操作履歴なし")}
+              {historyLog}
             </div>
           </div>
 
-          <h2>{text("OBS Browser Source URL", "OBSブラウザソースURL")}</h2>
-
           <div className="url-row">
-            <input readOnly value={cardUrl} />
-            <button onClick={copyUrl}>{copied ? text("Copied", "コピー済み") : text("Copy", "コピー")}</button>
+            <input readOnly value={cardUrl} aria-label={text("OBS browser source URL", "OBSブラウザソースURL")} />
+            <button onClick={copyUrl}>{copied ? text("Copied", "コピー済み") : text("Copy OBS URL", "OBS URLをコピー")}</button>
           </div>
 
           <div className={`obs-size-hint ${settings.layoutMode === "COMPACT" ? "is-compact" : ""}`}>
             {settings.layoutMode === "COMPACT"
-              ? text("OBS source size: 380 × 150 (then scale freely in OBS)", "OBSソースサイズ: 380 × 150（その後OBS側で自由に縮小）")
-              : text("OBS source size: 650 × 150", "OBSソースサイズ: 650 × 150")}
+              ? text("OBS · 380 × 150", "OBS · 380 × 150")
+              : text("OBS · 650 × 150", "OBS · 650 × 150")}
           </div>
 
           <a className="open-link" href={cardUrl} target="_blank">
-            {text("Open card in new tab ↗", "カードを新しいタブで開く ↗")}
+            {text("Open card", "カードを開く")}
           </a>
-
-          <h2>{text("Share design JSON", "デザインJSON共有")}</h2>
 
           <div className="share-buttons">
             <button type="button" onClick={copySettingsText}>
@@ -3238,7 +3234,7 @@ export default function Home() {
                 className="load-settings-button"
                 onClick={importSettings}
               >
-                {text("Load pasted design", "貼り付けたデザインを読込")}
+                {text("Import design", "デザインを読み込む")}
               </button>
             </div>
           )}
