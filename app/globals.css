@@ -7185,199 +7185,362 @@ label.summary-toggle span {
   border-radius: inherit;
 }
 
+/* v2.3.1 — refined broadcast effects.
+   650×150 and 380×150; no emoji, speedometer, full-screen white flashes or external assets.
+   Preserve all existing preset keys and animation settings in shared editor / OBS renderer. */
 
-/* Premium effects (v2.3): transparent vector textures with no canvas or network calls.
-   Kept separate from editor styling so OBS and live preview render identically. */
-
-/* Win/Loss: PRISM FOIL — brushed chrome facets, a swept highlight, fine sparks. */
-.result-opening-prism {
+.result-opening-fx {
+  --cinema-accent: color-mix(in srgb, var(--rating-effect-color, #c5d6ed) 76%, #f3eadf);
   isolation: isolate;
-  --prism-glow: #eec77a;
-  background:
-    radial-gradient(ellipse at 40% 45%, rgba(255, 192, 87, .19), transparent 54%),
-    linear-gradient(115deg, rgba(2, 5, 12, .86), rgba(15, 15, 22, .36), rgba(2, 5, 12, .82));
-  animation: prism-backdrop-v230 1.45s ease-out both;
 }
-.result-opening-prism.is-loss {
-  --prism-glow: #8eaaff;
-  background:
-    radial-gradient(ellipse at 60% 50%, rgba(84, 112, 241, .19), transparent 54%),
-    linear-gradient(115deg, rgba(2, 5, 12, .84), rgba(15, 15, 28, .4), rgba(2, 5, 12, .88));
+.result-opening-fx.is-loss {
+  --cinema-accent: color-mix(in srgb, var(--rating-effect-color, #a3b8d4) 72%, #9eb3c9);
 }
-.result-opening-prism .prism-foil {
+
+/* Default: fine vector chevrons rather than large Unicode arrows. */
+.rating-arrow-stream .rating-arrow-particle {
+  width: 19px !important;
+  height: 19px !important;
+  font-size: 0 !important;
+  -webkit-text-stroke: 0 !important;
+  text-shadow: none !important;
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--arrow-color) 28%, transparent)) !important;
+}
+.rating-arrow-stream .arrow-glyph {
+  display: block;
+  width: 11px;
+  height: 11px;
+  margin: 3px auto;
+  border-top: 2px solid currentColor;
+  border-left: 2px solid currentColor;
+  transform: rotate(45deg);
+}
+.rating-arrow-stream.is-down .arrow-glyph {
+  transform: rotate(225deg);
+}
+.rating-arrow-stream::before {
+  opacity: .38 !important;
+  filter: blur(18px) !important;
+}
+
+/* Full Throttle: motorsport speed-camera sweep, not an illustrated dashboard. */
+.result-opening-throttle {
+  background: none !important;
+}
+.result-opening-throttle .speed-fx-scrim,
+.result-opening-throttle .speed-fx-grid,
+.result-opening-throttle .speed-fx-blade,
+.result-opening-throttle .speed-fx-lines,
+.result-opening-throttle .speed-fx-tracers {
   position: absolute;
   inset: 0;
-  background: url("/effects/prism-foil.svg") center / 100% 100% no-repeat;
-  mix-blend-mode: screen;
-  animation: prism-texture-v230 1.45s cubic-bezier(.16, 1, .3, 1) both;
+  pointer-events: none;
 }
-.result-opening-prism .prism-scan {
-  position: absolute;
-  inset: -50% -30%;
+.result-opening-throttle .speed-fx-scrim {
+  background: linear-gradient(95deg, rgba(3,5,9,.34), rgba(3,5,9,.73) 38%, rgba(3,5,9,.36) 85%, transparent);
+  animation: refined-dim 1.02s ease-out both;
+}
+.result-opening-throttle .speed-fx-grid {
   background:
-    repeating-linear-gradient(0deg, transparent 0 6px, rgba(255,255,255,.07) 6px 7px, transparent 7px 13px),
-    linear-gradient(110deg, transparent 40%, rgba(255,255,255,.1) 46%, color-mix(in srgb, var(--prism-glow) 70%, #fff) 50%, rgba(255,255,255,.12) 54%, transparent 61%);
-  mix-blend-mode: screen;
+    repeating-linear-gradient(0deg, transparent 0 21px, rgba(236,245,255,.09) 22px 22.5px, transparent 23px 38px),
+    repeating-linear-gradient(90deg, transparent 0 57px, rgba(236,245,255,.055) 57px 58px, transparent 58px 84px);
+  mask-image: linear-gradient(90deg, transparent, #000 30%, #000 72%, transparent);
   opacity: 0;
-  animation: prism-scan-v230 1.32s cubic-bezier(.2, .65, .22, 1) both;
+  transform: skewX(-16deg) translateX(22px);
+  animation: refined-grid 1.12s ease-out both;
 }
-.result-opening-prism .prism-edge {
+.result-opening-throttle .speed-fx-lines span {
   position: absolute;
-  left: -30%;
-  top: 50%;
-  width: 160%;
-  height: 3px;
-  transform: translateY(-50%) rotate(-8deg) scaleX(.14);
-  transform-origin: 20% 50%;
-  background: linear-gradient(90deg, transparent, var(--prism-glow) 32%, white 50%, var(--prism-glow) 72%, transparent);
-  box-shadow: 0 0 7px white, 0 0 19px var(--prism-glow), 0 0 31px var(--prism-glow);
+  left: -50%;
+  top: var(--line-y);
+  width: var(--line-width);
+  height: 1px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--cinema-accent) 24%, transparent) 42%, rgba(250,252,255,.76) 86%, transparent 100%);
+  box-shadow: 0 0 5px color-mix(in srgb, var(--cinema-accent) 18%, transparent);
   opacity: 0;
-  animation: prism-edge-v230 1.18s cubic-bezier(.14, .86, .22, 1) both;
+  transform: skewX(-18deg);
+  animation: refined-speedline .8s cubic-bezier(.18,.72,.18,1) var(--line-delay) both;
 }
-.result-opening-prism .prism-sparks {
+.result-opening-throttle .speed-fx-blade {
+  inset: -20% -42%;
+  background: linear-gradient(104deg, transparent 40%, rgba(255,255,255,.015) 46%, color-mix(in srgb, var(--cinema-accent) 28%, transparent) 49%, rgba(255,255,255,.65) 50%, color-mix(in srgb, var(--cinema-accent) 22%, transparent) 52%, transparent 57%);
+  transform: translateX(-48%) skewX(-11deg);
+  opacity: 0;
+  animation: refined-blade .92s cubic-bezier(.13,.65,.2,1) .15s both;
+}
+.result-opening-throttle .speed-fx-tracers span {
   position: absolute;
-  inset: 0;
+  left: 45%;
+  top: calc(12% + (var(--trace-index, 0) * 14%));
+  width: 52px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.7), transparent);
+  opacity: 0;
+  transform: skewX(-18deg);
+  animation: refined-tracer .85s ease-out both;
+  animation-delay: calc(var(--trace-index, 0) * .065s);
 }
-.result-opening-prism .prism-sparks span {
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  left: var(--px);
-  top: var(--py);
-  background: #fff;
-  box-shadow: 0 0 6px #fff, 0 0 12px var(--prism-glow);
-  clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
-  animation: prism-spark-v230 1.2s ease-out both;
-  animation-delay: var(--pd);
+.result-opening-throttle .speed-fx-tracers span:nth-child(1) { --trace-index: 0; }
+.result-opening-throttle .speed-fx-tracers span:nth-child(2) { --trace-index: 1; }
+.result-opening-throttle .speed-fx-tracers span:nth-child(3) { --trace-index: 2; }
+.result-opening-throttle .speed-fx-tracers span:nth-child(4) { --trace-index: 3; }
+.result-opening-throttle .speed-fx-tracers span:nth-child(5) { --trace-index: 4; }
+.result-opening-throttle .speed-fx-tracers span:nth-child(6) { --trace-index: 5; }
+.result-opening-throttle.is-loss .speed-fx-blade {
+  animation-direction: reverse;
 }
-.result-opening-prism .prism-sparks span:nth-child(1) { --px: 7%; --py: 22%; --pd: .11s; }
-.result-opening-prism .prism-sparks span:nth-child(2) { --px: 14%; --py: 77%; --pd: .22s; }
-.result-opening-prism .prism-sparks span:nth-child(3) { --px: 26%; --py: 16%; --pd: .17s; }
-.result-opening-prism .prism-sparks span:nth-child(4) { --px: 34%; --py: 80%; --pd: .32s; }
-.result-opening-prism .prism-sparks span:nth-child(5) { --px: 47%; --py: 23%; --pd: .28s; }
-.result-opening-prism .prism-sparks span:nth-child(6) { --px: 56%; --py: 72%; --pd: .37s; }
-.result-opening-prism .prism-sparks span:nth-child(7) { --px: 65%; --py: 14%; --pd: .24s; }
-.result-opening-prism .prism-sparks span:nth-child(8) { --px: 75%; --py: 82%; --pd: .43s; }
-.result-opening-prism .prism-sparks span:nth-child(9) { --px: 86%; --py: 25%; --pd: .33s; }
-.result-opening-prism .prism-sparks span:nth-child(10) { --px: 92%; --py: 67%; --pd: .41s; }
-@keyframes prism-backdrop-v230 {
+@keyframes refined-dim {
   0% { opacity: 0; }
-  13% { opacity: .98; }
-  64% { opacity: .84; }
+  17% { opacity: .85; }
+  58% { opacity: .58; }
   100% { opacity: 0; }
 }
-@keyframes prism-texture-v230 {
-  0% { opacity: 0; transform: scale(1.045); }
-  20% { opacity: 1; transform: scale(1); }
-  72% { opacity: .82; }
-  100% { opacity: 0; transform: scale(.99); }
+@keyframes refined-grid {
+  0% { opacity: 0; transform: skewX(-16deg) translateX(28px); }
+  30% { opacity: .5; }
+  100% { opacity: 0; transform: skewX(-16deg) translateX(-22px); }
 }
-@keyframes prism-scan-v230 {
-  0% { opacity: 0; transform: translateX(-48%) skewX(-13deg); }
-  16% { opacity: .18; }
-  48% { opacity: .88; }
-  100% { opacity: 0; transform: translateX(48%) skewX(-13deg); }
+@keyframes refined-speedline {
+  0% { opacity: 0; transform: translateX(-24px) skewX(-18deg) scaleX(.6); }
+  22% { opacity: .75; }
+  100% { opacity: 0; transform: translateX(660px) skewX(-18deg) scaleX(1.22); }
 }
-@keyframes prism-edge-v230 {
-  0% { opacity: 0; transform: translateY(-50%) rotate(-8deg) scaleX(.14); }
-  28% { opacity: 1; }
-  66% { opacity: .9; transform: translateY(-50%) rotate(-8deg) scaleX(1); }
-  100% { opacity: 0; transform: translateY(-50%) rotate(-8deg) scaleX(1.04); }
+@keyframes refined-blade {
+  0% { opacity: 0; transform: translateX(-48%) skewX(-11deg); }
+  30% { opacity: .78; }
+  100% { opacity: 0; transform: translateX(48%) skewX(-11deg); }
 }
-@keyframes prism-spark-v230 {
-  0% { opacity: 0; transform: translateY(13px) scale(.3) rotate(0deg); }
-  28% { opacity: 1; transform: translateY(0) scale(1.3) rotate(45deg); }
-  100% { opacity: 0; transform: translateY(-21px) scale(.5) rotate(90deg); }
+@keyframes refined-tracer {
+  0% { opacity: 0; transform: translateX(-100px) skewX(-18deg); }
+  25% { opacity: .8; }
+  100% { opacity: 0; transform: translateX(260px) skewX(-18deg); }
 }
 
-/* Rank: CHROME REVEAL — polished foil behind the rank icon and text. */
+/* Neon Rush: satin light trails, slender elliptical traces, no heavy neon circles. */
+.result-opening-neonrush {
+  background: linear-gradient(125deg, rgba(2, 7, 13, .3), rgba(2,7,13,.54) 52%, transparent) !important;
+}
+.result-opening-neonrush .neon-rush-glow {
+  background: radial-gradient(ellipse at 58% 50%, color-mix(in srgb, var(--cinema-accent) 16%, transparent), transparent 62%) !important;
+  filter: blur(13px);
+  animation: refined-dim 1.06s ease-out both;
+}
+.result-opening-neonrush .neon-rush-lines span {
+  height: 1.5px;
+  left: -28%;
+  width: 46%;
+  transform: rotate(-9deg);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--cinema-accent) 62%, white), transparent) !important;
+  box-shadow: 0 0 6px color-mix(in srgb, var(--cinema-accent) 20%, transparent) !important;
+  animation: refined-neon-line .82s cubic-bezier(.17,.73,.2,1) both !important;
+}
+.result-opening-neonrush .neon-rush-rings span {
+  width: 200px;
+  height: 70px;
+  border: 1px solid color-mix(in srgb, var(--cinema-accent) 55%, transparent) !important;
+  box-shadow: 0 0 8px color-mix(in srgb, var(--cinema-accent) 12%, transparent) !important;
+  animation: refined-neon-trace .95s ease-out both !important;
+}
+.result-opening-neonrush .neon-rush-rings span:nth-child(2) { animation-delay: .13s !important; }
+@keyframes refined-neon-line {
+  0% { opacity: 0; transform: translateX(-150px) rotate(-9deg) scaleX(.65); }
+  30% { opacity: .9; }
+  100% { opacity: 0; transform: translateX(690px) rotate(-9deg) scaleX(1); }
+}
+@keyframes refined-neon-trace {
+  0% { opacity: 0; transform: translate(-50%,-50%) scale(.55); }
+  24% { opacity: .65; }
+  100% { opacity: 0; transform: translate(-50%,-50%) scale(1.42); }
+}
+
+/* Shockwave: a horizontal pressure front with glass-fine debris. */
+.result-opening-shockwave { background: rgba(3, 6, 12, .25) !important; }
+.result-opening-shockwave .shockwave-core {
+  background: radial-gradient(ellipse at 50% 50%, color-mix(in srgb, var(--cinema-accent) 22%, transparent), transparent 60%) !important;
+  filter: blur(8px);
+  animation: refined-dim 1s ease-out both;
+}
+.result-opening-shockwave .shockwave-rings span {
+  width: 215px;
+  height: 66px;
+  border-width: 1px;
+  border-color: color-mix(in srgb, var(--cinema-accent) 58%, rgba(255,255,255,.6)) !important;
+  box-shadow: 0 0 7px color-mix(in srgb, var(--cinema-accent) 17%, transparent) !important;
+  animation: refined-shockfront .88s ease-out both !important;
+}
+.result-opening-shockwave .shockwave-rings span:nth-child(2) { animation-delay: .1s !important; }
+.result-opening-shockwave .shockwave-shards span {
+  width: 48px;
+  height: 1px;
+  border-radius: 0;
+  background: linear-gradient(90deg, rgba(255,255,255,.86), color-mix(in srgb, var(--cinema-accent) 50%, transparent), transparent) !important;
+  box-shadow: 0 0 4px color-mix(in srgb, var(--cinema-accent) 24%, transparent) !important;
+  animation: refined-shard .77s ease-out both !important;
+}
+@keyframes refined-shockfront {
+  0% { opacity: 0; transform: translate(-50%,-50%) scale(.15,.4); }
+  20% { opacity: .83; }
+  100% { opacity: 0; transform: translate(-50%,-50%) scale(2.9,1.7); }
+}
+@keyframes refined-shard {
+  0% { opacity: 0; transform: rotate(var(--shock-rot)) translateX(0) scaleX(.3); }
+  24% { opacity: .7; }
+  100% { opacity: 0; transform: rotate(var(--shock-rot)) translateX(185px) scaleX(1.15); }
+}
+
+/* Star Struck: precise optical glints instead of emoji hearts and stars. */
+.result-opening-starstruck {
+  background: radial-gradient(ellipse at 50% 50%, color-mix(in srgb, var(--cinema-accent) 12%, transparent), transparent 68%) !important;
+}
+.result-opening-starstruck .starstruck-particles span {
+  width: 3px;
+  height: 3px;
+  font-size: 0;
+  color: var(--cinema-accent) !important;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 5px rgba(255,255,255,.5), 0 0 10px color-mix(in srgb, var(--cinema-accent) 38%, transparent);
+  text-shadow: none;
+  animation: refined-starlight 1.18s ease-out forwards !important;
+}
+.result-opening-starstruck .starstruck-particles span::after {
+  content: "";
+  position: absolute;
+  left: -5px;
+  top: 1px;
+  width: 13px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.82), transparent);
+}
+@keyframes refined-starlight {
+  0% { opacity: 0; transform: translate(calc(var(--sx) * .85), calc(var(--sy) * .85)) scale(.4); }
+  26% { opacity: .94; transform: translate(var(--sx), var(--sy)) scale(1); }
+  62% { opacity: .7; }
+  100% { opacity: 0; transform: translate(var(--sx), calc(var(--sy) - 15px)) scale(.65); }
+}
+
+/* Chrome Reveal: brushed-panel highlight, without the removed Prism Foil asset. */
 .rank-reveal-style-chrome::before {
-  background:
-    radial-gradient(ellipse at 50% 54%, rgba(183, 218, 240, .18), transparent 52%),
-    rgba(1, 4, 10, .94) !important;
+  background: radial-gradient(ellipse at 50% 50%, rgba(192,211,225,.13), transparent 63%), rgba(1,3,8,.92) !important;
 }
 .rank-reveal-style-chrome::after {
   content: "";
   position: absolute;
   inset: 0;
   z-index: 3;
-  pointer-events: none;
-  background: url("/effects/prism-foil.svg") center / 100% 100% no-repeat;
   opacity: 0;
-  animation: chrome-facets-v230 2.9s ease-out both;
-}
-.rank-reveal-style-chrome .rank-reveal-stars { display: block; }
-.rank-reveal-style-chrome .rank-reveal-stars span { width: 5px; height: 5px; }
-.rank-reveal-style-chrome .rank-reveal-bg {
-  animation-name: chrome-icon-v230;
-}
-.rank-reveal-style-chrome .rank-reveal-label {
-  animation-name: chrome-label-v230;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 11px, rgba(232,247,255,.025) 11px 12px),
+    linear-gradient(102deg, transparent 24%, rgba(229,238,249,.09) 42%, rgba(255,255,255,.32) 49%, rgba(228,239,251,.09) 54%, transparent 70%);
+  animation: refined-chrome-sweep 2.9s ease-out both;
 }
 .rank-reveal-style-chrome .rank-reveal-text {
-  background:
-    linear-gradient(116deg, rgba(6,9,15,.96) 0%, rgba(39,50,63,.94) 43%, rgba(11,14,21,.96) 100%) !important;
-  border-color: rgba(215,239,251,.82) !important;
-  box-shadow: 0 0 15px rgba(220,240,255,.24), inset 0 1px 0 rgba(255,255,255,.3), 0 8px 26px #000c !important;
+  background: linear-gradient(125deg, rgba(5,8,15,.94), rgba(28,36,47,.94) 42%, rgba(5,8,15,.96)) !important;
+  border: 1px solid rgba(223,237,247,.48) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.13), 0 7px 20px rgba(0,0,0,.6) !important;
   animation-name: chrome-text-v230;
 }
+.rank-reveal-style-chrome .rank-reveal-bg { animation-name: chrome-icon-v230; }
+.rank-reveal-style-chrome .rank-reveal-label { animation-name: chrome-label-v230; }
 .rank-reveal-style-chrome .rank-reveal-text::after {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(105deg, transparent 25%, rgba(255,255,255,.4) 46%, rgba(255,255,255,.8) 50%, transparent 60%);
+  background: linear-gradient(102deg, transparent 38%, rgba(255,255,255,.38) 50%, transparent 62%);
   transform: translateX(-150%);
   animation: chrome-shine-v230 2.7s .18s ease-out both;
-  pointer-events: none;
 }
-@keyframes chrome-facets-v230 {
-  0% { opacity: 0; transform: scale(1.05); }
-  17%, 75% { opacity: .78; transform: scale(1); }
-  100% { opacity: 0; transform: scale(1.02); }
+@keyframes refined-chrome-sweep {
+  0% { opacity: 0; transform: translateX(-15%); }
+  23% { opacity: .65; }
+  75% { opacity: .42; }
+  100% { opacity: 0; transform: translateX(14%); }
 }
 @keyframes chrome-icon-v230 {
-  0% { opacity: 0; transform: translate(-50%, -50%) scale(.65); }
-  30% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
-  75% { opacity: .9; transform: translate(-50%, -50%) scale(1); }
-  100% { opacity: 0; transform: translate(-50%, -55%) scale(1.03); }
+  0% { opacity: 0; transform: translate(-50%,-50%) scale(.65); }
+  30% { opacity: .9; transform: translate(-50%,-50%) scale(1.045); }
+  75% { opacity: .86; transform: translate(-50%,-50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%,-55%) scale(1.02); }
 }
 @keyframes chrome-label-v230 {
-  0% { opacity: 0; transform: translateX(-50%) translateY(-8px); letter-spacing: .4em; }
+  0% { opacity: 0; transform: translateX(-50%) translateY(-8px); }
   25%, 78% { opacity: 1; transform: translateX(-50%) translateY(0); }
   100% { opacity: 0; transform: translateX(-50%) translateY(-7px); }
 }
 @keyframes chrome-text-v230 {
-  0% { opacity: 0; transform: translate(-50%, -50%) scale(.78); }
-  26% { opacity: 1; transform: translate(-50%, -50%) scale(1.045); }
-  76% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-  100% { opacity: 0; transform: translate(-50%, -53%) scale(1.02); }
+  0% { opacity: 0; transform: translate(-50%,-50%) scale(.85); }
+  26% { opacity: 1; transform: translate(-50%,-50%) scale(1.025); }
+  76% { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%,-53%) scale(1.01); }
 }
 @keyframes chrome-shine-v230 {
-  0%, 11% { transform: translateX(-150%); }
-  53%, 100% { transform: translateX(150%); }
+  0%, 13% { transform: translateX(-150%); }
+  60%, 100% { transform: translateX(150%); }
 }
 
-/* MMR/LR: SCANLINE — a compact foil HUD sweep without covering score text. */
+/* Shared rank polish: retain each rank animation while reducing overpowering bloom. */
+.rank-reveal .rank-reveal-text {
+  box-shadow:
+    0 8px 20px rgba(0,0,0,.68),
+    inset 0 1px 0 rgba(255,255,255,.13),
+    0 0 12px color-mix(in srgb, var(--rating-effect-color) 16%, transparent) !important;
+  text-shadow: 0 2px 4px rgba(0,0,0,.95) !important;
+}
+.rank-reveal .rank-reveal-label {
+  text-shadow: 0 2px 6px #000, 0 0 9px color-mix(in srgb, var(--rating-effect-color) 18%, transparent) !important;
+}
+.rank-reveal .rank-reveal-bg {
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--rating-effect-color) 25%, transparent)) !important;
+}
+
+/* Existing MMR/LR switch treatments: lighter highlights, no harsh color separation. */
+.rating-switch-effect-glitch {
+  filter: none !important;
+  background: repeating-linear-gradient(0deg, transparent 0 12px, color-mix(in srgb, var(--rating-effect-color) 22%, transparent) 12px 13px, transparent 13px 20px) !important;
+  box-shadow: none !important;
+}
+.rating-switch-effect-pulse {
+  box-shadow: 0 0 7px color-mix(in srgb, var(--rating-effect-color) 16%, transparent) !important;
+}
+.card-shell .card-score.rating-score-switch-glitch {
+  animation: refined-glitch-score .45s steps(2,end) both !important;
+}
+.card-shell .rating-label.rating-label-switch-glitch {
+  animation: refined-glitch-label .45s steps(2,end) both !important;
+}
+@keyframes refined-glitch-score {
+  0% { opacity: .48; transform: translate(-52%,-50%); }
+  40% { opacity: 1; transform: translate(-48%,-50%); }
+  100% { opacity: 1; transform: translate(-50%,-50%); }
+}
+@keyframes refined-glitch-label {
+  0% { opacity: .48; transform: translate(-48%,-50%); }
+  40% { opacity: 1; transform: translate(-52%,-50%); }
+  100% { opacity: 1; transform: translate(-50%,-50%); }
+}
+
+/* Keep the new Scan preset, tuned to the same restrained broadcast style. */
 .rating-switch-effect-scan {
-  width: 235px !important;
-  height: 80px !important;
-  border: 1px solid color-mix(in srgb, var(--rating-effect-color) 42%, transparent);
-  border-radius: 14px;
+  width: 216px !important;
+  height: 68px !important;
+  border: 1px solid color-mix(in srgb, var(--rating-effect-color) 29%, transparent);
+  border-radius: 8px;
   background:
-    repeating-linear-gradient(0deg, transparent 0 5px, color-mix(in srgb, var(--rating-effect-color) 24%, transparent) 5px 6px, transparent 6px 11px),
-    linear-gradient(100deg, transparent 25%, color-mix(in srgb, var(--rating-effect-color) 28%, transparent) 43%, rgba(255,255,255,.65) 50%, transparent 58%);
-  background-size: 100% 100%, 240% 100%;
-  box-shadow: 0 0 16px color-mix(in srgb, var(--rating-effect-color) 18%, transparent);
+    repeating-linear-gradient(0deg, transparent 0 8px, color-mix(in srgb, var(--rating-effect-color) 13%, transparent) 8px 9px),
+    linear-gradient(100deg, transparent 35%, rgba(255,255,255,.34) 50%, transparent 65%);
+  background-size: 100% 100%, 230% 100%;
+  box-shadow: none;
   animation: scan-panel-v230 .66s ease-out both !important;
 }
 .rating-switch-effect-scan::after {
   content: "";
   position: absolute;
-  inset: 14px 7px;
-  border-top: 1px solid rgba(255,255,255,.72);
-  border-bottom: 1px solid color-mix(in srgb, var(--rating-effect-color) 65%, transparent);
-  opacity: .65;
+  inset: 12px 7px;
+  border-top: 1px solid rgba(255,255,255,.25);
+  border-bottom: 1px solid color-mix(in srgb, var(--rating-effect-color) 33%, transparent);
 }
 .card-shell .card-score.rating-score-switch-scan {
   animation: scan-score-v230 .59s cubic-bezier(.16,1,.3,1) both !important;
@@ -7386,30 +7549,28 @@ label.summary-toggle span {
   animation: scan-label-v230 .59s cubic-bezier(.16,1,.3,1) both !important;
 }
 @keyframes scan-panel-v230 {
-  0% { opacity: 0; transform: translate(-62%, -50%) scaleX(.75); background-position: 0 0, 110% 0; }
-  23% { opacity: .72; }
-  66% { opacity: .62; transform: translate(-50%, -50%) scaleX(1); }
-  100% { opacity: 0; transform: translate(-41%, -50%); background-position: 0 0, -110% 0; }
+  0% { opacity: 0; transform: translate(-60%,-50%) scaleX(.8); background-position: 0 0, 110% 0; }
+  25% { opacity: .65; }
+  100% { opacity: 0; transform: translate(-40%,-50%); background-position: 0 0, -110% 0; }
 }
 @keyframes scan-score-v230 {
-  0% { opacity: .18; transform: translate(-50%, -50%) scaleX(.93); }
-  44% { opacity: 1; transform: translate(-50%, -50%) scaleX(1.025); }
-  100% { opacity: 1; transform: translate(-50%, -50%) scaleX(1); }
+  0% { opacity: .3; transform: translate(-50%,-50%) scale(.96); }
+  50% { opacity: 1; transform: translate(-50%,-50%) scale(1.02); }
+  100% { opacity: 1; transform: translate(-50%,-50%) scale(1); }
 }
 @keyframes scan-label-v230 {
-  0% { opacity: .25; transform: translate(-50%, -50%) translateY(7px); }
-  55% { opacity: 1; transform: translate(-50%, -50%) translateY(-2px); }
-  100% { opacity: 1; transform: translate(-50%, -50%); }
+  0% { opacity: .34; transform: translate(-50%,-50%) translateY(6px); }
+  55% { opacity: 1; transform: translate(-50%,-50%) translateY(-1px); }
+  100% { opacity: 1; transform: translate(-50%,-50%); }
 }
+
 @media (prefers-reduced-motion: reduce) {
-  .result-opening-prism, .result-opening-prism *,
+  .result-opening-fx, .result-opening-fx *,
   .rank-reveal-style-chrome, .rank-reveal-style-chrome *,
-  .rating-switch-effect-scan,
-  .card-shell .rating-score-switch-scan,
-  .card-shell .rating-label-switch-scan {
+  .rating-switch-effect-scan, .rating-arrow-stream .rating-arrow-particle {
     animation: none !important;
   }
-  .result-opening-prism, .rank-reveal-style-chrome::after, .rating-switch-effect-scan {
+  .result-opening-fx, .rank-reveal-style-chrome::after, .rating-switch-effect-scan {
     opacity: 0 !important;
   }
 }
