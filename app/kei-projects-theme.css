@@ -1,0 +1,121 @@
+/* Kei Projects application chrome
+   Intentional exclusion: user-customizable .card-shell and .obs-page artwork. */
+:root {
+  color-scheme: dark;
+  --bg: #09090b;
+  --panel: #101013;
+  --panel-2: #18181b;
+  --line: #29292d;
+  --text: #f4f4f5;
+  --muted: #a1a1aa;
+  --accent: #e4e4e7;
+  --accent-2: #d4d4d8;
+}
+
+html:not(.obs-transparent),
+body:not(.obs-transparent) {
+  background: #09090b;
+  color: #f4f4f5;
+}
+
+.builder-page { padding-top: 64px; }
+.builder-page .hero { margin-bottom: 22px; }
+.builder-page .hero h1 {
+  font-size: clamp(30px, 4vw, 42px);
+  letter-spacing: -.045em;
+}
+.builder-page .hero h1 span { background: none; color: inherit; -webkit-text-fill-color: currentColor; }
+.builder-page .panel {
+  background: #101013;
+  border-color: #29292d;
+  box-shadow: none;
+}
+.builder-page h2 { color: #d4d4d8; }
+.builder-page .basic-settings-group,
+.builder-page .design-group,
+.builder-page .design-visibility-board,
+.builder-page .visibility-control {
+  background: #151518;
+  border-color: #303036;
+  box-shadow: none;
+}
+.builder-page .design-group > summary:hover,
+.builder-page .basic-settings-group > summary:hover {
+  background: #1d1d22;
+}
+.builder-page .settings-panel input:not([type="color"]):not([type="checkbox"]):not([type="range"]),
+.builder-page .settings-panel select,
+.builder-page .settings-panel textarea,
+.builder-page .preview-panel input,
+.builder-page .preview-panel textarea {
+  background: #18181b;
+  border-color: #39393f;
+  color: #f4f4f5;
+}
+.builder-page :is(input, select, textarea):focus-visible,
+.builder-page button:focus-visible,
+.project-nav summary:focus-visible,
+.project-nav-menu a:focus-visible {
+  outline: 2px solid #f4f4f5;
+  outline-offset: 2px;
+}
+.builder-page :is(input, select, textarea):focus {
+  border-color: #71717a;
+}
+.builder-page button:not(.reset-button):not(:disabled),
+.builder-page .share-buttons button,
+.builder-page .load-settings-button,
+.builder-page .fetch-button-row button,
+.builder-page .top-page-actions button,
+.project-nav summary {
+  background: #222226 !important;
+  color: #f4f4f5 !important;
+  border: 1px solid #3b3b42 !important;
+  box-shadow: none !important;
+  filter: none;
+}
+.builder-page button:not(.reset-button):not(:disabled):hover,
+.builder-page .share-buttons button:hover,
+.builder-page .load-settings-button:hover,
+.builder-page .fetch-button-row button:hover,
+.builder-page .top-page-actions button:hover,
+.project-nav summary:hover {
+  background: #303036 !important;
+  border-color: #52525b !important;
+  filter: none;
+}
+.builder-page .reset-button { background: #18181b; border-color: #39393f; color: #d4d4d8; }
+.builder-page .reset-button:hover { background: #27272a; }
+.builder-page .preview-history-log {
+  background: #18181b;
+  border-color: #39393f;
+  color: #a1a1aa;
+}
+.builder-page .open-link { color: #f4f4f5; }
+.builder-page .player-suggestion-menu {
+  background: #18181b;
+  border-color: #39393f;
+}
+.builder-page .player-suggestion-menu button:hover { background: #303036 !important; }
+.builder-page .basic-settings-group > summary::after { color: #d4d4d8; }
+.builder-page .design-history-wrap { color: #a1a1aa; }
+
+.project-nav summary {
+  background: #18181b !important;
+  border-color: #39393f !important;
+  color: #f4f4f5 !important;
+  box-shadow: none;
+}
+.project-nav-menu {
+  background: #141416;
+  border-color: #39393f;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, .35);
+}
+.project-nav-menu a { color: #e4e4e7; }
+.project-nav-menu a:hover,
+.project-nav-menu a:focus-visible { background: #27272a; }
+
+@media (max-width: 680px) {
+  .builder-page { padding-top: 24px; }
+  .builder-page .panel { padding: 16px; }
+}
