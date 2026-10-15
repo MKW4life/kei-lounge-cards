@@ -89,14 +89,15 @@ function labelShape(value: string): "ROUNDED" | "STAR" | "HEART" {
 
 function rankEffectStyle(
   value: string
-): "CLASSIC" | "FLASH" | "SLIDE" | "BURST" | "STARLIGHT" | "METEOR" {
+): "CLASSIC" | "FLASH" | "SLIDE" | "BURST" | "STARLIGHT" | "METEOR" | "CHROME" {
   const style = value.toUpperCase();
   if (
     style === "FLASH" ||
     style === "SLIDE" ||
     style === "BURST" ||
     style === "STARLIGHT" ||
-    style === "METEOR"
+    style === "METEOR" ||
+    style === "CHROME"
   ) {
     return style;
   }
@@ -130,7 +131,7 @@ function rankTextFormat(value: string): RankTextFormat {
 
 function ratingSwitchEffectStyle(
   value: string
-): "WAVE" | "FADE" | "SLIDE" | "PULSE" | "SWEEP" | "GLITCH" {
+): "WAVE" | "FADE" | "SLIDE" | "PULSE" | "SWEEP" | "GLITCH" | "SCAN" {
   const style = value.toUpperCase();
   if (style === "FLIP") return "SLIDE";
   if (
@@ -138,14 +139,15 @@ function ratingSwitchEffectStyle(
     style === "SLIDE" ||
     style === "PULSE" ||
     style === "SWEEP" ||
-    style === "GLITCH"
+    style === "GLITCH" ||
+    style === "SCAN"
   ) return style;
   return "WAVE";
 }
 
 function resultEffectStyle(
   value: string
-): "DEFAULT" | "THROTTLE" | "SKY" | "REINCARNATION" | "STARSTRUCK" | "NEONRUSH" | "SHOCKWAVE" {
+): "DEFAULT" | "THROTTLE" | "SKY" | "REINCARNATION" | "STARSTRUCK" | "NEONRUSH" | "SHOCKWAVE" | "PRISM" {
   const style = value.toUpperCase();
 
   if (
@@ -154,7 +156,8 @@ function resultEffectStyle(
     style === "REINCARNATION" ||
     style === "STARSTRUCK" ||
     style === "NEONRUSH" ||
-    style === "SHOCKWAVE"
+    style === "SHOCKWAVE" ||
+    style === "PRISM"
   ) {
     return style;
   }
