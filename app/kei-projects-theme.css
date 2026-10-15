@@ -119,3 +119,44 @@ body:not(.obs-transparent) {
   .builder-page { padding-top: 24px; }
   .builder-page .panel { padding: 16px; }
 }
+/* Neutralize remaining accent buttons in Lounge Card builder */
+.builder-page button:not(.reset-button),
+.builder-page [role="button"]:not(.reset-button),
+.builder-page .panel button:not(.reset-button),
+.builder-page .preview-panel button:not(.reset-button),
+.builder-page .settings-panel button:not(.reset-button) {
+  background: #18181b !important;
+  background-image: none !important;
+  color: #f4f4f5 !important;
+  border: 1px solid #39393f !important;
+  box-shadow: none !important;
+}
+
+.builder-page button:not(.reset-button):hover,
+.builder-page [role="button"]:not(.reset-button):hover,
+.builder-page .panel button:not(.reset-button):hover,
+.builder-page .preview-panel button:not(.reset-button):hover,
+.builder-page .settings-panel button:not(.reset-button):hover {
+  background: #27272a !important;
+  background-image: none !important;
+  border-color: #52525b !important;
+}
+
+.builder-page button:not(.reset-button):focus-visible,
+.builder-page [role="button"]:not(.reset-button):focus-visible {
+  outline: 2px solid #f4f4f5 !important;
+  outline-offset: 2px;
+}
+
+/* Selected / active / pressed states */
+.builder-page button[aria-pressed="true"],
+.builder-page button[aria-expanded="true"],
+.builder-page .panel button.active,
+.builder-page .panel button[data-active="true"],
+.builder-page .panel button.selected,
+.builder-page .panel button[aria-current="true"] {
+  background: #303036 !important;
+  background-image: none !important;
+  border-color: #5a5a63 !important;
+  color: #ffffff !important;
+}
