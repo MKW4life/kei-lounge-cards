@@ -34,9 +34,10 @@ type RankEffectStyle =
   | "SLIDE"
   | "BURST"
   | "STARLIGHT"
-  | "METEOR";
-type RatingSwitchEffectStyle = "WAVE" | "FADE" | "SLIDE" | "PULSE" | "SWEEP" | "GLITCH";
-type ResultEffectStyle = "DEFAULT" | "THROTTLE" | "SKY" | "REINCARNATION" | "STARSTRUCK" | "NEONRUSH" | "SHOCKWAVE";
+  | "METEOR"
+  | "CHROME";
+type RatingSwitchEffectStyle = "WAVE" | "FADE" | "SLIDE" | "PULSE" | "SWEEP" | "GLITCH" | "SCAN";
+type ResultEffectStyle = "DEFAULT" | "THROTTLE" | "SKY" | "REINCARNATION" | "STARSTRUCK" | "NEONRUSH" | "SHOCKWAVE" | "PRISM";
 type EventFormat = "EVENTS" | "PREFIX" | "HASH" | "NUMBER";
 type RankTextFormat = "DIVISION" | "FULL_SLASH" | "CLASS" | "FULL_BREAK";
 type EffectKind = "win" | "loss" | "rank-up" | "rank-down";
@@ -374,6 +375,17 @@ function ResultOpeningEffect({
             {Array.from({ length: 10 }, (_, index) => (
               <span key={`shockwave-shard-${index}`} />
             ))}
+          </div>
+        </>
+      )}
+
+      {normalizedStyle === "PRISM" && (
+        <>
+          <div className="prism-foil" />
+          <div className="prism-scan" />
+          <div className="prism-edge" />
+          <div className="prism-sparks">
+            {Array.from({ length: 10 }, (_, index) => <span key={`prism-spark-${index}`} />)}
           </div>
         </>
       )}
