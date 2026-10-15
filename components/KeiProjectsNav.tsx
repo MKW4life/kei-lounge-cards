@@ -3,7 +3,7 @@
  * The external Kei Projects and Course Stats links are opt-in until deployed
  * and verified, to avoid shipping dead destinations.
  */
-const projectsUrl = process.env.NEXT_PUBLIC_KEI_PROJECTS_URL?.trim();
+const projectsUrl = process.env.NEXT_PUBLIC_KEI_PROJECTS_URL?.trim() || "https://kei-projects-33b53.web.app/";
 const courseStatsUrl = process.env.NEXT_PUBLIC_MKW_COURSE_STATS_URL?.trim();
 
 export default function KeiProjectsNav() {
