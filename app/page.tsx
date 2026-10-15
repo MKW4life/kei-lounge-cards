@@ -3,6 +3,7 @@
 import KeiProjectsNav from "@/components/KeiProjectsNav";
 
 import RollingNumber from "@/components/RollingNumber";
+import ResultOpeningEffect from "@/components/ResultOpeningEffect";
 import {
   useCallback,
   useEffect,
@@ -42,7 +43,7 @@ type RankEffectStyle =
   | "METEOR"
   | "CHROME";
 type RatingSwitchEffectStyle = "WAVE" | "FADE" | "SLIDE" | "PULSE" | "SWEEP" | "GLITCH" | "SCAN";
-type ResultEffectStyle = "DEFAULT" | "THROTTLE" | "SKY" | "REINCARNATION" | "STARSTRUCK" | "NEONRUSH" | "SHOCKWAVE" | "PRISM";
+type ResultEffectStyle = "DEFAULT" | "THROTTLE" | "SKY" | "REINCARNATION" | "STARSTRUCK" | "NEONRUSH" | "SHOCKWAVE";
 type EventFormat = "EVENTS" | "PREFIX" | "HASH" | "NUMBER";
 type RankTextFormat = "DIVISION" | "FULL_SLASH" | "CLASS" | "FULL_BREAK";
 
@@ -841,7 +842,7 @@ function decodeDesignValue(key: keyof Settings, token: string) {
     }
 
     if (key === "resultEffectStyle") {
-      return (["DEFAULT", "THROTTLE", "SKY", "REINCARNATION", "STARSTRUCK", "NEONRUSH", "SHOCKWAVE", "PRISM"].includes(
+      return (["DEFAULT", "THROTTLE", "SKY", "REINCARNATION", "STARSTRUCK", "NEONRUSH", "SHOCKWAVE"].includes(
         decoded.toUpperCase()
       )
         ? decoded.toUpperCase()
@@ -1419,121 +1420,6 @@ const VERSION_HISTORY = [
 ] as const;
 
 
-
-function ResultOpeningEffect({
-  kind,
-  style,
-}: {
-  kind: "win" | "loss";
-  style: ResultEffectStyle;
-}) {
-  const isWin = kind === "win";
-  const normalizedStyle =
-    style === "SKY" ? "NEONRUSH" : style === "REINCARNATION" ? "SHOCKWAVE" : style;
-
-  if (normalizedStyle === "DEFAULT") {
-    return (
-      <div className={`rating-arrow-stream ${isWin ? "is-up" : "is-down"}`} aria-hidden="true">
-        {Array.from({ length: 12 }, (_, index) => {
-          const x = 5 + index * 8.18;
-          const delay = index * 0.075;
-          const duration = 1.25 + (index % 4) * 0.14;
-          const size = [42, 50, 60, 46, 56, 44][index % 6];
-
-          return (
-            <span
-              className="rating-arrow-particle"
-              key={`result-arrow-${index}`}
-              style={{
-                "--arrow-x": `${x}%`,
-                "--arrow-delay": `${delay}s`,
-                "--arrow-duration": `${duration}s`,
-                "--arrow-size": `${size}px`,
-              } as CSSProperties}
-            >
-              {isWin ? "⬆" : "⬇"}
-            </span>
-          );
-        })}
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className={`result-opening-fx result-opening-${normalizedStyle.toLowerCase()} ${
-        isWin ? "is-win" : "is-loss"
-      }`}
-      aria-hidden="true"
-    >
-      {normalizedStyle === "THROTTLE" && (
-        <>
-          <div className="throttle-dim" />
-          <div className="throttle-aura" />
-          <div className="throttle-overscan-ring" />
-          <div className="throttle-streaks">
-            {Array.from({ length: 8 }, (_, index) => (
-              <span key={`throttle-streak-${index}`} />
-            ))}
-          </div>
-          <div className="throttle-gauge">
-            <div className="throttle-gauge-inner">
-              <span className="throttle-gauge-status">{isWin ? "WIN" : "LOSS"}</span>
-              <div className="throttle-marks">
-                {Array.from({ length: 13 }, (_, index) => (
-                  <span key={`throttle-mark-${index}`} />
-                ))}
-              </div>
-              <div className="throttle-red-zone" />
-              <span className="throttle-needle" />
-              <span className="throttle-hub" />
-            </div>
-          </div>
-        </>
-      )}
-
-      {normalizedStyle === "NEONRUSH" && (
-        <>
-          <div className="neon-rush-glow" />
-          <div className="neon-rush-lines">
-            {Array.from({ length: 8 }, (_, index) => (
-              <span key={`neon-rush-line-${index}`} />
-            ))}
-          </div>
-          <div className="neon-rush-rings">
-            <span />
-            <span />
-            <span />
-          </div>
-        </>
-      )}
-
-      {normalizedStyle === "SHOCKWAVE" && (
-        <>
-          <div className="shockwave-core" />
-          <div className="shockwave-rings">
-            <span />
-            <span />
-            <span />
-          </div>
-          <div className="shockwave-shards">
-            {Array.from({ length: 10 }, (_, index) => (
-              <span key={`shockwave-shard-${index}`} />
-            ))}
-          </div>
-        </>
-      )}
-
-      {normalizedStyle === "STARSTRUCK" && (
-        <div className="starstruck-particles">
-          {Array.from({ length: 16 }, (_, index) => (
-            <span key={`starstruck-${index}`}>{index % 3 === 0 ? "♥" : index % 2 === 0 ? "✦" : "★"}</span>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
 
 type UiLanguage = "JP" | "EN";
 
@@ -3127,7 +3013,6 @@ export default function Home() {
                   <option value="STARSTRUCK">{text("Star Struck", "スターストラック")}</option>
                   <option value="NEONRUSH">{text("Neon Rush", "ネオンラッシュ")}</option>
                   <option value="SHOCKWAVE">{text("Shockwave", "ショックウェーブ")}</option>
-                   <option value="PRISM">{text("Prism Foil", "プリズム・フォイル")}</option>
                 </select>
               </label>
               <div className="design-subtitle">{text("Rank change effect", "ランク変動演出")}</div><label>{text("Rank Up / Down style", "Rank Up / Down演出")}<select value={settings.rankEffectStyle} onChange={(e) => update("rankEffectStyle", e.target.value as RankEffectStyle)}><option value="CLASSIC">{text("Classic reveal", "クラシック")}</option><option value="FLASH">{text("Light flash", "ライトフラッシュ")}</option><option value="SLIDE">{text("Side slide", "サイドスライド")}</option><option value="BURST">{text("Energy burst", "エナジーバースト")}</option><option value="STARLIGHT">{text("Starlight", "スターライト")}</option><option value="METEOR">{text("Meteor shower", "流星群")}</option><option value="CHROME">{text("Chrome reveal", "クローム・リビール")}</option></select></label>
