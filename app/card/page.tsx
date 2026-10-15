@@ -147,7 +147,7 @@ function ratingSwitchEffectStyle(
 
 function resultEffectStyle(
   value: string
-): "DEFAULT" | "THROTTLE" | "SKY" | "REINCARNATION" | "STARSTRUCK" | "NEONRUSH" | "SHOCKWAVE" | "PRISM" {
+): "DEFAULT" | "THROTTLE" | "SKY" | "REINCARNATION" | "STARSTRUCK" | "NEONRUSH" | "SHOCKWAVE" {
   const style = value.toUpperCase();
 
   if (
@@ -156,8 +156,7 @@ function resultEffectStyle(
     style === "REINCARNATION" ||
     style === "STARSTRUCK" ||
     style === "NEONRUSH" ||
-    style === "SHOCKWAVE" ||
-    style === "PRISM"
+    style === "SHOCKWAVE"
   ) {
     return style;
   }
