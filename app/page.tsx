@@ -39,9 +39,10 @@ type RankEffectStyle =
   | "SLIDE"
   | "BURST"
   | "STARLIGHT"
-  | "METEOR";
-type RatingSwitchEffectStyle = "WAVE" | "FADE" | "SLIDE" | "PULSE" | "SWEEP" | "GLITCH";
-type ResultEffectStyle = "DEFAULT" | "THROTTLE" | "SKY" | "REINCARNATION" | "STARSTRUCK" | "NEONRUSH" | "SHOCKWAVE";
+  | "METEOR"
+  | "CHROME";
+type RatingSwitchEffectStyle = "WAVE" | "FADE" | "SLIDE" | "PULSE" | "SWEEP" | "GLITCH" | "SCAN";
+type ResultEffectStyle = "DEFAULT" | "THROTTLE" | "SKY" | "REINCARNATION" | "STARSTRUCK" | "NEONRUSH" | "SHOCKWAVE" | "PRISM";
 type EventFormat = "EVENTS" | "PREFIX" | "HASH" | "NUMBER";
 type RankTextFormat = "DIVISION" | "FULL_SLASH" | "CLASS" | "FULL_BREAK";
 
@@ -823,6 +824,7 @@ function decodeDesignValue(key: keyof Settings, token: string) {
         "BURST",
         "STARLIGHT",
         "METEOR",
+        "CHROME",
       ].includes(decoded.toUpperCase())
         ? decoded.toUpperCase()
         : defaultValue) as never;
@@ -831,7 +833,7 @@ function decodeDesignValue(key: keyof Settings, token: string) {
     if (key === "ratingSwitchEffectStyle") {
       const normalized = decoded.toUpperCase();
       const migrated = normalized === "FLIP" ? "SLIDE" : normalized;
-      return (["WAVE", "FADE", "SLIDE", "PULSE", "SWEEP", "GLITCH"].includes(
+      return (["WAVE", "FADE", "SLIDE", "PULSE", "SWEEP", "GLITCH", "SCAN"].includes(
         migrated
       )
         ? migrated
@@ -839,7 +841,7 @@ function decodeDesignValue(key: keyof Settings, token: string) {
     }
 
     if (key === "resultEffectStyle") {
-      return (["DEFAULT", "THROTTLE", "SKY", "REINCARNATION", "STARSTRUCK", "NEONRUSH", "SHOCKWAVE"].includes(
+      return (["DEFAULT", "THROTTLE", "SKY", "REINCARNATION", "STARSTRUCK", "NEONRUSH", "SHOCKWAVE", "PRISM"].includes(
         decoded.toUpperCase()
       )
         ? decoded.toUpperCase()
@@ -3125,10 +3127,11 @@ export default function Home() {
                   <option value="STARSTRUCK">{text("Star Struck", "スターストラック")}</option>
                   <option value="NEONRUSH">{text("Neon Rush", "ネオンラッシュ")}</option>
                   <option value="SHOCKWAVE">{text("Shockwave", "ショックウェーブ")}</option>
+                   <option value="PRISM">{text("Prism Foil", "プリズム・フォイル")}</option>
                 </select>
               </label>
-              <div className="design-subtitle">{text("Rank change effect", "ランク変動演出")}</div><label>{text("Rank Up / Down style", "Rank Up / Down演出")}<select value={settings.rankEffectStyle} onChange={(e) => update("rankEffectStyle", e.target.value as RankEffectStyle)}><option value="CLASSIC">{text("Classic reveal", "クラシック")}</option><option value="FLASH">{text("Light flash", "ライトフラッシュ")}</option><option value="SLIDE">{text("Side slide", "サイドスライド")}</option><option value="BURST">{text("Energy burst", "エナジーバースト")}</option><option value="STARLIGHT">{text("Starlight", "スターライト")}</option><option value="METEOR">{text("Meteor shower", "流星群")}</option></select></label>
-              <div className="design-subtitle">{text("MMR / LR switch effect", "MMR / LR切替演出")}</div><label>{text("Switch style", "切替演出")}<select value={settings.ratingSwitchEffectStyle} onChange={(e) => update("ratingSwitchEffectStyle", e.target.value as RatingSwitchEffectStyle)}><option value="WAVE">{text("Wave", "ウェーブ")}</option><option value="FADE">{text("Soft fade", "ソフトフェード")}</option><option value="SLIDE">{text("Slide in", "スライドイン")}</option><option value="PULSE">{text("Pulse", "パルス")}</option><option value="SWEEP">{text("Light sweep", "ライトスイープ")}</option><option value="GLITCH">{text("Digital glitch", "デジタルグリッチ")}</option></select></label>
+              <div className="design-subtitle">{text("Rank change effect", "ランク変動演出")}</div><label>{text("Rank Up / Down style", "Rank Up / Down演出")}<select value={settings.rankEffectStyle} onChange={(e) => update("rankEffectStyle", e.target.value as RankEffectStyle)}><option value="CLASSIC">{text("Classic reveal", "クラシック")}</option><option value="FLASH">{text("Light flash", "ライトフラッシュ")}</option><option value="SLIDE">{text("Side slide", "サイドスライド")}</option><option value="BURST">{text("Energy burst", "エナジーバースト")}</option><option value="STARLIGHT">{text("Starlight", "スターライト")}</option><option value="METEOR">{text("Meteor shower", "流星群")}</option><option value="CHROME">{text("Chrome reveal", "クローム・リビール")}</option></select></label>
+              <div className="design-subtitle">{text("MMR / LR switch effect", "MMR / LR切替演出")}</div><label>{text("Switch style", "切替演出")}<select value={settings.ratingSwitchEffectStyle} onChange={(e) => update("ratingSwitchEffectStyle", e.target.value as RatingSwitchEffectStyle)}><option value="WAVE">{text("Wave", "ウェーブ")}</option><option value="FADE">{text("Soft fade", "ソフトフェード")}</option><option value="SLIDE">{text("Slide in", "スライドイン")}</option><option value="PULSE">{text("Pulse", "パルス")}</option><option value="SWEEP">{text("Light sweep", "ライトスイープ")}</option><option value="GLITCH">{text("Digital glitch", "デジタルグリッチ")}</option><option value="SCAN">{text("Scanline", "スキャンライン")}</option></select></label>
               <div className="design-subtitle">{text("Effect color", "エフェクト色")}</div><div className="two-col"><label>{text("Effect color", "エフェクト色")}<input type="color" value={settings.ratingEffectColor} disabled={settings.ratingEffectUseMainColor} onChange={(e) => update("ratingEffectColor", e.target.value)} /></label><label className="checkbox-label"><input type="checkbox" checked={settings.ratingEffectUseMainColor} onChange={(e) => update("ratingEffectUseMainColor", e.target.checked)} />{text("Use border color", "枠線色を使用")}</label></div>
               <div className="design-subtitle">{text("Border", "枠線")}</div><div className="two-col"><label>{text("Border color", "枠線色")}<input type="color" value={settings.borderColor} onChange={(e) => update("borderColor", e.target.value)} /></label><label>{text("Animated border color", "枠線カラー")}<input type="color" value={settings.flowColor} onChange={(e) => update("flowColor", e.target.value)} /></label></div><OptionSlider label={text("Border speed", "枠線速度")} optionLabel={text("Border animation", "枠線")} checked={settings.flowEnabled} onCheckedChange={(checked) => update("flowEnabled", checked)} value={settings.flowSpeed} min={0} max={100} disabled={!settings.flowEnabled} onChange={(v) => update("flowSpeed", v)} /><MappedSlider label={text("Border length", "枠線長さ")} value={settings.flowLength} minValue={1} maxValue={96} disabled={!settings.flowEnabled} onChange={(v) => update("flowLength", v)} />
             </div>
