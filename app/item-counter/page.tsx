@@ -1,5 +1,7 @@
 "use client";
 
+import KeiProjectsNav from "@/components/KeiProjectsNav";
+
 import {
   useCallback,
   useEffect,
@@ -237,22 +239,7 @@ export default function ItemCounterPage() {
 
   return (
     <main className={styles.page}>
-      <nav className="project-nav" aria-label="Kei projects">
-        <details>
-          <summary>Kei Projects</summary>
-          <div className="project-nav-menu">
-            <a href="/">Kei Lounge Cards</a>
-            <a href="/item-counter">MKW Item Counter</a>
-            <a
-              href="https://kei-brstm-hub.vercel.app/"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Kei Music Hub
-            </a>
-          </div>
-        </details>
-      </nav>
+      <KeiProjectsNav />
 
       <div className={styles.shell}>
         <header className={styles.hero}>
