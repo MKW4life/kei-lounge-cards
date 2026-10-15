@@ -7,11 +7,11 @@ The Lounge Card editor and `/item-counter` now render the same menu from `compon
 | Variable | Purpose |
 | --- | --- |
 | `NEXT_PUBLIC_KEI_PROJECTS_URL` | Optional override of the confirmed Firebase Spark landing page `https://kei-projects-33b53.web.app/` |
-| `NEXT_PUBLIC_MKW_COURSE_STATS_URL` | Confirmed public MKW Course Stats deployment |
+| `NEXT_PUBLIC_MKW_COURSE_STATS_URL` | Optional override of verified `https://mkw-trackstats.pages.dev/` |
 
-The Kei Projects home link is enabled by default, with no Vercel environment variable needed. Use `NEXT_PUBLIC_KEI_PROJECTS_URL` only to override the confirmed destination. Set `NEXT_PUBLIC_MKW_COURSE_STATS_URL` only once the Course Stats deployment is verified. Rebuild/redeploy for changes to public Next.js environment variables to take effect. Do not put secret keys or tokens in `NEXT_PUBLIC_` variables.
+The Kei Projects home link is enabled by default, with no Vercel environment variable needed. Use `NEXT_PUBLIC_KEI_PROJECTS_URL` only to override the confirmed destination. The verified Course Stats page is linked by default; `NEXT_PUBLIC_MKW_COURSE_STATS_URL` is only needed for an override. Rebuild/redeploy for changes to public Next.js environment variables to take effect. Do not put secret keys or tokens in `NEXT_PUBLIC_` variables.
 
-When Course Stats is unset, only its menu entry is hidden. Existing BRSTM Hub, Lounge Card, and Item Counter links keep working.
+Both the portal and Course Stats are shown by default. Existing BRSTM Hub, Lounge Card, and Item Counter links keep working.
 
 ## Compatibility
 

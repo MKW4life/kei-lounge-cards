@@ -1,10 +1,10 @@
 /**
  * Navigation shared by the Lounge Card editor and Item Counter.
- * The external Kei Projects and Course Stats links are opt-in until deployed
- * and verified, to avoid shipping dead destinations.
+ * The portal and MKW Course Stats URLs have both been verified as live.
+ * Keep optional public environment variables for URL overrides.
  */
 const projectsUrl = process.env.NEXT_PUBLIC_KEI_PROJECTS_URL?.trim() || "https://kei-projects-33b53.web.app/";
-const courseStatsUrl = process.env.NEXT_PUBLIC_MKW_COURSE_STATS_URL?.trim();
+const courseStatsUrl = process.env.NEXT_PUBLIC_MKW_COURSE_STATS_URL?.trim() || "https://mkw-trackstats.pages.dev/";
 
 export default function KeiProjectsNav() {
   return (
