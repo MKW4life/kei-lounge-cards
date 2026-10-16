@@ -1375,6 +1375,11 @@ function getPreviewRank(
 
 const VERSION_HISTORY = [
   {
+    version: "v2.3.2",
+    en: "Enlarged the independent red tachometer while preserving its animated needle. Playing Cards now streams eleven larger cards, followed by a dramatic Ace of Spades on wins; timing aligns with the existing Rank Up sequence when a rank actually changes.",
+    jp: "針のアニメーションを維持したまま赤いタコメーターを拡大しました。トランプカスケードはカードを11枚に増やし、勝利時は最後に大きなスペードのAが流れるよう改善。実際に昇格した場合のRANK UP演出につながるタイミングに調整しました。",
+  },
+  {
     version: "v2.3.1",
     en: "Refined the layered effects: larger red tachometer, restored clean colorful Star Struck particles, added Playing Cards, replaced default arrows with light streaks, and introduced the Aurora rank reveal.",
     jp: "レイヤー演出を改善。赤いタコメーターを拡大し、スターストラックを背景付きではないカラフルな粒子に修正しました。トランプカスケードを追加し、デフォルトの矢印を光跡に変更。ランク変動にオーロラスイープを追加しました。",
