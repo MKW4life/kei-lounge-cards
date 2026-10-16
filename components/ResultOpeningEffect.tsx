@@ -54,8 +54,11 @@ export default function ResultOpeningEffect({
       {selected === "THROTTLE" && (
         <>
           <div className="speed-fx-scrim" />
-          <div className="speed-fx-grid" />
-          <div className="speed-fx-blade" />
+          <div className="tachometer" aria-hidden="true">
+            <div className="tachometer-dial" />
+            <div className="tachometer-needle" />
+            <div className="tachometer-hub" />
+          </div>
           <div className="speed-fx-lines">
             {Array.from({ length: 12 }, (_, index) => (
               <span
@@ -68,35 +71,31 @@ export default function ResultOpeningEffect({
               />
             ))}
           </div>
-          <div className="speed-fx-tracers">
-            {Array.from({ length: 6 }, (_, index) => <span key={index} />)}
-          </div>
         </>
       )}
 
       {selected === "NEONRUSH" && (
         <>
-          <div className="neon-rush-glow" />
-          <div className="neon-rush-lines">
-            {Array.from({ length: 8 }, (_, index) => <span key={index} />)}
-          </div>
-          <div className="neon-rush-rings"><span /><span /></div>
+          <div className="neon-asset-frame" />
+          <div className="neon-asset-trail" />
         </>
       )}
 
       {selected === "SHOCKWAVE" && (
         <>
-          <div className="shockwave-core" />
-          <div className="shockwave-rings"><span /><span /></div>
+          <div className="shock-asset-core" />
+          <div className="shock-asset-ring" />
           <div className="shockwave-shards">
-            {Array.from({ length: 10 }, (_, index) => <span key={index} />)}
+            {Array.from({ length: 8 }, (_, index) => <span key={index} />)}
           </div>
         </>
       )}
 
       {selected === "STARSTRUCK" && (
         <div className="starstruck-particles">
-          {Array.from({ length: 16 }, (_, index) => <span key={index} />)}
+          {Array.from({ length: 16 }, (_, index) => (
+            <span key={index}>{index % 3 === 0 ? "♥" : index % 2 === 0 ? "✦" : "★"}</span>
+          ))}
         </div>
       )}
     </div>
