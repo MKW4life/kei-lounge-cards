@@ -41,9 +41,10 @@ type RankEffectStyle =
   | "BURST"
   | "STARLIGHT"
   | "METEOR"
-  | "CHROME";
+  | "CHROME"
+  | "AURORA";
 type RatingSwitchEffectStyle = "WAVE" | "FADE" | "SLIDE" | "PULSE" | "SWEEP" | "GLITCH" | "SCAN";
-type ResultEffectStyle = "DEFAULT" | "THROTTLE" | "SKY" | "REINCARNATION" | "STARSTRUCK" | "NEONRUSH" | "SHOCKWAVE";
+type ResultEffectStyle = "DEFAULT" | "THROTTLE" | "SKY" | "REINCARNATION" | "STARSTRUCK" | "NEONRUSH" | "SHOCKWAVE" | "CARDS";
 type EventFormat = "EVENTS" | "PREFIX" | "HASH" | "NUMBER";
 type RankTextFormat = "DIVISION" | "FULL_SLASH" | "CLASS" | "FULL_BREAK";
 
@@ -826,6 +827,7 @@ function decodeDesignValue(key: keyof Settings, token: string) {
         "STARLIGHT",
         "METEOR",
         "CHROME",
+        "AURORA",
       ].includes(decoded.toUpperCase())
         ? decoded.toUpperCase()
         : defaultValue) as never;
@@ -842,7 +844,7 @@ function decodeDesignValue(key: keyof Settings, token: string) {
     }
 
     if (key === "resultEffectStyle") {
-      return (["DEFAULT", "THROTTLE", "SKY", "REINCARNATION", "STARSTRUCK", "NEONRUSH", "SHOCKWAVE"].includes(
+      return (["DEFAULT", "THROTTLE", "SKY", "REINCARNATION", "STARSTRUCK", "NEONRUSH", "SHOCKWAVE", "CARDS"].includes(
         decoded.toUpperCase()
       )
         ? decoded.toUpperCase()
@@ -1372,6 +1374,16 @@ function getPreviewRank(
 }
 
 const VERSION_HISTORY = [
+  {
+    version: "v2.3.1",
+    en: "Refined the layered effects: larger red tachometer, restored clean colorful Star Struck particles, added Playing Cards, replaced default arrows with light streaks, and introduced the Aurora rank reveal.",
+    jp: "レイヤー演出を改善。赤いタコメーターを拡大し、スターストラックを背景付きではないカラフルな粒子に修正しました。トランプカスケードを追加し、デフォルトの矢印を光跡に変更。ランク変動にオーロラスイープを追加しました。",
+  },
+  {
+    version: "v2.3.0",
+    en: "Added separate animated texture layers for the tachometer needle, Neon Rush and Shockwave, plus Chrome Reveal and Scanline effects.",
+    jp: "タコメーターの針・ネオンラッシュ・ショックウェーブを独立した素材としてアニメーション化し、クローム・リビールとスキャンラインも追加しました。",
+  },
   {
     version: "v2.0.5–v2.2.9",
     en: "Improved Undo / Redo, Lounge-name autocomplete, JP / EN wording, Preview / OBS parity, selectable Win / Loss effects, automatic player refresh, and Compact mode customization. All player text elements now support adjustable character spacing, including Rank text, and Rank text can be shown as division only, division/tier, tier only, or on two lines. MMR / LR switch effects now preserve text shadows; 3D Flip was replaced with Slide In, Pulse, and Light Sweep.",
@@ -3013,9 +3025,10 @@ export default function Home() {
                   <option value="STARSTRUCK">{text("Star Struck", "スターストラック")}</option>
                   <option value="NEONRUSH">{text("Neon Rush", "ネオンラッシュ")}</option>
                   <option value="SHOCKWAVE">{text("Shockwave", "ショックウェーブ")}</option>
+                  <option value="CARDS">{text("Playing Cards", "トランプカスケード")}</option>
                 </select>
               </label>
-              <div className="design-subtitle">{text("Rank change effect", "ランク変動演出")}</div><label>{text("Rank Up / Down style", "Rank Up / Down演出")}<select value={settings.rankEffectStyle} onChange={(e) => update("rankEffectStyle", e.target.value as RankEffectStyle)}><option value="CLASSIC">{text("Classic reveal", "クラシック")}</option><option value="FLASH">{text("Light flash", "ライトフラッシュ")}</option><option value="SLIDE">{text("Side slide", "サイドスライド")}</option><option value="BURST">{text("Energy burst", "エナジーバースト")}</option><option value="STARLIGHT">{text("Starlight", "スターライト")}</option><option value="METEOR">{text("Meteor shower", "流星群")}</option><option value="CHROME">{text("Chrome reveal", "クローム・リビール")}</option></select></label>
+              <div className="design-subtitle">{text("Rank change effect", "ランク変動演出")}</div><label>{text("Rank Up / Down style", "Rank Up / Down演出")}<select value={settings.rankEffectStyle} onChange={(e) => update("rankEffectStyle", e.target.value as RankEffectStyle)}><option value="CLASSIC">{text("Classic reveal", "クラシック")}</option><option value="FLASH">{text("Light flash", "ライトフラッシュ")}</option><option value="SLIDE">{text("Side slide", "サイドスライド")}</option><option value="BURST">{text("Energy burst", "エナジーバースト")}</option><option value="STARLIGHT">{text("Starlight", "スターライト")}</option><option value="METEOR">{text("Meteor shower", "流星群")}</option><option value="CHROME">{text("Chrome reveal", "クローム・リビール")}</option><option value="AURORA">{text("Aurora sweep", "オーロラスイープ")}</option></select></label>
               <div className="design-subtitle">{text("MMR / LR switch effect", "MMR / LR切替演出")}</div><label>{text("Switch style", "切替演出")}<select value={settings.ratingSwitchEffectStyle} onChange={(e) => update("ratingSwitchEffectStyle", e.target.value as RatingSwitchEffectStyle)}><option value="WAVE">{text("Wave", "ウェーブ")}</option><option value="FADE">{text("Soft fade", "ソフトフェード")}</option><option value="SLIDE">{text("Slide in", "スライドイン")}</option><option value="PULSE">{text("Pulse", "パルス")}</option><option value="SWEEP">{text("Light sweep", "ライトスイープ")}</option><option value="GLITCH">{text("Digital glitch", "デジタルグリッチ")}</option><option value="SCAN">{text("Scanline", "スキャンライン")}</option></select></label>
               <div className="design-subtitle">{text("Effect color", "エフェクト色")}</div><div className="two-col"><label>{text("Effect color", "エフェクト色")}<input type="color" value={settings.ratingEffectColor} disabled={settings.ratingEffectUseMainColor} onChange={(e) => update("ratingEffectColor", e.target.value)} /></label><label className="checkbox-label"><input type="checkbox" checked={settings.ratingEffectUseMainColor} onChange={(e) => update("ratingEffectUseMainColor", e.target.checked)} />{text("Use border color", "枠線色を使用")}</label></div>
               <div className="design-subtitle">{text("Border", "枠線")}</div><div className="two-col"><label>{text("Border color", "枠線色")}<input type="color" value={settings.borderColor} onChange={(e) => update("borderColor", e.target.value)} /></label><label>{text("Animated border color", "枠線カラー")}<input type="color" value={settings.flowColor} onChange={(e) => update("flowColor", e.target.value)} /></label></div><OptionSlider label={text("Border speed", "枠線速度")} optionLabel={text("Border animation", "枠線")} checked={settings.flowEnabled} onCheckedChange={(checked) => update("flowEnabled", checked)} value={settings.flowSpeed} min={0} max={100} disabled={!settings.flowEnabled} onChange={(v) => update("flowSpeed", v)} /><MappedSlider label={text("Border length", "枠線長さ")} value={settings.flowLength} minValue={1} maxValue={96} disabled={!settings.flowEnabled} onChange={(v) => update("flowLength", v)} />
