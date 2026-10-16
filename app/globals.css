@@ -7779,10 +7779,17 @@ label.summary-toggle span {
 
 /* Tachometer: enlarge the independent dial / needle / hub together. */
 .result-opening-throttle .tachometer {
-  width: 256px;
-  height: 256px;
-  right: -19px;
-  top: 82%;
+  /* Keep the independent dial, needle and hub aligned while enlarging. */
+  width: 350px;
+  height: 350px;
+  right: -38px;
+  top: 108%;
+}
+.card-shell.compact-mode .result-opening-throttle .tachometer {
+  width: 267px;
+  height: 267px;
+  right: -32px;
+  top: 111%;
 }
 
 /* Star Struck: remove the unwanted square backing around each glyph. */
@@ -7868,62 +7875,131 @@ label.summary-toggle span {
   100% { opacity: 0; transform: translate(-50%, 91px) skewX(-10deg) scaleY(1.2); }
 }
 
-/* Playing Cards: staggered compact cards, not a full-screen banner. */
+/* Playing Cards v2.3.2: many cards stream across, one large Ace closes a win. */
 .result-opening-cards {
-  background: radial-gradient(ellipse at center, rgba(255,255,255,.055), transparent 68%);
+  background: radial-gradient(ellipse at 50% 50%, rgba(255,255,255,.05), transparent 72%) !important;
 }
-.playing-card-cascade { position: absolute; inset: 0; }
+.playing-card-cascade {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
 .playing-card-cascade .playing-card {
   position: absolute;
   z-index: 3;
-  left: var(--deal-x);
-  top: 50%;
-  width: 36px;
-  height: 52px;
-  border: 1px solid rgba(255,255,255,.84);
-  border-radius: 5px;
-  background: linear-gradient(145deg, #fff, #e7e7eb);
-  box-shadow: 0 6px 15px rgba(0,0,0,.52), inset 0 0 0 2px #eee;
-  color: #181923;
+  top: calc(50% + var(--card-y, 0px));
+  left: -18%;
+  width: 52px;
+  height: 74px;
+  border: 1px solid rgba(255,255,255,.92);
+  border-radius: 6px;
+  background: linear-gradient(143deg, #fff 0%, #f8f8fa 42%, #e1e2e8 100%);
+  box-shadow: 0 6px 18px rgba(0,0,0,.48), inset 0 0 0 2px rgba(255,255,255,.66);
+  color: #181820;
   opacity: 0;
   overflow: hidden;
-  font-family: Georgia, 'Times New Roman', serif;
-  transform: translate(-50%, 38px) rotate(var(--deal-angle));
-  animation: playing-card-deal-v231 1.17s cubic-bezier(.2,.7,.2,1) var(--deal-delay) both;
+  transform: translateY(-50%) rotate(var(--card-rot, 0deg));
+  font-family: Georgia, "Times New Roman", serif;
+  will-change: transform, opacity, left;
 }
-.playing-card-cascade .playing-card.is-red { color: #bd263b; }
+.playing-card-cascade .playing-card.is-red { color: #c02b42; }
 .playing-card-cascade .playing-card-face {
   position: absolute;
-  left: 4px;
-  top: 3px;
-  font: 700 12px/.9 Georgia,serif;
+  left: 5px;
+  top: 4px;
+  font: 700 16px/.92 Georgia,serif;
 }
 .playing-card-cascade .playing-card-face small {
   display: block;
-  font-size: 9px;
   margin-top: 2px;
+  font-size: 11px;
 }
 .playing-card-cascade .playing-card-suit {
   position: absolute;
-  font: 26px/1 Georgia,serif;
-  left: 50%;
   top: 53%;
+  left: 50%;
   transform: translate(-50%,-50%);
+  font: 32px/1 Georgia,serif;
 }
-.result-opening-cards.is-loss .playing-card {
-  animation-name: playing-card-fall-v231;
+.playing-card-cascade .playing-card.stream-card {
+  animation: card-stream-win-v232 1.02s cubic-bezier(.2,.72,.25,1) var(--deal-delay) both;
 }
-@keyframes playing-card-deal-v231 {
-  0% { opacity: 0; transform: translate(-50%, 58px) rotate(calc(var(--deal-angle) - 14deg)) scale(.68); }
-  24% { opacity: .98; transform: translate(-50%,-49%) rotate(var(--deal-angle)) scale(1); }
-  67% { opacity: .93; transform: translate(-50%,-51%) rotate(var(--deal-angle)) scale(1); }
-  100% { opacity: 0; transform: translate(-50%,-104px) rotate(calc(var(--deal-angle) + 13deg)) scale(.85); }
+.result-opening-cards.is-loss .playing-card-cascade .playing-card.stream-card {
+  animation-name: card-stream-loss-v232;
 }
-@keyframes playing-card-fall-v231 {
-  0% { opacity: 0; transform: translate(-50%,-95px) rotate(calc(var(--deal-angle) + 13deg)) scale(.7); }
-  24% { opacity: .98; transform: translate(-50%,-51%) rotate(var(--deal-angle)) scale(1); }
-  67% { opacity: .93; transform: translate(-50%,-49%) rotate(var(--deal-angle)) scale(1); }
-  100% { opacity: 0; transform: translate(-50%, 101px) rotate(calc(var(--deal-angle) - 18deg)) scale(.8); }
+.playing-card-cascade .playing-card.hero-ace {
+  z-index: 7;
+  top: 50%;
+  left: -30%;
+  width: 100px;
+  height: 132px;
+  border-radius: 10px;
+  box-shadow: 0 12px 29px rgba(0,0,0,.55), 0 0 15px rgba(255,255,255,.14), inset 0 0 0 2px #fff;
+  animation: hero-ace-finish-v232 .94s cubic-bezier(.16,.7,.2,1) .73s both;
+}
+.playing-card-cascade .hero-ace .playing-card-face {
+  left: 9px;
+  top: 7px;
+  font-size: 26px;
+}
+.playing-card-cascade .hero-ace .playing-card-face small {
+  margin-top: 3px;
+  font-size: 17px;
+}
+.playing-card-cascade .hero-ace .playing-card-suit { font-size: 67px; }
+
+/* Cards fade out before the existing, actual Rank Up phase begins (~1.7s). */
+@keyframes card-stream-win-v232 {
+  0% {
+    opacity: 0;
+    left: -18%;
+    transform: translateY(-50%) rotate(calc(var(--card-rot) - 14deg)) scale(.8);
+  }
+  18% { opacity: .95; }
+  68% { opacity: .92; }
+  100% {
+    opacity: 0;
+    left: 118%;
+    transform: translateY(-50%) rotate(calc(var(--card-rot) + 12deg)) scale(1);
+  }
+}
+@keyframes card-stream-loss-v232 {
+  0% {
+    opacity: 0;
+    left: -18%;
+    transform: translateY(calc(-50% - 20px)) rotate(calc(var(--card-rot) + 9deg)) scale(.8);
+  }
+  18% { opacity: .9; }
+  68% { opacity: .85; }
+  100% {
+    opacity: 0;
+    left: 118%;
+    transform: translateY(calc(-50% + 22px)) rotate(calc(var(--card-rot) - 16deg)) scale(.95);
+  }
+}
+@keyframes hero-ace-finish-v232 {
+  0% {
+    opacity: 0;
+    left: -30%;
+    transform: translate(-50%,-50%) rotate(-19deg) scale(.75);
+  }
+  18% { opacity: 1; }
+  51% {
+    opacity: 1;
+    left: 44%;
+    transform: translate(-50%,-50%) rotate(-7deg) scale(1.12);
+  }
+  77% {
+    opacity: 1;
+    left: 72%;
+    transform: translate(-50%,-50%) rotate(1deg) scale(1.22);
+  }
+  100% {
+    opacity: 0;
+    left: 126%;
+    transform: translate(-50%,-50%) rotate(13deg) scale(1.16);
+  }
 }
 
 /* Aurora rank: soft moving light curtain under rank icon and legible copy. */
