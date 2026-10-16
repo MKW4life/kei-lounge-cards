@@ -89,7 +89,7 @@ function labelShape(value: string): "ROUNDED" | "STAR" | "HEART" {
 
 function rankEffectStyle(
   value: string
-): "CLASSIC" | "FLASH" | "SLIDE" | "BURST" | "STARLIGHT" | "METEOR" | "CHROME" {
+): "CLASSIC" | "FLASH" | "SLIDE" | "BURST" | "STARLIGHT" | "METEOR" | "CHROME" | "AURORA" {
   const style = value.toUpperCase();
   if (
     style === "FLASH" ||
@@ -97,7 +97,8 @@ function rankEffectStyle(
     style === "BURST" ||
     style === "STARLIGHT" ||
     style === "METEOR" ||
-    style === "CHROME"
+    style === "CHROME" ||
+    style === "AURORA"
   ) {
     return style;
   }
@@ -147,7 +148,7 @@ function ratingSwitchEffectStyle(
 
 function resultEffectStyle(
   value: string
-): "DEFAULT" | "THROTTLE" | "SKY" | "REINCARNATION" | "STARSTRUCK" | "NEONRUSH" | "SHOCKWAVE" {
+): "DEFAULT" | "THROTTLE" | "SKY" | "REINCARNATION" | "STARSTRUCK" | "NEONRUSH" | "SHOCKWAVE" | "CARDS" {
   const style = value.toUpperCase();
 
   if (
@@ -156,7 +157,8 @@ function resultEffectStyle(
     style === "REINCARNATION" ||
     style === "STARSTRUCK" ||
     style === "NEONRUSH" ||
-    style === "SHOCKWAVE"
+    style === "SHOCKWAVE" ||
+    style === "CARDS"
   ) {
     return style;
   }
