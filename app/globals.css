@@ -7574,3 +7574,202 @@ label.summary-toggle span {
     opacity: 0 !important;
   }
 }
+
+
+/* Layered OBS effect assets: independent elements are animated, not a single picture.
+   These overlays are contained by the 650×150 / 380×150 card surface. */
+
+/* Full Throttle — black / red tachometer: stationary dial and hub, moving needle. */
+.result-opening-throttle .tachometer {
+  position: absolute;
+  z-index: 2;
+  top: 73%;
+  right: -14px;
+  width: 220px;
+  height: 220px;
+  transform: translateY(-50%);
+  opacity: 0;
+  pointer-events: none;
+  animation: layered-tach-visibility 1.45s ease-out both;
+}
+.result-opening-throttle .tachometer-dial,
+.result-opening-throttle .tachometer-needle {
+  position: absolute;
+  inset: 0;
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+.result-opening-throttle .tachometer-dial {
+  background-image: url("/effects/throttle-dial.svg");
+  filter: drop-shadow(0 0 9px rgba(246, 26, 47, .24));
+}
+.result-opening-throttle .tachometer-needle {
+  background-image: url("/effects/throttle-needle.svg");
+  transform-origin: 50% 50%;
+  animation: layered-tach-win 1.23s cubic-bezier(.18, .76, .24, 1) both;
+}
+.result-opening-throttle.is-loss .tachometer-needle {
+  animation-name: layered-tach-loss;
+}
+.result-opening-throttle .tachometer-hub {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  top: 50%;
+  width: 32px;
+  height: 32px;
+  transform: translate(-50%, -50%);
+  background: url("/effects/throttle-hub.svg") center / contain no-repeat;
+}
+.result-opening-throttle .speed-fx-scrim {
+  opacity: .3;
+  background: linear-gradient(90deg, transparent, rgba(0,0,0,.18) 64%, rgba(0,0,0,.65)) !important;
+}
+.result-opening-throttle .speed-fx-lines span {
+  height: 1px;
+  opacity: .35;
+  box-shadow: none;
+  animation-duration: .9s;
+}
+@keyframes layered-tach-visibility {
+  0% { opacity: 0; transform: translate(14px,-50%) scale(.95); }
+  13% { opacity: .96; }
+  75% { opacity: .96; transform: translate(0,-50%) scale(1); }
+  100% { opacity: 0; transform: translate(-5px,-50%) scale(1); }
+}
+@keyframes layered-tach-win {
+  0% { transform: rotate(147deg); }
+  15% { transform: rotate(165deg); }
+  66% { transform: rotate(323deg); }
+  82% { transform: rotate(313deg); }
+  100% { transform: rotate(320deg); }
+}
+@keyframes layered-tach-loss {
+  0% { transform: rotate(320deg); }
+  17% { transform: rotate(332deg); }
+  69% { transform: rotate(156deg); }
+  85% { transform: rotate(169deg); }
+  100% { transform: rotate(163deg); }
+}
+
+/* Neon Rush — stationary luminescent frame and independently travelling trail. */
+.result-opening-neonrush .neon-asset-frame,
+.result-opening-neonrush .neon-asset-trail {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+.result-opening-neonrush .neon-asset-frame {
+  background-image: url("/effects/neon-frame.svg");
+  animation: layered-neon-frame 1.35s ease-out both;
+}
+.result-opening-neonrush .neon-asset-trail {
+  inset: 0 -18%;
+  background-image: url("/effects/neon-trail.svg");
+  background-size: 74% 100%;
+  animation: layered-neon-trail 1.1s cubic-bezier(.16, .8, .2, 1) both;
+}
+.result-opening-neonrush.is-loss .neon-asset-frame,
+.result-opening-neonrush.is-loss .neon-asset-trail {
+  filter: hue-rotate(-32deg) saturate(.75);
+}
+@keyframes layered-neon-frame {
+  0% { opacity: 0; transform: scaleX(.97); }
+  22% { opacity: .7; }
+  74% { opacity: .57; }
+  100% { opacity: 0; transform: scaleX(1); }
+}
+@keyframes layered-neon-trail {
+  0% { opacity: 0; transform: translateX(-48%); }
+  18% { opacity: .86; }
+  70% { opacity: .68; }
+  100% { opacity: 0; transform: translateX(48%); }
+}
+
+/* Shockwave — stationary burst and an independently expanding elliptical front. */
+.result-opening-shockwave .shock-asset-core,
+.result-opening-shockwave .shock-asset-ring {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  top: 50%;
+  height: 150px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  pointer-events: none;
+}
+.result-opening-shockwave .shock-asset-core {
+  width: 300px;
+  background-image: url("/effects/shockwave-core.svg");
+  animation: layered-shock-core 1.18s ease-out both;
+}
+.result-opening-shockwave .shock-asset-ring {
+  width: 360px;
+  background-image: url("/effects/shockwave-ring.svg");
+  animation: layered-shock-ring 1.08s cubic-bezier(.13, .72, .2, 1) both;
+}
+.result-opening-shockwave .shockwave-shards span {
+  opacity: 0;
+  animation-duration: .85s !important;
+}
+@keyframes layered-shock-core {
+  0% { opacity: 0; transform: translate(-50%,-50%) scale(.3); }
+  16% { opacity: .76; }
+  53% { opacity: .53; transform: translate(-50%,-50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%,-50%) scale(1.2); }
+}
+@keyframes layered-shock-ring {
+  0% { opacity: 0; transform: translate(-50%,-50%) scale(.3,.35); }
+  16% { opacity: .84; }
+  100% { opacity: 0; transform: translate(-50%,-50%) scale(1.8,1.13); }
+}
+
+/* Star Struck — the older multicolour hearts and stars, with staggered motion. */
+.result-opening-starstruck {
+  background: radial-gradient(ellipse at 50% 50%, rgba(255,189,234,.18), transparent 65%) !important;
+}
+.result-opening-starstruck .starstruck-particles span {
+  width: auto !important;
+  height: auto !important;
+  background: transparent !important;
+  border-radius: 0;
+  font-size: 24px !important;
+  text-shadow: 0 0 6px rgba(255,255,255,.55), 0 0 15px currentColor !important;
+  filter: none !important;
+}
+.result-opening-starstruck .starstruck-particles span::after {
+  content: none !important;
+  display: none;
+}
+.result-opening-starstruck .starstruck-particles span:nth-child(4n + 1) { color: #ffe26a !important; }
+.result-opening-starstruck .starstruck-particles span:nth-child(4n + 2) { color: #ff7dbd !important; }
+.result-opening-starstruck .starstruck-particles span:nth-child(4n + 3) { color: #7ddaff !important; }
+.result-opening-starstruck .starstruck-particles span:nth-child(4n) { color: #bc97ff !important; }
+.result-opening-starstruck.is-win .starstruck-particles span {
+  animation: starstruck-pop-v209 1.35s cubic-bezier(.16,1,.3,1) forwards !important;
+}
+.result-opening-starstruck.is-loss .starstruck-particles span {
+  animation: starstruck-fall-v209 1.35s cubic-bezier(.35,.1,.4,1) forwards !important;
+}
+
+@media (max-width: 420px) {
+  .result-opening-throttle .tachometer {
+    right: -35px;
+  }
+}
+/* The OBS browser runs at a fixed pixel size regardless of screen width. */
+@media (prefers-reduced-motion: reduce) {
+  .result-opening-throttle .tachometer,
+  .result-opening-neonrush .neon-asset-frame,
+  .result-opening-neonrush .neon-asset-trail,
+  .result-opening-shockwave .shock-asset-core,
+  .result-opening-shockwave .shock-asset-ring {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+}
