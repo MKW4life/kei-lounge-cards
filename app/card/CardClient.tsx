@@ -36,9 +36,10 @@ type RankEffectStyle =
   | "BURST"
   | "STARLIGHT"
   | "METEOR"
-  | "CHROME";
+  | "CHROME"
+  | "AURORA";
 type RatingSwitchEffectStyle = "WAVE" | "FADE" | "SLIDE" | "PULSE" | "SWEEP" | "GLITCH" | "SCAN";
-type ResultEffectStyle = "DEFAULT" | "THROTTLE" | "SKY" | "REINCARNATION" | "STARSTRUCK" | "NEONRUSH" | "SHOCKWAVE";
+type ResultEffectStyle = "DEFAULT" | "THROTTLE" | "SKY" | "REINCARNATION" | "STARSTRUCK" | "NEONRUSH" | "SHOCKWAVE" | "CARDS";
 type EventFormat = "EVENTS" | "PREFIX" | "HASH" | "NUMBER";
 type RankTextFormat = "DIVISION" | "FULL_SLASH" | "CLASS" | "FULL_BREAK";
 type EffectKind = "win" | "loss" | "rank-up" | "rank-down";

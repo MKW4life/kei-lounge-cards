@@ -7,7 +7,8 @@ export type ResultEffectStyle =
   | "REINCARNATION"
   | "STARSTRUCK"
   | "NEONRUSH"
-  | "SHOCKWAVE";
+  | "SHOCKWAVE"
+  | "CARDS";
 
 /** Shared by the editor preview and /card (OBS). No app state or timers. */
 export default function ResultOpeningEffect({
@@ -23,24 +24,20 @@ export default function ResultOpeningEffect({
     style === "REINCARNATION" ? "SHOCKWAVE" : style;
 
   if (selected === "DEFAULT") {
+    // Minimal luminous streaks rather than oversized directional arrows.
     return (
-      <div
-        className={`rating-arrow-stream ${isWin ? "is-up" : "is-down"}`}
-        aria-hidden="true"
-      >
-        {Array.from({ length: 10 }, (_, index) => (
+      <div className={`result-opening-default ${isWin ? "is-up" : "is-down"}`} aria-hidden="true">
+        <div className="default-light-beam" />
+        {Array.from({ length: 7 }, (_, index) => (
           <span
-            className="rating-arrow-particle"
+            className="default-light-streak"
             key={index}
             style={{
-              "--arrow-x": `${8 + index * 9}%`,
-              "--arrow-delay": `${index * 0.075}s`,
-              "--arrow-duration": `${1.1 + (index % 3) * 0.12}s`,
-              "--arrow-size": `${19 + (index % 3) * 5}px`,
+              "--streak-x": `${12 + index * 12}%`,
+              "--streak-delay": `${index * 0.095}s`,
+              "--streak-height": `${20 + (index % 3) * 10}px`,
             } as CSSProperties}
-          >
-            <i className="arrow-glyph" />
-          </span>
+          />
         ))}
       </div>
     );
@@ -89,6 +86,31 @@ export default function ResultOpeningEffect({
             {Array.from({ length: 8 }, (_, index) => <span key={index} />)}
           </div>
         </>
+      )}
+
+      {selected === "CARDS" && (
+        <div className="playing-card-cascade">
+          {[
+            { face: "A", suit: "♠" },
+            { face: "K", suit: "♥" },
+            { face: "Q", suit: "♦" },
+            { face: "J", suit: "♣" },
+            { face: "A", suit: "♥" },
+          ].map((card, index) => (
+            <span
+              key={index}
+              className={`playing-card ${card.suit === "♥" || card.suit === "♦" ? "is-red" : "is-black"}`}
+              style={{
+                "--deal-x": `${15 + index * 17}%`,
+                "--deal-delay": `${index * 0.075}s`,
+                "--deal-angle": `${-14 + index * 7}deg`,
+              } as CSSProperties}
+            >
+              <span className="playing-card-face">{card.face}<small>{card.suit}</small></span>
+              <span className="playing-card-suit">{card.suit}</span>
+            </span>
+          ))}
+        </div>
       )}
 
       {selected === "STARSTRUCK" && (
