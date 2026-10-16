@@ -7928,7 +7928,7 @@ label.summary-toggle span {
 
 /* Aurora rank: soft moving light curtain under rank icon and legible copy. */
 .rank-reveal-style-aurora { isolation: isolate; overflow: hidden; }
-.rank-reveal-style-aurora::before {
+.rank-reveal.rank-reveal-style-aurora::before {
   background:
     radial-gradient(ellipse at 48% 45%, rgba(95,203,219,.16), transparent 60%),
     linear-gradient(120deg, #03080f, #121321 53%, #03080f) !important;
