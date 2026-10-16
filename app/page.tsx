@@ -1375,64 +1375,69 @@ function getPreviewRank(
 
 const VERSION_HISTORY = [
   {
+    version: "v2.3.3",
+    en: "Enlarged and raised the tachometer. Simplified release notes.",
+    jp: "タコメーターを拡大・上方移動。履歴の説明を簡潔にしました。",
+  },
+  {
     version: "v2.3.2",
-    en: "Enlarged the independent red tachometer while preserving its animated needle. Playing Cards now streams eleven larger cards, followed by a dramatic Ace of Spades on wins; timing aligns with the existing Rank Up sequence when a rank actually changes.",
-    jp: "針のアニメーションを維持したまま赤いタコメーターを拡大しました。トランプカスケードはカードを11枚に増やし、勝利時は最後に大きなスペードのAが流れるよう改善。実際に昇格した場合のRANK UP演出につながるタイミングに調整しました。",
+    en: "Added 11-card cascade and a large Ace of Spades finale.",
+    jp: "トランプ11枚の連続演出と大きなスペードAを追加しました。",
   },
   {
     version: "v2.3.1",
-    en: "Refined the layered effects: larger red tachometer, restored clean colorful Star Struck particles, added Playing Cards, replaced default arrows with light streaks, and introduced the Aurora rank reveal.",
-    jp: "レイヤー演出を改善。赤いタコメーターを拡大し、スターストラックを背景付きではないカラフルな粒子に修正しました。トランプカスケードを追加し、デフォルトの矢印を光跡に変更。ランク変動にオーロラスイープを追加しました。",
+    en: "Refined Star Struck and default effects; added Playing Cards and Aurora.",
+    jp: "スターストラックとデフォルト演出を改善。トランプとオーロラを追加しました。",
   },
   {
     version: "v2.3.0",
-    en: "Added separate animated texture layers for the tachometer needle, Neon Rush and Shockwave, plus Chrome Reveal and Scanline effects.",
-    jp: "タコメーターの針・ネオンラッシュ・ショックウェーブを独立した素材としてアニメーション化し、クローム・リビールとスキャンラインも追加しました。",
+    en: "Animated tachometer, neon, and shockwave layers; added Chrome and Scanline.",
+    jp: "タコメーター・ネオン・衝撃波を改良。クロームとスキャンラインを追加しました。",
   },
   {
     version: "v2.0.5–v2.2.9",
-    en: "Improved Undo / Redo, Lounge-name autocomplete, JP / EN wording, Preview / OBS parity, selectable Win / Loss effects, automatic player refresh, and Compact mode customization. All player text elements now support adjustable character spacing, including Rank text, and Rank text can be shown as division only, division/tier, tier only, or on two lines. MMR / LR switch effects now preserve text shadows; 3D Flip was replaced with Slide In, Pulse, and Light Sweep.",
-    jp: "Undo / Redo、Lounge名予測変換、JP / EN表記、Preview / OBSの一致、勝利 / 敗北演出、Lounge名変更時の自動更新、コンパクトモードの調整機能を改善しました。名前・レート・RT/CT・MMR/LR・ランク・模擬数・追加テキストのすべてで文字間隔を狭く／広く調整できるようにし、ランク文字はDivisionのみ・Division/Tier・Tierのみ・2行表示から選択できるようにしました。MMR / LR切替のソフトフェードでも文字の影を維持するよう修正し、3Dフリップを削除してスライドイン・パルス・ライトスイープを追加しました。",
+    en: "Improved editor history, player lookup, card effects, text spacing, and preview/OBS parity.",
+    jp: "編集履歴・プレイヤー検索・カード演出・文字間隔・プレビューとOBSの一致を改善しました。",
   },
   {
     version: "v2.0.0–v2.0.4",
-    en: "Added Events, extra text, per-element transparency, project navigation, full JP / EN UI, automatic Lounge data fetch, clipboard design import, and reorganized the Design panel.",
-    jp: "模擬数、追加テキスト、要素別透明度、プロジェクトナビ、JP / EN UI、Loungeデータ自動取得、クリップボードからのデザイン読込を追加し、Design画面を再構成しました。",
+    en: "Added events, extra text, per-element transparency, project links, and design import.",
+    jp: "模擬数・追加テキスト・透明度設定・プロジェクトリンク・デザイン読込を追加しました。",
   },
   {
     version: "v1.9.0–v1.9.4",
-    en: "Refined rate-change arrows, MMR / LR switch effects, Rank Up / Rank Down visibility, and New Rank presentation.",
-    jp: "レート変動矢印、MMR / LR切替演出、Rank Up / Rank DownとNew Rank演出の見やすさを改善しました。",
+    en: "Improved rate arrows, MMR/LR transitions, and rank-change visibility.",
+    jp: "レート変動の矢印、MMR/LR切替、ランク変動の見やすさを改善しました。",
   },
   {
     version: "v1.8.5–v1.8.9",
-    en: "Built the Rank Up / Rank Down → New Rank sequence and added Starlight, Meteor Shower, and directional rate-change effects.",
-    jp: "Rank Up / Rank Down → New Rankの演出順を整備し、Starlight・Meteor Shower・方向付きレート変動演出を追加しました。",
+    en: "Added Rank Up/Down sequences, Starlight, and Meteor Shower.",
+    jp: "ランク変動の演出順を整備し、スターライトと流星群を追加しました。",
   },
   {
     version: "v1.8.0–v1.8.3",
-    en: "Improved rank transitions, MMR / LR switching, spacing, initial design settings, JSON handling, and RT/CT / MMR/LR placement.",
-    jp: "ランク変動、MMR / LR切替、文字間隔、初期デザイン、JSON処理、RT/CT・MMR/LR配置を改善しました。",
+    en: "Improved rank transitions, rating layouts, and JSON handling.",
+    jp: "ランク演出・レート配置・JSON処理を改善しました。",
   },
   {
     version: "v1.7.0",
-    en: "Standardized sliders to 0–100 and reorganized position, size, text-gradient, shadow, and design categories.",
-    jp: "スライダーを0–100へ統一し、配置・サイズ・文字グラデーション・影・設定カテゴリを大幅に整理しました。",
+    en: "Standardized sliders and reorganized design settings.",
+    jp: "スライダーを統一し、デザイン設定を整理しました。",
   },
   {
     version: "v1.6.0–v1.6.8",
-    en: "Simplified RT/CT and MMR/LR styling, improved visibility and transparency, updated defaults, and expanded font support.",
-    jp: "RT/CT・MMR/LR表示を簡素化し、表示設定・透明度・初期プリセット・フォント対応を改善しました。",
+    en: "Improved visibility, transparency, defaults, and font choices.",
+    jp: "表示・透明度・初期設定・フォント選択を改善しました。",
   },
   {
     version: "v1.4.0–v1.5.0",
-    en: "Expanded core card customization with visibility, custom images, image transparency, and font selection.",
-    jp: "表示切替、追加画像、画像透明度、フォント選択などカードデザインの基本機能を拡充しました。",
+    en: "Added customizable visibility, images, and fonts.",
+    jp: "表示切替・画像・フォントのカスタマイズを追加しました。",
   },
   {
     version: "v1.2.0–v1.3.0",
-    en: "Added design sharing, early RT/CT and MMR/LR styling, label designs, and independent text-spacing controls.",
-    jp: "デザイン共有、初期のRT/CT・MMR/LRスタイル、ラベルデザイン、文字間隔設定を追加しました。",
+    en: "Added design sharing and early layout/text spacing controls.",
+    jp: "デザイン共有と配置・文字間隔の設定を追加しました。",
   },
 ] as const;
 

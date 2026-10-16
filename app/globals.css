@@ -7777,19 +7777,19 @@ label.summary-toggle span {
 
 /* v2.3.1 — compact overlay animations. Both editor and /card use the same layer. */
 
-/* Tachometer: enlarge the independent dial / needle / hub together. */
+/* Tachometer: increase presence and raise the dial; the top edge may crop slightly.
+   Dial, needle and hub stay within the same animated layer. */
 .result-opening-throttle .tachometer {
-  /* Keep the independent dial, needle and hub aligned while enlarging. */
-  width: 350px;
-  height: 350px;
-  right: -38px;
-  top: 108%;
+  width: 400px;
+  height: 400px;
+  right: -50px;
+  top: 95%;
 }
 .card-shell.compact-mode .result-opening-throttle .tachometer {
-  width: 267px;
-  height: 267px;
-  right: -32px;
-  top: 111%;
+  width: 300px;
+  height: 300px;
+  right: -40px;
+  top: 95%;
 }
 
 /* Star Struck: remove the unwanted square backing around each glyph. */
