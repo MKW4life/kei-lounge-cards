@@ -91,25 +91,37 @@ export default function ResultOpeningEffect({
       {selected === "CARDS" && (
         <div className="playing-card-cascade">
           {[
-            { face: "A", suit: "♠" },
-            { face: "K", suit: "♥" },
-            { face: "Q", suit: "♦" },
-            { face: "J", suit: "♣" },
-            { face: "A", suit: "♥" },
-          ].map((card, index) => (
+            ["9", "♣"],
+            ["K", "♥"],
+            ["7", "♦"],
+            ["J", "♠"],
+            ["Q", "♣"],
+            ["10", "♥"],
+            ["A", "♦"],
+            ["8", "♠"],
+            ["K", "♣"],
+            ["Q", "♥"],
+            ["J", "♦"],
+          ].map(([face, suit], index) => (
             <span
               key={index}
-              className={`playing-card ${card.suit === "♥" || card.suit === "♦" ? "is-red" : "is-black"}`}
+              className={`playing-card stream-card ${suit === "♥" || suit === "♦" ? "is-red" : "is-black"}`}
               style={{
-                "--deal-x": `${15 + index * 17}%`,
-                "--deal-delay": `${index * 0.075}s`,
-                "--deal-angle": `${-14 + index * 7}deg`,
+                "--deal-delay": `${index * 0.052}s`,
+                "--card-y": `${-30 + (index % 5) * 15}px`,
+                "--card-rot": `${-15 + (index % 6) * 6}deg`,
               } as CSSProperties}
             >
-              <span className="playing-card-face">{card.face}<small>{card.suit}</small></span>
-              <span className="playing-card-suit">{card.suit}</span>
+              <span className="playing-card-face">{face}<small>{suit}</small></span>
+              <span className="playing-card-suit">{suit}</span>
             </span>
           ))}
+          {isWin && (
+            <span className="playing-card hero-ace is-black">
+              <span className="playing-card-face">A<small>♠</small></span>
+              <span className="playing-card-suit">♠</span>
+            </span>
+          )}
         </div>
       )}
 
