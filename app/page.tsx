@@ -1375,6 +1375,11 @@ function getPreviewRank(
 
 const VERSION_HISTORY = [
   {
+    version: "v2.3.4",
+    en: "Made the default result effect clearly show rate increases and decreases.",
+    jp: "デフォルト演出を、レートの上昇・下降が分かる矢印表示に変更しました。",
+  },
+  {
     version: "v2.3.3",
     en: "Enlarged and raised the tachometer. Simplified release notes.",
     jp: "タコメーターを拡大・上方移動。履歴の説明を簡潔にしました。",

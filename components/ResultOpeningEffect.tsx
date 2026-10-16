@@ -24,21 +24,37 @@ export default function ResultOpeningEffect({
     style === "REINCARNATION" ? "SHOCKWAVE" : style;
 
   if (selected === "DEFAULT") {
-    // Minimal luminous streaks rather than oversized directional arrows.
+    // Clear and familiar rate direction cue; shared by editor preview and OBS.
     return (
       <div className={`result-opening-default ${isWin ? "is-up" : "is-down"}`} aria-hidden="true">
-        <div className="default-light-beam" />
-        {Array.from({ length: 7 }, (_, index) => (
-          <span
-            className="default-light-streak"
-            key={index}
-            style={{
-              "--streak-x": `${12 + index * 12}%`,
-              "--streak-delay": `${index * 0.095}s`,
-              "--streak-height": `${20 + (index % 3) * 10}px`,
-            } as CSSProperties}
-          />
-        ))}
+        <div className="default-rate-wash" />
+        <div className="default-rate-marks">
+          {Array.from({ length: 3 }, (_, index) => <span key={index} />)}
+        </div>
+        <div className="default-rate-lockup">
+          <svg
+            className="default-rate-arrow"
+            viewBox="0 0 78 96"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M39 5L73 44H56V88H22V44H5L39 5Z"
+              fill="currentColor"
+              stroke="rgba(255,255,255,.76)"
+              strokeWidth="1.7"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M39 16L60 40H49V77H29V40H18L39 16Z"
+              fill="rgba(255,255,255,.13)"
+            />
+          </svg>
+          <span className="default-rate-caption">
+            <span>RATE</span>
+            <strong>{isWin ? "UP" : "DOWN"}</strong>
+          </span>
+        </div>
       </div>
     );
   }
