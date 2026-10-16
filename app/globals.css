@@ -7773,3 +7773,209 @@ label.summary-toggle span {
     opacity: 0 !important;
   }
 }
+
+
+/* v2.3.1 — compact overlay animations. Both editor and /card use the same layer. */
+
+/* Tachometer: enlarge the independent dial / needle / hub together. */
+.result-opening-throttle .tachometer {
+  width: 256px;
+  height: 256px;
+  right: -19px;
+  top: 82%;
+}
+
+/* Star Struck: remove the unwanted square backing around each glyph. */
+.result-opening-starstruck .starstruck-particles span {
+  display: block !important;
+  width: auto !important;
+  height: auto !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: none !important;
+  background: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+  font-size: 22px !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+  text-shadow: 0 0 4px currentColor, 0 0 9px color-mix(in srgb, currentColor 42%, transparent) !important;
+}
+.result-opening-starstruck .starstruck-particles span::before,
+.result-opening-starstruck .starstruck-particles span::after {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+.result-opening-starstruck .starstruck-particles span:nth-child(4n + 1) { color: #ffd568 !important; }
+.result-opening-starstruck .starstruck-particles span:nth-child(4n + 2) { color: #ff84b8 !important; }
+.result-opening-starstruck .starstruck-particles span:nth-child(4n + 3) { color: #7ccff9 !important; }
+.result-opening-starstruck .starstruck-particles span:nth-child(4n) { color: #b49afc !important; }
+
+/* Default: directional streaks (no big arrows or arrow glyphs). */
+.result-opening-default {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  border-radius: 70px;
+  pointer-events: none;
+  overflow: hidden;
+}
+.result-opening-default .default-light-beam {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 25%, rgba(255,255,255,.04) 47%, rgba(205,231,255,.21) 50%, rgba(255,255,255,.04) 54%, transparent 74%);
+  background-size: 250% 100%;
+  opacity: 0;
+  animation: default-light-beam-v231 1.18s ease-out both;
+}
+.result-opening-default.is-down .default-light-beam {
+  background: linear-gradient(105deg, transparent 25%, rgba(255,255,255,.04) 47%, rgba(255,129,149,.2) 50%, rgba(255,255,255,.04) 54%, transparent 74%);
+  background-size: 250% 100%;
+}
+.result-opening-default .default-light-streak {
+  position: absolute;
+  left: var(--streak-x);
+  top: 50%;
+  width: 2px;
+  height: var(--streak-height);
+  border-radius: 2px;
+  background: linear-gradient(to bottom, transparent, #deefff 45%, rgba(158,210,255,.55), transparent);
+  box-shadow: 0 0 5px rgba(203,228,255,.45);
+  opacity: 0;
+  transform: translate(-50%, 35px) skewX(-10deg);
+  animation: default-streak-up-v231 1.05s cubic-bezier(.2,.7,.2,1) var(--streak-delay) both;
+}
+.result-opening-default.is-down .default-light-streak {
+  background: linear-gradient(to bottom, transparent, #ffe3e5 45%, rgba(247,119,143,.55), transparent);
+  animation-name: default-streak-down-v231;
+}
+@keyframes default-light-beam-v231 {
+  0% { opacity: 0; background-position: 100% 0; }
+  24% { opacity: .78; }
+  100% { opacity: 0; background-position: -100% 0; }
+}
+@keyframes default-streak-up-v231 {
+  0% { opacity: 0; transform: translate(-50%, 35px) skewX(-10deg) scaleY(.7); }
+  25% { opacity: .82; }
+  100% { opacity: 0; transform: translate(-50%, -91px) skewX(-10deg) scaleY(1.2); }
+}
+@keyframes default-streak-down-v231 {
+  0% { opacity: 0; transform: translate(-50%, -35px) skewX(-10deg) scaleY(.7); }
+  25% { opacity: .82; }
+  100% { opacity: 0; transform: translate(-50%, 91px) skewX(-10deg) scaleY(1.2); }
+}
+
+/* Playing Cards: staggered compact cards, not a full-screen banner. */
+.result-opening-cards {
+  background: radial-gradient(ellipse at center, rgba(255,255,255,.055), transparent 68%);
+}
+.playing-card-cascade { position: absolute; inset: 0; }
+.playing-card-cascade .playing-card {
+  position: absolute;
+  z-index: 3;
+  left: var(--deal-x);
+  top: 50%;
+  width: 36px;
+  height: 52px;
+  border: 1px solid rgba(255,255,255,.84);
+  border-radius: 5px;
+  background: linear-gradient(145deg, #fff, #e7e7eb);
+  box-shadow: 0 6px 15px rgba(0,0,0,.52), inset 0 0 0 2px #eee;
+  color: #181923;
+  opacity: 0;
+  overflow: hidden;
+  font-family: Georgia, 'Times New Roman', serif;
+  transform: translate(-50%, 38px) rotate(var(--deal-angle));
+  animation: playing-card-deal-v231 1.17s cubic-bezier(.2,.7,.2,1) var(--deal-delay) both;
+}
+.playing-card-cascade .playing-card.is-red { color: #bd263b; }
+.playing-card-cascade .playing-card-face {
+  position: absolute;
+  left: 4px;
+  top: 3px;
+  font: 700 12px/.9 Georgia,serif;
+}
+.playing-card-cascade .playing-card-face small {
+  display: block;
+  font-size: 9px;
+  margin-top: 2px;
+}
+.playing-card-cascade .playing-card-suit {
+  position: absolute;
+  font: 26px/1 Georgia,serif;
+  left: 50%;
+  top: 53%;
+  transform: translate(-50%,-50%);
+}
+.result-opening-cards.is-loss .playing-card {
+  animation-name: playing-card-fall-v231;
+}
+@keyframes playing-card-deal-v231 {
+  0% { opacity: 0; transform: translate(-50%, 58px) rotate(calc(var(--deal-angle) - 14deg)) scale(.68); }
+  24% { opacity: .98; transform: translate(-50%,-49%) rotate(var(--deal-angle)) scale(1); }
+  67% { opacity: .93; transform: translate(-50%,-51%) rotate(var(--deal-angle)) scale(1); }
+  100% { opacity: 0; transform: translate(-50%,-104px) rotate(calc(var(--deal-angle) + 13deg)) scale(.85); }
+}
+@keyframes playing-card-fall-v231 {
+  0% { opacity: 0; transform: translate(-50%,-95px) rotate(calc(var(--deal-angle) + 13deg)) scale(.7); }
+  24% { opacity: .98; transform: translate(-50%,-51%) rotate(var(--deal-angle)) scale(1); }
+  67% { opacity: .93; transform: translate(-50%,-49%) rotate(var(--deal-angle)) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, 101px) rotate(calc(var(--deal-angle) - 18deg)) scale(.8); }
+}
+
+/* Aurora rank: soft moving light curtain under rank icon and legible copy. */
+.rank-reveal-style-aurora { isolation: isolate; overflow: hidden; }
+.rank-reveal-style-aurora::before {
+  background:
+    radial-gradient(ellipse at 48% 45%, rgba(95,203,219,.16), transparent 60%),
+    linear-gradient(120deg, #03080f, #121321 53%, #03080f) !important;
+}
+.rank-reveal-style-aurora::after {
+  content: "";
+  position: absolute;
+  inset: -25%;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    linear-gradient(111deg, transparent 20%, rgba(73,205,202,.16) 35%, rgba(157,124,237,.22) 49%, rgba(103,164,248,.13) 61%, transparent 78%),
+    linear-gradient(72deg, transparent 37%, rgba(255,255,255,.15) 48%, transparent 57%);
+  filter: blur(8px);
+  animation: aurora-curtain-v231 2.9s ease-out both;
+}
+.rank-reveal-style-aurora .rank-reveal-stars { display: block; }
+.rank-reveal-style-aurora .rank-reveal-stars span {
+  background: #eaf9ff;
+  box-shadow: 0 0 9px rgba(137,227,255,.52), 0 0 17px rgba(161,133,255,.25);
+}
+.rank-reveal-style-aurora .rank-reveal-bg {
+  filter: drop-shadow(0 0 12px rgba(145,220,250,.36)) !important;
+  opacity: .86 !important;
+}
+.rank-reveal-style-aurora .rank-reveal-text {
+  background: linear-gradient(110deg, rgba(4,9,17,.94), rgba(32,42,58,.92), rgba(9,12,25,.96)) !important;
+  border-color: rgba(179,219,239,.55) !important;
+  box-shadow: 0 8px 22px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.17) !important;
+}
+.rank-reveal-style-aurora .rank-reveal-label {
+  text-shadow: 0 2px 6px rgba(0,0,0,.8), 0 0 10px rgba(133,226,255,.36) !important;
+}
+@keyframes aurora-curtain-v231 {
+  0% { opacity: 0; transform: translateX(-19%) skewX(-9deg); }
+  24% { opacity: .76; }
+  74% { opacity: .55; }
+  100% { opacity: 0; transform: translateX(19%) skewX(-9deg); }
+}
+
+/* Avoid repeated animation under accessibility preferences. */
+@media (prefers-reduced-motion: reduce) {
+  .result-opening-default, .result-opening-default *,
+  .result-opening-cards, .result-opening-cards *,
+  .rank-reveal-style-aurora::after {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+}
