@@ -305,31 +305,6 @@ export default function ItemCounterPage() {
           )}
         </section>
 
-        <section className={`${styles.panel} ${styles.connectionPanel}`}>
-          <div>
-            <h2>Windowsホットキー</h2>
-          </div>
-          <div className={styles.connectionRow}>
-            <a
-              className={styles.button}
-              href="/MKW_Item_Counter_Hotkeys.ps1"
-              download
-            >
-              Hotkeyスクリプトを保存
-            </a>
-            <a
-              className={styles.button}
-              href="/start_mkw_hotkeys.bat"
-              download
-            >
-              起動BATを保存
-            </a>
-          </div>
-          <p className={styles.help}>
-            2ファイルを同じフォルダに保存して起動BATを実行。初回は接続キーを入力してください。
-          </p>
-        </section>
-
         <div className={styles.workspace}>
           <section className={styles.counterColumn}>
             <div className={styles.sectionHead}>
