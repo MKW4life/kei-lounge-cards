@@ -244,7 +244,7 @@ export default function ItemCounterPage() {
       <div className={styles.shell}>
         <header className={styles.hero}>
           <div>
-            <h1 className={styles.title}>MKW Item Counter</h1>
+            <h1 className={styles.title}>Item Overlay</h1>
           </div>
           <button
             type="button"

@@ -1,6 +1,6 @@
 /**
  * Navigation shared by the Lounge Card editor and Item Counter.
- * The portal and MKW Course Stats URLs have both been verified as live.
+ * The portal and Track Stats URLs have both been verified as live.
  * Keep optional public environment variables for URL overrides.
  */
 const projectsUrl = process.env.NEXT_PUBLIC_KEI_PROJECTS_URL?.trim() || "https://kei-projects-33b53.web.app/";
@@ -14,15 +14,16 @@ export default function KeiProjectsNav() {
         <div className="project-nav-menu">
           {projectsUrl && <a href={projectsUrl}>Kei Projects ホーム</a>}
           <a href="/">Kei Lounge Card</a>
-          <a href="/item-counter">MKW Item Counter</a>
+          <a href="/item-counter">Item Overlay</a>
           <a href="https://kei-brstm-hub.vercel.app/" target="_blank" rel="noopener noreferrer">
             Kei BRSTM Hub
           </a>
           {courseStatsUrl && (
             <a href={courseStatsUrl} target="_blank" rel="noopener noreferrer">
-              MKW Course Stats
+              Track Stats
             </a>
           )}
+          <a href="https://pitwall-mkw-overlay.kei-projects.workers.dev/" target="_blank" rel="noopener noreferrer">Table Overlay</a>
         </div>
       </details>
     </nav>
