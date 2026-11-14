@@ -248,6 +248,7 @@ type PlayerApiResponse = {
   flagUrl: string;
   currentMmr: number;
   currentLr: number;
+  totalEvents?: number;
   rankText: string;
   emblemUrl: string;
   rankNumber: number | null;
@@ -259,6 +260,7 @@ type DisplayState = {
   flagUrl: string;
   mmr: string;
   lr: string;
+  events: string;
   rank: string;
   icon: string;
 };
@@ -483,6 +485,7 @@ export default function CardClient({
     flagUrl: initial.flagUrl,
     mmr: initial.mmr,
     lr: initial.lr,
+    events: initial.events,
     rank: cleanRankText(initial.rank),
     icon: initial.icon,
   };
@@ -861,7 +864,7 @@ export default function CardClient({
         lastRankRef.current = nextRank;
         lastRankTextRef.current = cleanRankText(data.rankText || initial.rank);
 
-        const nextDisplay: DisplayState = {
+        const nextDisplay: Omit<DisplayState, "events"> = {
           name: initial.name,
           flag: data.flagEmoji || initial.flag,
           flagUrl: data.flagUrl || initial.flagUrl,
@@ -875,7 +878,15 @@ export default function CardClient({
 
         if (!active) return;
 
-        setDisplay(nextDisplay);
+        setDisplay((previous) => ({
+          ...nextDisplay,
+          events:
+            typeof data.totalEvents === "number" &&
+            Number.isSafeInteger(data.totalEvents) &&
+            data.totalEvents >= 0
+              ? String(data.totalEvents)
+              : previous.events,
+        }));
       } catch {
         // OBS表示中に一時的に取得できなくても、前回表示を維持する
       }
@@ -1229,7 +1240,7 @@ export default function CardClient({
             </div>
           )}
 
-        {initial.showEvents && formatEvents(initial.events, initial.eventFormat) && (
+        {initial.showEvents && formatEvents(display.events, initial.eventFormat) && (
           <div
             className={`event-line ${initial.eventsUseMainColor ? "main-gradient-text" : "solid-custom-text"}`}
             style={{
@@ -1238,7 +1249,7 @@ export default function CardClient({
               color: initial.eventsUseMainColor ? undefined : initial.eventsColor,
               opacity: opacityFromTransparency(initial.eventsTransparency),
             }}
-          >{formatEvents(initial.events, initial.eventFormat)}</div>
+          >{formatEvents(display.events, initial.eventFormat)}</div>
         )}
 
         {initial.showOtherText && initial.otherText && (
