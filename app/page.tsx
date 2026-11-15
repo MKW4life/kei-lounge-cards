@@ -3140,16 +3140,16 @@ export default function Home() {
                 {text("Loss", "敗北")}
               </button>
               <button type="button" onClick={() => triggerPreviewEffect("win")}>
-                {text("Score up", "得点増加のみ")}
+                {text("Score +", "得点+")}
               </button>
               <button type="button" onClick={() => triggerPreviewEffect("loss")}>
-                {text("Score down", "得点減少のみ")}
+                {text("Score −", "得点−")}
               </button>
               <button type="button" onClick={() => {
                 setPreviewActiveRating(prev => prev === "MMR" ? "LR" : "MMR");
                 setPreviewSwitchAnimationToken(token => token + 1);
               }}>
-                {text("MMR / LR switch", "MMR / LR切替")}
+                {text("MMR ⇄ LR", "MMR ⇄ LR")}
               </button>
             </div>
 

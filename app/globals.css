@@ -107,6 +107,7 @@ select {
 .preview-panel {
   position: sticky;
   top: 20px;
+  min-width: 0;
 }
 
 h2 {
@@ -5093,26 +5094,31 @@ label.summary-toggle span {
 }
 
 
-/* v2.0.7 — fixed preview action row with one history log */
+/* Preview controls wrap to the available panel width, including desktop columns. */
 .preview-action-row {
   display: flex;
   align-items: center;
   gap: 8px;
   margin: 14px 0 4px;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
 .preview-action-row .animation-buttons {
   display: flex;
   gap: 8px;
   margin: 0 !important;
-  flex: 0 0 auto;
+  flex: 1 1 100%;
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
 .preview-history-controls {
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
-  flex: 0 0 auto;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .preview-history-controls button {
@@ -5122,7 +5128,7 @@ label.summary-toggle span {
 }
 
 .preview-history-log {
-  flex: 1 1 auto;
+  flex: 1 1 100%;
   min-width: 0;
   height: 38px;
   display: flex;
@@ -5147,17 +5153,6 @@ label.summary-toggle span {
 .design-heading-row {
   display: block !important;
 }
-
-@media (max-width: 980px) {
-  .preview-action-row {
-    flex-wrap: wrap;
-  }
-
-  .preview-history-log {
-    flex-basis: 100%;
-  }
-}
-
 
 /* v2.0.8 — Live Preview / OBS visual parity */
 .card-shell {
