@@ -1630,6 +1630,11 @@ export default function Home() {
   const settingsRef = useRef<Settings>(defaultSettings);
   const [copied, setCopied] = useState(false);
   const [settingsCopied, setSettingsCopied] = useState(false);
+  const [designPresets, setDesignPresets] = useState<Record<string, Partial<Settings>>>({});
+  const [presetName, setPresetName] = useState("");
+  const [selectedPreset, setSelectedPreset] = useState("");
+  const [presetStatus, setPresetStatus] = useState("");
+
   const [showImportSettings, setShowImportSettings] = useState(false);
   const [importSettingsText, setImportSettingsText] = useState("");
   const [importSettingsStatus, setImportSettingsStatus] = useState("");
@@ -1686,6 +1691,26 @@ export default function Home() {
     const savedLanguage = localStorage.getItem("kei-lounge-cards-language");
     if (savedLanguage === "EN" || savedLanguage === "JP") {
       setUiLanguage(savedLanguage);
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("kei-lounge-design-presets-v1");
+      if (!raw) return;
+      const parsed: unknown = JSON.parse(raw);
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        const presets: Record<string, Partial<Settings>> = {};
+        for (const [name, value] of Object.entries(parsed)) {
+          if (name.length <= 50 && value && typeof value === "object" && !Array.isArray(value)) {
+            const normalized = parseDesignObject(value);
+            if (normalized) presets[name] = normalized;
+          }
+        }
+        setDesignPresets(presets);
+      }
+    } catch {
+      setPresetStatus("Could not restore design presets");
     }
   }, []);
 
@@ -2555,6 +2580,43 @@ export default function Home() {
     return JSON.stringify(designSettings, null, 2);
   }, [settings]);
 
+  const saveNamedPreset = () => {
+    const name = presetName.trim().slice(0, 50);
+    if (!name) { setPresetStatus(text("Enter a preset name", "プリセット名を入力してください")); return; }
+    const data = parseDesignObject(safeJsonParse<unknown>(settingsText));
+    if (!data) return;
+    const next = {...designPresets, [name]: data};
+    try {
+      localStorage.setItem("kei-lounge-design-presets-v1", JSON.stringify(next));
+      setDesignPresets(next);
+      setSelectedPreset(name);
+      setPresetStatus(text("Design saved", "デザインを保存しました"));
+    } catch {
+      setPresetStatus(text("Could not save design", "デザインを保存できませんでした"));
+    }
+  };
+
+  const loadNamedPreset = () => {
+    const design = designPresets[selectedPreset];
+    if (!design) return;
+    applySettingsWithHistory(previous => ({...previous, ...design}));
+    setPresetStatus(text("Design applied", "デザインを適用しました"));
+  };
+
+  const deleteNamedPreset = () => {
+    if (!selectedPreset) return;
+    const next = {...designPresets};
+    delete next[selectedPreset];
+    try {
+      localStorage.setItem("kei-lounge-design-presets-v1", JSON.stringify(next));
+      setDesignPresets(next);
+      setSelectedPreset("");
+      setPresetStatus(text("Design deleted", "プリセットを削除しました"));
+    } catch {
+      setPresetStatus(text("Could not delete design", "削除できませんでした"));
+    }
+  };
+
   const copyUrl = async () => {
     await navigator.clipboard.writeText(cardUrl);
     setCopied(true);
@@ -3077,6 +3139,18 @@ export default function Home() {
               <button type="button" onClick={() => triggerPreviewEffect("rank-down")}>
                 {text("Loss", "敗北")}
               </button>
+              <button type="button" onClick={() => triggerPreviewEffect("win")}>
+                {text("Score up", "得点増加のみ")}
+              </button>
+              <button type="button" onClick={() => triggerPreviewEffect("loss")}>
+                {text("Score down", "得点減少のみ")}
+              </button>
+              <button type="button" onClick={() => {
+                setPreviewActiveRating(prev => prev === "MMR" ? "LR" : "MMR");
+                setPreviewSwitchAnimationToken(token => token + 1);
+              }}>
+                {text("MMR / LR switch", "MMR / LR切替")}
+              </button>
             </div>
 
             <div className="preview-history-controls">
@@ -3123,6 +3197,30 @@ export default function Home() {
             {text("Open card", "カードを開く")}
           </a>
 
+          <div className="share-buttons" style={{flexWrap:"wrap"}}>
+            <input
+              value={presetName}
+              onChange={event => setPresetName(event.target.value)}
+              maxLength={50}
+              placeholder={text("Preset name", "プリセット名")}
+              aria-label={text("New design preset name", "新しいプリセット名")}
+            />
+            <button type="button" onClick={saveNamedPreset}>
+              {text("Save preset", "デザインを保存")}
+            </button>
+            <select value={selectedPreset} onChange={event => setSelectedPreset(event.target.value)}
+              aria-label={text("Saved designs", "保存済みデザイン")}>
+              <option value="">{text("Choose a preset", "保存済みデザインを選択")}</option>
+              {Object.keys(designPresets).sort().map(name => <option key={name} value={name}>{name}</option>)}
+            </select>
+            <button type="button" onClick={loadNamedPreset} disabled={!selectedPreset}>
+              {text("Apply", "切り替え")}
+            </button>
+            <button type="button" onClick={deleteNamedPreset} disabled={!selectedPreset}>
+              {text("Delete preset", "削除")}
+            </button>
+            {presetStatus && <span role="status">{presetStatus}</span>}
+          </div>
           <div className="share-buttons">
             <button type="button" onClick={copySettingsText}>
               {settingsCopied ? text("Copied", "コピー済み") : text("Copy design", "デザインをコピー")}
