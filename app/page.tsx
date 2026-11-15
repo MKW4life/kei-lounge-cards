@@ -3139,12 +3139,6 @@ export default function Home() {
               <button type="button" onClick={() => triggerPreviewEffect("rank-down")}>
                 {text("Loss", "敗北")}
               </button>
-              <button type="button" onClick={() => triggerPreviewEffect("win")}>
-                {text("Score +", "得点+")}
-              </button>
-              <button type="button" onClick={() => triggerPreviewEffect("loss")}>
-                {text("Score −", "得点−")}
-              </button>
               <button type="button" onClick={() => {
                 setPreviewActiveRating(prev => prev === "MMR" ? "LR" : "MMR");
                 setPreviewSwitchAnimationToken(token => token + 1);
